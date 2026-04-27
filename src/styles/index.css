@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --color-san-marino-50: #f4f7fb;
+  --color-san-marino-100: #e8edf6;
+  --color-san-marino-200: #cbd9ec;
+  --color-san-marino-300: #9ebadb;
+  --color-san-marino-400: #6a95c6;
+  --color-san-marino-500: #4778b0;
+  --color-san-marino-600: #39659e;
+  --color-san-marino-700: #2c4c78;
+  --color-san-marino-800: #284264;
+  --color-san-marino-900: #263954;
+  --color-san-marino-950: #192538;
+}
+
+:root {
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
