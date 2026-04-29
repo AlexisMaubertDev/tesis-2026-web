@@ -1,10 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../features/auth/pages/LoginPage.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
-
-function Dashboard() {
-  return <div className="p-4">Dashboard</div>;
-}
+import Home from "../pages/Home.tsx";
 
 export default function AppRoutes() {
   return (
@@ -16,7 +13,7 @@ export default function AppRoutes() {
           path="/"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <Home />
             </ProtectedRoute>
           }
         />
