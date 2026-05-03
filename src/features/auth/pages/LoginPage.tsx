@@ -5,21 +5,23 @@ import { useNavigate } from "react-router-dom";
 import PageLayout from "../../../components/layout/PageLayout";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import TextInput from "../../../components/ui/TextInput";
+import { useDispatch } from "react-redux";
+import { clearSnackbar, showError } from "../../../app/store/snackbarSlice";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ dni: null, password: "" });
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    dispatch(clearSnackbar());
 
     if (credentials.dni === null || !credentials.password.trim()) {
       setCredentials({ dni: null, password: "" });
-      setError("Por favor, ingresa tu DNI y contraseña");
+      dispatch(showError("Por favor, ingresa tu DNI y contraseña"));
       return;
     }
 
@@ -31,14 +33,21 @@ export default function LoginPage() {
         password: credentials.password.trim(),
       });
       if (!data.success) {
-        setError(data.message || "Error al iniciar sesión");
+        dispatch(
+          showError(
+            data.message ||
+              "Error al iniciar sesión. Verifica tus credenciales.",
+          ),
+        );
         return;
       }
       login(data);
       navigate("/");
     } catch (err) {
       console.log(err);
-      setError("Error en el servidor. Intenta nuevamente más tarde.");
+      dispatch(
+        showError("Error en el servidor. Intenta nuevamente más tarde."),
+      );
     } finally {
       setLoading(false);
     }
@@ -55,9 +64,10 @@ export default function LoginPage() {
       <section className="flex flex-col justify-between min-h-screen pb-2 pt-24">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 bg-san-marino-400 p-8 rounded-2xl shadow-xl w-96"
+          className="flex flex-col gap-6 bg-san-marino-200 p-8 rounded shadow-xl w-96"
         >
-          <h2 className="text-2xl font-bold text-center">Iniciar sesión</h2>
+          <h2 className="text-2xl font-bold text-center">Ingresar</h2>
+          <p>Por favor, ingresa tu DNI y contraseña</p>
           <div className="flex flex-col gap-2">
             <TextInput
               type="number"
@@ -75,12 +85,6 @@ export default function LoginPage() {
               onChange={handleChange}
             />
           </div>
-
-          {error && (
-            <p className="bg-san-marino-100 p-1 rounded-lg text-center text-red-500">
-              {error}
-            </p>
-          )}
           <div className="flex w-full justify-center">
             <CallToActionButton type="submit" disabled={loading}>
               {loading ? "Ingresando..." : "Ingresar"}

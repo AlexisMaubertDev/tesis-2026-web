@@ -11,7 +11,7 @@ export default function CallToActionButton({
 }) {
   return (
     <button
-      className="bg-orange-700  px-4 py-2 rounded-lg hover:bg-orange-500 disabled:bg-slate-400 disabled:cursor-default duration-200 ease-in cursor-pointer"
+      className="text-white bg-orange-700 px-4 py-2 rounded-lg outline-2 outline-transparent hover:not-disabled:outline-orange-900 disabled:bg-slate-400 disabled:cursor-default duration-300 ease-linear cursor-pointer"
       type={type}
       onClick={handleSubmit}
       disabled={disabled}

@@ -13,7 +13,7 @@ export default function TextInput({
 }) {
   return (
     <input
-      className="w-full p-3 border border-san-marino-700 rounded-lg bg-san-marino-500 focus-visible:outline focus-visible:outline-san-marino-6ñlads00"
+      className="w-full p-3 border border-san-marino-700 rounded-lg bg-san-marino-100 focus-visible:outline-2 focus-visible:outline-san-marino-500"
       type={type}
       placeholder={placeholder}
       name={name}
