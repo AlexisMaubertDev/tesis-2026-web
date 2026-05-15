@@ -1,6 +1,6 @@
-import type { User } from "./User";
+import type { Usuario } from "./Usuario.ts";
 
 export interface AuthState {
-  user: User | null;
+  usuario: Usuario | null;
   token: string | null;
 }

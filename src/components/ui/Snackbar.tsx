@@ -23,6 +23,7 @@ export default function Snackbar() {
 
   useEffect(() => {
     if (error || info || success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpen(true);
     }
   }, [error, info, success]);

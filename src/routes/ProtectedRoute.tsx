@@ -8,9 +8,9 @@ export default function ProtectedRoute({
 }: {
   children: JSX.Element;
 }) {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { usuario } = useSelector((state: RootState) => state.auth);
 
-  if (!user) {
+  if (!usuario) {
     return <Navigate to="/login" />;
   }
 

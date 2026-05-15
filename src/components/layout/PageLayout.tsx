@@ -1,14 +1,17 @@
-import { type JSX } from "react";
 import Snackbar from "../ui/Snackbar";
 
-export default function PageLayout({ children }: { children: JSX.Element }) {
+type Props = {
+  children: React.ReactNode;
+};
+
+export default function PageLayout({ children }: Props) {
   return (
-    <main
+    <div
       className="relative font-sans flex flex-col min-h-screen
-    justify-center items-center bg-san-marino-300 text-zinc-900 overflow-hidden"
+    justify-start items-center bg-san-marino-300 text-zinc-900 overflow-hidden"
     >
       {children}
       <Snackbar />
-    </main>
+    </div>
   );
 }
