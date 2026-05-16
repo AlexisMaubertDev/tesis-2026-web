@@ -34,8 +34,8 @@ export default function UsuariosPage() {
     <PageLayout>
       <MainLayout>
         <main className="flex flex-col justify-start items-center py-4 px-4">
-          <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full bg-san-marino-200 rounded shadow p-4 mt-4 mx-4 gap-4">
-            <h1 className="text-xl sm:text-2xl font-bold uppercase">
+          <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 gap-4">
+            <h1 className=" sm:text-lg font-bold uppercase self-center">
               Usuarios
             </h1>
 
@@ -58,7 +58,7 @@ export default function UsuariosPage() {
           >
             Recargar Usuarios
           </button> */}
-          <section className="w-full bg-san-marino-200 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
+          <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
             <UsuariosTable usuarios={usuarios} />
           </section>
         </main>

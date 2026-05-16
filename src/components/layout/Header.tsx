@@ -12,19 +12,19 @@ export default function Header() {
   }
 
   return (
-    <header className="h-16 bg-san-marino-400 w-full px-4">
+    <header className="h-16 bg-cerulean-600 w-full px-4">
       <div className="flex items-center justify-between h-full max-w-5xl mx-auto gap-4">
-        <h1 className="text-xl font-bold text-san-marino-100">ParkControl</h1>
-        <nav className="flex gap-4">
+        <h1 className="font-bold text-slate-100">ParkControl</h1>
+        <nav className="flex gap-4 text-xs">
           <Link
             to="/acerca-de"
-            className="text-san-marino-100 hover:text-san-marino-600 transition-colors duration-300"
+            className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300"
           >
             {usuario.nombre + " " + usuario.apellido}
           </Link>
           {(usuario.rol === "CAJERO" || usuario.rol === "PLAYERO") && (
             <button
-              className="text-san-marino-100 hover:text-san-marino-600 transition-colors duration-300 cursor-pointer"
+              className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"
               onClick={() => {
                 localStorage.removeItem("token");
                 window.location.reload();
@@ -35,7 +35,7 @@ export default function Header() {
           )}
           {(usuario.rol === "CAJERO" || usuario.rol === "PLAYERO") && (
             <button
-              className="text-san-marino-100 hover:text-san-marino-600 transition-colors duration-300 cursor-pointer"
+              className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"
               onClick={() => {
                 localStorage.removeItem("token");
                 window.location.reload();
@@ -46,7 +46,7 @@ export default function Header() {
           )}
           {!(usuario.rol === "CAJERO" || usuario.rol === "PLAYERO") && (
             <button
-              className="text-san-marino-100 hover:text-san-marino-600 transition-colors duration-300 cursor-pointer"
+              className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"
               onClick={() => {
                 dispatch(logout());
               }}

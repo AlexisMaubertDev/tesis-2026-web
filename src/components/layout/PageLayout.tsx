@@ -8,7 +8,7 @@ export default function PageLayout({ children }: Props) {
   return (
     <div
       className="relative font-sans flex flex-col min-h-screen
-    justify-start items-center bg-san-marino-300 text-zinc-900 overflow-hidden"
+    justify-start items-center bg-san-marino-100 text-zinc-900 overflow-hidden"
     >
       {children}
       <Snackbar />

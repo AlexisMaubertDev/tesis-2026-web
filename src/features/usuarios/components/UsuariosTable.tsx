@@ -13,37 +13,55 @@ export default function UsuariosTable({ usuarios }: Props) {
     <>
       {/* Desktop */}
       <table className="w-full hidden lg:table border-collapse">
-        <thead className="bg-san-marino-500 text-white text-left">
-          <tr className="text-sm">
-            <th className="border px-2 py-2 border-black">Nombre</th>
-            <th className="border px-2 py-2 border-black">Apellido</th>
-            <th className="border px-2 py-2 border-black">DNI</th>
-            <th className="border px-2 py-2 border-black">Legajo</th>
-            <th className="border px-2 py-2 border-black">Sucursal</th>
-            <th className="border px-2 py-2 border-black">Turno</th>
-            <th className="border px-2 py-2 border-black">Email</th>
-            <th className="border px-2 py-2 border-black">Bloqueado</th>
-            <th className="border px-2 py-2 border-black">Rol</th>
-            <th className="border px-2 py-2 border-black">Acciones</th>
+        <thead className="bg-cerulean-600 text-white text-left">
+          <tr className="text-sm border-b border-cerulean-400">
+            <th className="border-r px-2 py-2 ">Nombre</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Apellido</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">DNI</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Legajo</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Sucursal</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Turno</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Email</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">
+              Bloqueado
+            </th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Rol</th>
+            <th className="px-2 py-2 border-cerulean-400">Acciones</th>
           </tr>
         </thead>
 
-        <tbody className="bg-san-marino-100">
+        <tbody className="bg-cerulean-50 text-xs">
           {usuarios.map((usuario) => (
             <tr key={usuario.legajo}>
-              <td className="border px-2 py-2">{usuario.nombre}</td>
-              <td className="border px-2 py-2">{usuario.apellido}</td>
-              <td className="border px-2 py-2">{usuario.dni}</td>
-              <td className="border px-2 py-2">{usuario.legajo}</td>
-              <td className="border px-2 py-2">{usuario.Sucursal.nombre}</td>
-              <td className="border px-2 py-2">{usuario.numero_turno}</td>
-              <td className="border px-2 py-2">{usuario.email}</td>
-              <td className="border px-2 py-2">
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.nombre}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.apellido}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.dni}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.legajo}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.Sucursal.nombre}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.numero_turno}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.email}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
                 {usuario.bloqueado ? "Sí" : "No"}
               </td>
-              <td className="border px-2 py-2">{usuario.rol}</td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.rol}
+              </td>
 
-              <td className="border px-2 py-2">
+              <td className="border-b border-cerulean-200 px-2 py-2">
                 <div className="flex items-center gap-2">
                   <button className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer">
                     <Tooltip title="Editar">

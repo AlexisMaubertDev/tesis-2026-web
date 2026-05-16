@@ -13,6 +13,30 @@
   --color-san-marino-800: #284264;
   --color-san-marino-900: #263954;
   --color-san-marino-950: #192538;
+
+  --color-cerulean-50: #eef4f7;
+  --color-cerulean-100: #dceaef;
+  --color-cerulean-200: #bad5de;
+  --color-cerulean-300: #97bfce;
+  --color-cerulean-400: #74aabe;
+  --color-cerulean-500: #5295ad;
+  --color-cerulean-600: #41778b;
+  --color-cerulean-700: #315968;
+  --color-cerulean-800: #213c45;
+  --color-cerulean-900: #101e23;
+  --color-cerulean-950: #0b1518;
+
+  --color-scarlet-rush-50: #fbe9eb;
+  --color-scarlet-rush-100: #f7d4d6;
+  --color-scarlet-rush-200: #f0a8ad;
+  --color-scarlet-rush-300: #e87d84;
+  --color-scarlet-rush-400: #e0525b;
+  --color-scarlet-rush-500: #d92632;
+  --color-scarlet-rush-600: #ad1f28;
+  --color-scarlet-rush-700: #82171e;
+  --color-scarlet-rush-800: #570f14;
+  --color-scarlet-rush-900: #2b080a;
+  --color-scarlet-rush-950: #1e0507;
 }
 
 :root {
