@@ -11,12 +11,12 @@ export default function Home() {
     <PageLayout>
       <MainLayout>
         <main className="flex flex-col justify-start items-center py-4">
-          <ul className="flex flex-col max-w-4xl w-full gap-2 p-4 items-center">
+          <ul className="flex flex-col max-w-6xl w-full gap-2 p-4 items-center">
             {usuario?.rol === "SISTEMAS" && (
               <li className="flex w-1/2">
                 <Link
                   to="/usuarios"
-                  className="w-full bg-san-marino-500 text-white uppercase px-8 py-4 rounded hover:bg-san-marino-600 transition-colors cursor-pointer text-center"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
                 >
                   Usuarios
                 </Link>

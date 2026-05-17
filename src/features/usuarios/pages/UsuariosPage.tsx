@@ -4,13 +4,17 @@ import PageLayout from "../../../components/layout/PageLayout.tsx";
 import MainLayout from "../../../components/layout/MainLayout.tsx";
 import { obtenerUsuarios } from "../services/usuariosService.ts";
 import type { RootState } from "../../../app/store/index.ts";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import UsuariosTable from "../components/UsuariosTable.tsx";
 import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
+import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
+import { showError } from "../../../app/store/snackbarSlice.ts";
 
 export default function UsuariosPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [nuevoUsuarioModalOpen, setNuevoUsuarioModalOpen] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!token) return;
@@ -21,14 +25,17 @@ export default function UsuariosPage() {
         setUsuarios(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        console.error(error.response?.data);
+        dispatch(
+          showError(
+            error.response?.data?.message ||
+              "Error al cargar usuarios. Intenta nuevamente más tarde.",
+          ),
+        );
       }
     };
 
     cargarUsuarios();
   }, [token]);
-
-  console.log(usuarios);
 
   return (
     <PageLayout>
@@ -47,20 +54,23 @@ export default function UsuariosPage() {
                 Refrescar
               </CallToActionButton>
 
-              <CallToActionButton type="button" handleSubmit={() => {}}>
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => setNuevoUsuarioModalOpen(true)}
+              >
                 Agregar Usuario
               </CallToActionButton>
             </div>
           </section>
-          {/* <button
-            className="bg-san-marino-500 text-white uppercase px-8 py-4 rounded hover:bg-san-marino-600 transition-colors cursor-pointer"
-            onClick={cargarUsuarios}
-          >
-            Recargar Usuarios
-          </button> */}
+
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
             <UsuariosTable usuarios={usuarios} />
           </section>
+
+          <NuevoUsuarioModal
+            open={nuevoUsuarioModalOpen}
+            onClose={() => setNuevoUsuarioModalOpen(false)}
+          />
         </main>
       </MainLayout>
     </PageLayout>

@@ -1,5 +1,5 @@
 export interface Usuario {
-  id: number;
+  id: string;
   nombre: string;
   apellido: string;
   legajo: string;
@@ -10,6 +10,8 @@ export interface Usuario {
   bloqueado: boolean;
   Sucursal: {
     nombre: string;
+    id: string;
+    direccion: string;
   };
 
   rol: "PLAYERO" | "CAJERO" | "SUPERVISOR" | "SISTEMAS";

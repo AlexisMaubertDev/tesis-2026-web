@@ -1,19 +1,25 @@
 import { useState } from "react";
 import { loginRequest } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import PageLayout from "../../../components/layout/PageLayout";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import TextInput from "../../../components/ui/TextInput";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { clearSnackbar, showError } from "../../../app/store/snackbarSlice";
+import type { RootState } from "../../../app/store";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ dni: null, password: "" });
   const [loading, setLoading] = useState<boolean>(false);
+  const { usuario } = useSelector((state: RootState) => state.auth);
   const { login } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  if (usuario) {
+    return <Navigate to="/" />;
+  }
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,10 +65,12 @@ export default function LoginPage() {
       <section className="flex flex-col justify-between min-h-screen pb-2 pt-24">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-6 bg-san-marino-200 p-4 sm:p-8 rounded shadow-xl max-w-96 mx-4"
+          className="flex flex-col gap-6 bg-cerulean-100 p-4 sm:p-8 rounded shadow-xl max-w-96 mx-4"
         >
-          <h2 className="text-2xl font-bold text-center">Ingresar</h2>
-          <p>Por favor, ingresa tu DNI y contraseña</p>
+          <h1 className=" font-bold text-center">Ingresar</h1>
+          <p className="text-center text-xs">
+            Por favor, ingresa tu DNI y contraseña
+          </p>
           <div className="flex flex-col gap-2">
             <TextInput
               type="number"
@@ -87,7 +95,7 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <p className="text-center text-san-marino-900 pb-32 sm:pb-20">
+        <p className="text-center text-cerulean-900 pb-32 sm:pb-20">
           Creado por <span className="font-bold">Alexis Maubert</span>
         </p>
       </section>

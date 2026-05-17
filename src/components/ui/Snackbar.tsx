@@ -30,33 +30,33 @@ export default function Snackbar() {
 
   return (
     <aside
-      className={`fixed bottom-0 left-0 min-w-1/3 rounded-tr-lg bg-san-marino-100 p-4 transition-transform duration-300
+      className={`fixed bottom-0 left-0 min-w-1/3 rounded-tr-lg bg-cerulean-50 p-4 transition-transform duration-300
         ${!open ? "translate-y-full" : "translate-y-0"}
-        shadow-lg flex justify-between items-center gap-4`}
+        shadow-lg flex justify-between items-center gap-4 text-xs`}
     >
       {error && (
         <div className="flex items-center gap-2">
-          <ErrorIcon className="text-red-500" fontSize="large" />
+          <ErrorIcon className="text-red-500" fontSize="medium" />
           <p className="text-red-500">{error}</p>
         </div>
       )}
       {info && (
         <div className="flex items-center gap-2">
-          <InfoIcon className="text-blue-500" fontSize="large" />
+          <InfoIcon className="text-blue-500" fontSize="medium" />
           <p className="text-blue-500">{info}</p>
         </div>
       )}
       {success && (
         <div className="flex items-center gap-2">
-          <CheckCircleIcon className="text-green-500" fontSize="large" />
+          <CheckCircleIcon className="text-green-500" fontSize="medium" />
           <p className="text-green-500">{success}</p>
         </div>
       )}
       <button
         onClick={handleClose}
-        className="cursor-pointer p-1 rounded-lg hover:bg-san-marino-200 transition-colors"
+        className="cursor-pointer p-1 rounded-lg hover:bg-cerulean-200 transition-colors"
       >
-        <CloseIcon fontSize="medium" className="text-san-marino-900" />
+        <CloseIcon fontSize="medium" className="text-cerulean-900" />
       </button>
     </aside>
   );
