@@ -25,6 +25,8 @@ export default function UsuariosTable({ usuarios }: Props) {
             <th className="border-r px-2 py-2 border-cerulean-400">
               Bloqueado
             </th>
+
+            <th className="border-r px-2 py-2 border-cerulean-400">Domingos</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Rol</th>
             <th className="px-2 py-2 border-cerulean-400">Acciones</th>
           </tr>
@@ -51,11 +53,14 @@ export default function UsuariosTable({ usuarios }: Props) {
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
                 {usuario.numero_turno}
               </td>
-              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+              <td className="border-r border-b border-cerulean-200 px-2 py-2 break-all">
                 {usuario.email}
               </td>
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
                 {usuario.bloqueado ? "Sí" : "No"}
+              </td>
+              <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                {usuario.trabaja_domingo ? "Sí" : "No"}
               </td>
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
                 {usuario.rol}
@@ -128,14 +133,17 @@ export default function UsuariosTable({ usuarios }: Props) {
                 <p>{usuario.numero_turno}</p>
               </div>
 
+              <div className="sm:col-span-2">
+                <p className="font-semibold text-gray-700">Email</p>
+                <p className="break-all">{usuario.email}</p>
+              </div>
               <div>
                 <p className="font-semibold text-gray-700">Bloqueado</p>
                 <p>{usuario.bloqueado ? "Sí" : "No"}</p>
               </div>
-
-              <div className="sm:col-span-2">
-                <p className="font-semibold text-gray-700">Email</p>
-                <p className="break-all">{usuario.email}</p>
+              <div>
+                <p className="font-semibold text-gray-700">Trabaja domingos</p>
+                <p>{usuario.trabaja_domingo ? "Sí" : "No"}</p>
               </div>
             </div>
 

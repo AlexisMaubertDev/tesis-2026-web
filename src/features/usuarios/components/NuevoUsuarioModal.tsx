@@ -1,24 +1,26 @@
 import Modal from "@mui/material/Modal";
 import TextInput from "../../../components/ui/TextInput";
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { type Usuario } from "../../../types/Usuario.ts";
 import Checkbox from "@mui/material/Checkbox";
 import { showSuccess } from "../../../app/store/snackbarSlice.ts";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
-import { obtenerSucursales } from "../services/sucursalesService.ts";
 import SelectInput from "../../../components/ui/SelectInput.tsx";
 import { crearUsuario } from "../services/usuariosService.ts";
+import { verificarCampos } from "../utils/verificarCampos.ts";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  sucursales: { id: string; nombre: string; direccion: string }[];
 };
 
-type UsuarioForm = Usuario & {
+export type UsuarioForm = Usuario & {
   password: string;
 };
+
 const initialFormData: UsuarioForm = {
   id: "",
   nombre: "",
@@ -38,94 +40,19 @@ const initialFormData: UsuarioForm = {
   trabaja_domingo: false,
 };
 
-export default function NuevoUsuarioModal({ open, onClose }: Props) {
+export default function NuevoUsuarioModal({ open, onClose, sucursales }: Props) {
   const { token } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState<UsuarioForm>(initialFormData);
-  const [sucursales, setSucursales] = useState<
-    { id: string; nombre: string; direccion: string }[]
-  >([]);
+  
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const dispatch = useDispatch();
 
-  const verificarCampos = (): boolean => {
-    if (!formData.nombre.trim()) {
-      setError("El campo 'Nombre' es obligatorio");
-      return false;
-    }
-    if (!formData.apellido.trim()) {
-      setError("El campo 'Apellido' es obligatorio");
-      return false;
-    }
-
-    if (
-      !formData.dni.trim() ||
-      formData.dni.length < 7 ||
-      formData.dni.length > 8
-    ) {
-      setError("Ingresar un DNI válido (7 u 8 dígitos)");
-      return false;
-    }
-    if (!formData.legajo.trim()) {
-      setError("El campo 'Legajo' es obligatorio");
-      return false;
-    }
-    if (formData.legajo.length < 4) {
-      setError("El legajo debe tener al menos 4 dígitos");
-      return false;
-    }
-
-    if (
-      !formData.email ||
-      !formData.email.trim() ||
-      !formData.email.includes("@")
-    ) {
-      setError("Ingresar un email valido");
-      return false;
-    }
-    if (!formData.password.trim()) {
-      setError("El campo 'Contraseña' es obligatorio");
-      return false;
-    }
-
-    if (formData.password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
-      return false;
-    }
-
-    if (!/[A-Z]/.test(formData.password)) {
-      setError("La contraseña debe contener al menos una mayúscula");
-      return false;
-    }
-
-    if (!/\d/.test(formData.password)) {
-      setError("La contraseña debe contener al menos un número");
-      return false;
-    }
-
-    if (!formData.Sucursal.nombre || !formData.Sucursal.nombre!.trim()) {
-      setError("El campo 'Sucursal' es obligatorio");
-      return false;
-    }
-
-    if (
-      formData.numero_turno !== 1 &&
-      formData.numero_turno !== 2 &&
-      formData.numero_turno !== 3
-    ) {
-      setError("Los valores permitidos para turno son 1, 2 o 3");
-      return false;
-    }
-    // Add more validation checks as needed
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    if (!verificarCampos()) return;
+    if (!verificarCampos(formData, setError)) return;
 
     setLoading(true);
 
@@ -151,21 +78,6 @@ export default function NuevoUsuarioModal({ open, onClose }: Props) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-    if (!token) return;
-
-    const cargarSucursales = async () => {
-      try {
-        const res = await obtenerSucursales(token);
-        setSucursales(res.data);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        console.error(error.response?.data);
-      }
-    };
-
-    cargarSucursales();
-  }, [token]);
 
   return (
     <Modal
