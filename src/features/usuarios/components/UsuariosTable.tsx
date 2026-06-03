@@ -3,12 +3,54 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import Tooltip from "@mui/material/Tooltip";
+import { useState } from "react";
+import ChoiceModal from "../../../components/ui/ChoiceModal";
+import { eliminarUsuario } from "../services/usuariosService";
+import type { RootState } from "../../../app/store";
+import { useDispatch, useSelector } from "react-redux";
+import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 
 type Props = {
   usuarios: Usuario[];
 };
 
 export default function UsuariosTable({ usuarios }: Props) {
+  const [modalOpen, setModalOpen] = useState<string | null>(null);
+  const { token } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+
+  const handleDelete = async (legajo: string) => {
+    try {
+      const res = await eliminarUsuario(token!, legajo);
+
+      console.log(res);
+
+      setModalOpen(null);
+      if (res.success) {
+        dispatch(showSuccess("Usuario eliminado con exito"));
+      } else {
+        dispatch(
+          showError(
+            res.message ||
+              "No se pudo eliminar el usuario. Intenta nuevamente más tarde.",
+          ),
+        );
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error.response?.data);
+      setModalOpen(null);
+      dispatch(
+        showError(
+          error.response?.data?.message ||
+            "Error al eliminar usuario. Intenta nuevamente más tarde.",
+        ),
+      );
+    }
+
+    setModalOpen(null);
+  };
   return (
     <>
       {/* Desktop */}
@@ -74,7 +116,10 @@ export default function UsuariosTable({ usuarios }: Props) {
                     </Tooltip>
                   </button>
 
-                  <button className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer">
+                  <button
+                    className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer"
+                    onClick={() => setModalOpen(usuario.legajo)}
+                  >
                     <Tooltip title="Eliminar">
                       <DeleteIcon />
                     </Tooltip>
@@ -155,7 +200,10 @@ export default function UsuariosTable({ usuarios }: Props) {
                 </Tooltip>
               </button>
 
-              <button className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer">
+              <button
+                className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer"
+                onClick={() => setModalOpen(usuario.legajo)}
+              >
                 <Tooltip title="Eliminar">
                   <DeleteIcon />
                 </Tooltip>
@@ -169,6 +217,21 @@ export default function UsuariosTable({ usuarios }: Props) {
             </div>
           </div>
         ))}
+        <ChoiceModal
+          open={modalOpen !== null}
+          setOpen={() => setModalOpen(null)}
+          title={`Estas seguro que quieres eliminar el usuario ${modalOpen}?`}
+          subtitle="Esta acción no se puede deshacer."
+          disabled={false}
+          confirm={() => {
+            if (modalOpen) {
+              handleDelete(modalOpen);
+            }
+          }}
+          cancel={() => {
+            setModalOpen(null);
+          }}
+        />
       </div>
     </>
   );

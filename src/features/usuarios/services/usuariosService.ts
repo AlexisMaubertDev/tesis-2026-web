@@ -18,3 +18,12 @@ export const crearUsuario = async (token: string, usuarioData: Usuario) => {
   });
   return res.data;
 };
+
+export const eliminarUsuario = async (token: string, legajo: string) => {
+  const res = await api.delete(`/usuarios/${legajo}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
