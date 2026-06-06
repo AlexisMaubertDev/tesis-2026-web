@@ -70,12 +70,15 @@ export default function UsuariosPage() {
       return;
     }
 
+    console.log(texto);
+
     const resultados = usuarios.filter((usuario) => {
       return (
         usuario.nombre.toLowerCase().includes(texto) ||
         usuario.apellido.toLowerCase().includes(texto) ||
         usuario.email!.toLowerCase().includes(texto) ||
-        usuario.Sucursal.nombre.toLowerCase().includes(texto)
+        usuario.legajo.toLowerCase().includes(texto) ||
+        usuario.dni.toLowerCase().includes(texto)
       );
     });
 
@@ -132,7 +135,8 @@ export default function UsuariosPage() {
           usuario.nombre.toLowerCase().includes(texto) ||
           usuario.apellido.toLowerCase().includes(texto) ||
           usuario.email?.toLowerCase().includes(texto) ||
-          usuario.Sucursal.nombre.toLowerCase().includes(texto)
+          usuario.legajo.toString().toLowerCase().includes(texto) ||
+          usuario.dni.toString().toLowerCase().includes(texto)
         );
       });
     }
@@ -171,7 +175,7 @@ export default function UsuariosPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onSearch={buscarUsuarios}
-                  title="Buscar por nombre, apellido, email o sucursal"
+                  title="Buscar por nombre, apellido, email, dni o legajo"
                 />
                 <FilterMenu
                   filtros={filtros}
