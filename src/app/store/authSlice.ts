@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AuthState } from "../../types/AuthState";
+import type { Turno_Caja } from "../../types/Usuario";
 
 const initialState: AuthState = {
   usuario: null,
@@ -18,8 +19,13 @@ const authSlice = createSlice({
       state.usuario = null;
       state.token = null;
     },
+    empezarTurnoCaja: (state, action: PayloadAction<Turno_Caja>) => {
+      if (state.usuario) {
+        state.usuario.Turno_Caja = action.payload;
+      }
+    },
   },
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, empezarTurnoCaja } = authSlice.actions;
 export default authSlice.reducer;

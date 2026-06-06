@@ -4,6 +4,8 @@ import ProtectedRoute from "./ProtectedRoute.tsx";
 import Home from "../pages/Home.tsx";
 import SistemasRoute from "./SistemasRoute.tsx";
 import UsuariosPage from "../features/usuarios/pages/UsuariosPage.tsx";
+import VehiculosPage from "../features/vehiculos/pages/VehiculosPage.tsx";
+import SucursalesPage from "../features/sucursales/pages/SucursalesPage.tsx";
 
 export default function AppRoutes() {
   return (
@@ -26,6 +28,24 @@ export default function AppRoutes() {
               <SistemasRoute>
                 <UsuariosPage />
               </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sucursales"
+          element={
+            <ProtectedRoute>
+              <SistemasRoute>
+                <SucursalesPage />
+              </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehiculos"
+          element={
+            <ProtectedRoute>
+              <VehiculosPage />
             </ProtectedRoute>
           }
         />

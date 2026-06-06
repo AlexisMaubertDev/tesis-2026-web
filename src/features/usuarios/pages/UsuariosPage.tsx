@@ -12,6 +12,9 @@ import { showError } from "../../../app/store/snackbarSlice.ts";
 import Search from "../../../components/ui/Search.tsx";
 import { obtenerSucursales } from "../services/sucursalesService.ts";
 import FilterMenu from "../components/FilterMenu.tsx";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Link from "@mui/material/Link";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 export type FiltrosUsuarios = {
   sucursales: string[];
@@ -144,6 +147,18 @@ export default function UsuariosPage() {
   return (
     <PageLayout>
       <MainLayout>
+        <aside className="w-full p-4 text-sm">
+          <Breadcrumbs
+            aria-label="breadcrumb"
+            separator={<NavigateNextIcon fontSize="small" />}
+            classes={{ root: "text-sm! text-cerulean-600! font-bold!" }}
+          >
+            <Link href="/" underline="hover" color="inherit">
+              Inicio
+            </Link>
+            <span>Usuarios</span>
+          </Breadcrumbs>
+        </aside>
         <main className="flex flex-col justify-start items-center py-4 px-4">
           <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 gap-4">
             <h1 className=" sm:text-lg font-bold uppercase self-center">

@@ -23,8 +23,6 @@ export default function UsuariosTable({ usuarios }: Props) {
     try {
       const res = await eliminarUsuario(token!, legajo);
 
-      console.log(res);
-
       setModalOpen(null);
       if (res.success) {
         dispatch(showSuccess("Usuario eliminado con exito"));

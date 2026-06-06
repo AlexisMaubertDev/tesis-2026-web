@@ -1,6 +1,6 @@
 import Modal from "@mui/material/Modal";
 import TextInput from "../../../components/ui/TextInput";
-import {  useState } from "react";
+import { useState } from "react";
 import { type Usuario } from "../../../types/Usuario.ts";
 import Checkbox from "@mui/material/Checkbox";
 import { showSuccess } from "../../../app/store/snackbarSlice.ts";
@@ -40,10 +40,14 @@ const initialFormData: UsuarioForm = {
   trabaja_domingo: false,
 };
 
-export default function NuevoUsuarioModal({ open, onClose, sucursales }: Props) {
+export default function NuevoUsuarioModal({
+  open,
+  onClose,
+  sucursales,
+}: Props) {
   const { token } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState<UsuarioForm>(initialFormData);
-  
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +71,10 @@ export default function NuevoUsuarioModal({ open, onClose, sucursales }: Props) 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
-      setError("Error al crear usuario. Intenta nuevamente más tarde.");
+      setError(
+        err.response?.data?.message ||
+          "Error al crear usuario. Intenta nuevamente más tarde.",
+      );
     } finally {
       setLoading(false);
     }
@@ -77,7 +84,6 @@ export default function NuevoUsuarioModal({ open, onClose, sucursales }: Props) 
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
 
   return (
     <Modal
