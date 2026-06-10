@@ -7,15 +7,18 @@ import SucursalesTable from "../components/SucursalesTable";
 import type { RootState } from "../../../app/store";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-import { obtenerSucursales } from "../../usuarios/services/sucursalesService";
 import type { Sucursal } from "../../../types/Sucursal";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
-import NuevaSucursalModal from "../components/NuevaSucursalModal";
+import NuevaSucursalModal from "../components/SucursalModal";
+import { obtenerSucursales } from "../services/sucursalesService";
 
 export default function SucursalesPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [selectedSucursal, setSelectedSucursal] = useState<Sucursal | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -26,7 +29,7 @@ export default function SucursalesPage() {
         setSucursales(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        console.error(error.response?.data);
+        console.error(error.response?.message);
       }
     };
 
@@ -71,13 +74,27 @@ export default function SucursalesPage() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <SucursalesTable sucursales={sucursales} />
+            <SucursalesTable
+              sucursales={sucursales}
+              setSelectedSucursal={setSelectedSucursal}
+              setModalOpen={setModalOpen}
+            />
           </section>
         </main>
-        <NuevaSucursalModal
-          open={modalOpen}
-          onClose={() => setModalOpen(false)}
-        />
+        {modalOpen && (
+          <NuevaSucursalModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            initialData={{
+              id: selectedSucursal?.id || "",
+              nombre: selectedSucursal?.nombre || "",
+              direccion: selectedSucursal?.direccion || "",
+              cajas: [],
+              barreras: [],
+              gruas: [],
+            }}
+          />
+        )}
       </MainLayout>
     </PageLayout>
   );

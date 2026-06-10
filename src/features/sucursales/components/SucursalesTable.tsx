@@ -8,9 +8,19 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 
 type Props = {
   sucursales: Sucursal[];
+  setSelectedSucursal: (sucursal: Sucursal) => void;
+  setModalOpen: (open: boolean) => void;
 };
 
-export default function SucursalesTable({ sucursales }: Props) {
+export default function SucursalesTable({
+  sucursales,
+  setSelectedSucursal,
+  setModalOpen,
+}: Props) {
+  const handleEdit = (sucursal: Sucursal) => {
+    setSelectedSucursal(sucursal);
+    setModalOpen(true);
+  };
   return (
     <table className="w-full table border-collapse">
       <thead className="bg-cerulean-600 text-white text-left">
@@ -58,7 +68,10 @@ export default function SucursalesTable({ sucursales }: Props) {
             </td>
             <td className="border-b border-cerulean-200 px-2 py-2">
               <div className="flex items-center gap-2">
-                <button className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer">
+                <button
+                  className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
+                  onClick={() => handleEdit(sucursal)}
+                >
                   <Tooltip title="Editar">
                     <EditIcon />
                   </Tooltip>

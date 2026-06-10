@@ -10,11 +10,11 @@ import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
 import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
 import { showError } from "../../../app/store/snackbarSlice.ts";
 import Search from "../../../components/ui/Search.tsx";
-import { obtenerSucursales } from "../services/sucursalesService.ts";
 import FilterMenu from "../components/FilterMenu.tsx";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { obtenerSucursales } from "../../sucursales/services/sucursalesService.ts";
 
 export type FiltrosUsuarios = {
   sucursales: string[];
