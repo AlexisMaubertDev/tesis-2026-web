@@ -6,6 +6,9 @@ import SistemasRoute from "./SistemasRoute.tsx";
 import UsuariosPage from "../features/usuarios/pages/UsuariosPage.tsx";
 import VehiculosPage from "../features/vehiculos/pages/VehiculosPage.tsx";
 import SucursalesPage from "../features/sucursales/pages/SucursalesPage.tsx";
+import GruasPage from "../features/gruas/pages/GruasPage.tsx";
+import CajasPage from "../features/cajas/pages/CajasPage.tsx";
+import BarrerasPage from "../features/barreras/pages/BarrerasPage.tsx";
 
 export default function AppRoutes() {
   return (
@@ -37,6 +40,36 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <SistemasRoute>
                 <SucursalesPage />
+              </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gruas"
+          element={
+            <ProtectedRoute>
+              <SistemasRoute>
+                <GruasPage />
+              </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cajas"
+          element={
+            <ProtectedRoute>
+              <SistemasRoute>
+                <CajasPage />
+              </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/barreras"
+          element={
+            <ProtectedRoute>
+              <SistemasRoute>
+                <BarrerasPage />
               </SistemasRoute>
             </ProtectedRoute>
           }

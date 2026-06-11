@@ -15,6 +15,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { obtenerSucursales } from "../../sucursales/services/sucursalesService.ts";
+import { useSearchParams } from "react-router-dom";
 
 export type FiltrosUsuarios = {
   sucursales: string[];
@@ -25,6 +26,7 @@ export type FiltrosUsuarios = {
 
 export default function UsuariosPage() {
   const { token } = useSelector((state: RootState) => state.auth);
+  const [searchParams] = useSearchParams();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [sucursales, setSucursales] = useState<
     { id: string; nombre: string; direccion: string }[]
@@ -69,8 +71,6 @@ export default function UsuariosPage() {
       setUsuariosFiltrados(usuarios);
       return;
     }
-
-    console.log(texto);
 
     const resultados = usuarios.filter((usuario) => {
       return (
@@ -147,6 +147,31 @@ export default function UsuariosPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setUsuariosFiltrados(resultado);
   }, [usuarios, search, filtros]);
+
+  useEffect(() => {
+    const nuevosFiltros: FiltrosUsuarios = {
+      sucursales: [],
+      turnos: [],
+      trabajaDomingos: null,
+      bloqueados: false,
+    };
+
+    const sucursal = searchParams.get("sucursal");
+    const turno = searchParams.get("turno");
+    const domingos = searchParams.get("domingos");
+    const bloqueados = searchParams.get("bloqueados");
+
+    if (sucursal) nuevosFiltros.sucursales = [sucursal];
+
+    if (turno) nuevosFiltros.turnos = [Number(turno)];
+
+    if (domingos === "true") nuevosFiltros.trabajaDomingos = true;
+
+    if (bloqueados === "true") nuevosFiltros.bloqueados = true;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFiltros(nuevosFiltros);
+  }, [searchParams]);
 
   return (
     <PageLayout>

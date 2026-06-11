@@ -5,6 +5,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import StoreIcon from "@mui/icons-material/Store";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import { Link } from "react-router-dom";
 
 type Props = {
   sucursales: Sucursal[];
@@ -44,11 +45,13 @@ export default function SucursalesTable({
             </td>
             <td className="border-r border-b border-cerulean-200 px-2 py-2">
               <div className="flex items-center gap-2">
-                <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
-                  <Tooltip title="Usuarios">
-                    <PeopleIcon />
-                  </Tooltip>
-                </button>
+                <Link to={`/usuarios?sucursal=${sucursal.nombre}`}>
+                  <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
+                    <Tooltip title="Usuarios">
+                      <PeopleIcon />
+                    </Tooltip>
+                  </button>
+                </Link>
                 <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
                   <Tooltip title="Grúas">
                     <DirectionsCarIcon />
@@ -59,6 +62,7 @@ export default function SucursalesTable({
                     <StoreIcon />
                   </Tooltip>
                 </button>
+
                 <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
                   <Tooltip title="Cajas">
                     <MonetizationOnIcon />

@@ -40,6 +40,36 @@ export default function Home() {
                 </Link>
               </li>
             )}
+            {usuario.rol === "SISTEMAS" && (
+              <li className="flex w-1/2">
+                <Link
+                  to="/cajas"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
+                >
+                  Cajas
+                </Link>
+              </li>
+            )}
+            {usuario.rol === "SISTEMAS" && (
+              <li className="flex w-1/2">
+                <Link
+                  to="/gruas"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
+                >
+                  Gruas
+                </Link>
+              </li>
+            )}
+            {usuario.rol === "SISTEMAS" && (
+              <li className="flex w-1/2">
+                <Link
+                  to="/barreras"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
+                >
+                  Barreras
+                </Link>
+              </li>
+            )}
           </ul>
         </main>
       </MainLayout>

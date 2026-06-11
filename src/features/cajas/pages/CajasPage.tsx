@@ -1,49 +1,42 @@
+import { useEffect, useState } from "react";
 import MainLayout from "../../../components/layout/MainLayout";
 import PageLayout from "../../../components/layout/PageLayout";
-import SucursalesTable from "../components/SucursalesTable";
+import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
+import CallToActionButton from "../../../components/ui/CallToActionButton";
+import CajasTable from "../components/CajasTable";
 import type { RootState } from "../../../app/store";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import type { Sucursal } from "../../../types/Sucursal";
-import CallToActionButton from "../../../components/ui/CallToActionButton";
-import NuevaSucursalModal from "../components/SucursalModal";
-import { obtenerSucursales } from "../services/sucursalesService";
-import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
+import { obtenerCajas } from "../services/cajasService";
+import type { Caja } from "../../../types/Caja";
 
-export default function SucursalesPage() {
+export default function CajasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
-  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selectedSucursal, setSelectedSucursal] = useState<Sucursal | null>(
-    null,
-  );
+  const [cajas, setCajas] = useState<Caja[]>([]);
 
   useEffect(() => {
-    if (!token) return;
-
-    const cargarSucursales = async () => {
+    const cargarCajas = async () => {
       try {
-        const res = await obtenerSucursales(token);
-        setSucursales(res.data);
+        const res = await obtenerCajas(token!);
+        setCajas(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.response?.message);
       }
     };
-
-    cargarSucursales();
+    cargarCajas();
   }, [token]);
 
   return (
     <PageLayout>
       <MainLayout>
         <aside className="w-full p-4 text-sm">
-          <BreadcrumbsMenu page="Sucursales" />
+          <BreadcrumbsMenu page="Cajas" />
         </aside>
         <main className="flex flex-col justify-start items-center py-4 px-4">
           <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 gap-4">
             <h1 className=" sm:text-lg font-bold uppercase self-center">
-              Sucursales
+              Cajas
             </h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
               <CallToActionButton
@@ -57,33 +50,14 @@ export default function SucursalesPage() {
                 type="button"
                 handleSubmit={() => setModalOpen(true)}
               >
-                Agregar Sucursal
+                Agregar Caja
               </CallToActionButton>
             </div>
           </section>
-
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <SucursalesTable
-              sucursales={sucursales}
-              setSelectedSucursal={setSelectedSucursal}
-              setModalOpen={setModalOpen}
-            />
+            <CajasTable cajas={cajas} />
           </section>
         </main>
-        {modalOpen && (
-          <NuevaSucursalModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            initialData={{
-              id: selectedSucursal?.id || "",
-              nombre: selectedSucursal?.nombre || "",
-              direccion: selectedSucursal?.direccion || "",
-              cajas: [],
-              barreras: [],
-              gruas: [],
-            }}
-          />
-        )}
       </MainLayout>
     </PageLayout>
   );
