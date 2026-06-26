@@ -8,6 +8,7 @@ import type { Grua } from "../../../types/Grua";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
 import { obtenerGruas } from "../services/gruasServices";
+import NuevaGruaModal from "../components/GruaModal";
 
 export default function GruasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -57,6 +58,10 @@ export default function GruasPage() {
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
             <GruasTable gruas={gruas} />
           </section>
+          <NuevaGruaModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
         </main>
       </MainLayout>
     </PageLayout>

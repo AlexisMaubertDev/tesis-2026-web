@@ -2,18 +2,16 @@ import { useEffect, useState } from "react";
 import type { Usuario } from "../../../types/Usuario.ts";
 import PageLayout from "../../../components/layout/PageLayout.tsx";
 import MainLayout from "../../../components/layout/MainLayout.tsx";
-import { obtenerUsuarios } from "../services/usuariosService.ts";
 import type { RootState } from "../../../app/store/index.ts";
 import { useDispatch, useSelector } from "react-redux";
-import UsuariosTable from "../components/UsuariosTable.tsx";
-import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
-import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
 import { showError } from "../../../app/store/snackbarSlice.ts";
 import Search from "../../../components/ui/Search.tsx";
-import FilterMenu from "../components/FilterMenu.tsx";
 import { obtenerSucursales } from "../../sucursales/services/sucursalesService.ts";
 import { useSearchParams } from "react-router-dom";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu.tsx";
+import UsuariosSupervisorTable from "../../supervisor/components/UsuariosSupervisorTable.tsx";
+import { obtenerUsuarios } from "../../usuarios/services/usuariosService.ts";
+import FilterMenu from "../../usuarios/components/FilterMenu.tsx";
 
 export type FiltrosUsuarios = {
   sucursales: string[];
@@ -22,7 +20,7 @@ export type FiltrosUsuarios = {
   bloqueados: boolean;
 };
 
-export default function UsuariosPage() {
+export default function UsuariosSupervisorPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [searchParams] = useSearchParams();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -35,7 +33,6 @@ export default function UsuariosPage() {
     trabajaDomingos: null,
     bloqueados: false,
   });
-  const [nuevoUsuarioModalOpen, setNuevoUsuarioModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const dispatch = useDispatch();
@@ -183,7 +180,7 @@ export default function UsuariosPage() {
               Usuarios
             </h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 w-full md:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
               <div className="flex gap-2 w-full sm:col-span-2">
                 <Search
                   value={search}
@@ -197,31 +194,12 @@ export default function UsuariosPage() {
                   sucursales={sucursales}
                 />
               </div>
-              <CallToActionButton
-                type="button"
-                handleSubmit={() => window.location.reload()}
-              >
-                Refrescar
-              </CallToActionButton>
-
-              <CallToActionButton
-                type="button"
-                handleSubmit={() => setNuevoUsuarioModalOpen(true)}
-              >
-                Agregar Usuario
-              </CallToActionButton>
             </div>
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <UsuariosTable usuarios={usuariosFiltrados} />
+            <UsuariosSupervisorTable usuarios={usuariosFiltrados} />
           </section>
-
-          <NuevoUsuarioModal
-            open={nuevoUsuarioModalOpen}
-            onClose={() => setNuevoUsuarioModalOpen(false)}
-            sucursales={sucursales}
-          />
         </main>
       </MainLayout>
     </PageLayout>

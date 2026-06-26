@@ -9,6 +9,8 @@ import SucursalesPage from "../features/sucursales/pages/SucursalesPage.tsx";
 import GruasPage from "../features/gruas/pages/GruasPage.tsx";
 import CajasPage from "../features/cajas/pages/CajasPage.tsx";
 import BarrerasPage from "../features/barreras/pages/BarrerasPage.tsx";
+import SupervisorPage from "../features/supervisor/pages/SupervisorPage.tsx";
+import UsuariosSupervisorPage from "../features/supervisor/pages/UsuariosSupervisorPage.tsx";
 
 export default function AppRoutes() {
   return (
@@ -31,6 +33,22 @@ export default function AppRoutes() {
               <SistemasRoute>
                 <UsuariosPage />
               </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/supervisor"
+          element={
+            <ProtectedRoute>
+              <SupervisorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/supervisor/usuarios"
+          element={
+            <ProtectedRoute>
+              <UsuariosSupervisorPage />
             </ProtectedRoute>
           }
         />

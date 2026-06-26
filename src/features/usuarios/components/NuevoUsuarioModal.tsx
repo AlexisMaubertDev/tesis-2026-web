@@ -185,6 +185,7 @@ export default function NuevoUsuarioModal({
                 { value: "CAJERO", label: "Cajero" },
                 { value: "SUPERVISOR", label: "Supervisor" },
                 { value: "SISTEMAS", label: "Sistemas" },
+                { value: "GRUERO", label: "Gruero" },
               ]}
               value={formData.rol}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>

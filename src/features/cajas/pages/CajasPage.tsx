@@ -8,6 +8,7 @@ import type { RootState } from "../../../app/store";
 import { useSelector } from "react-redux";
 import { obtenerCajas } from "../services/cajasService";
 import type { Caja } from "../../../types/Caja";
+import NuevaCajaModal from "../components/CajaModal";
 
 export default function CajasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -57,6 +58,10 @@ export default function CajasPage() {
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
             <CajasTable cajas={cajas} />
           </section>
+          <NuevaCajaModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
         </main>
       </MainLayout>
     </PageLayout>

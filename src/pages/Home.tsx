@@ -14,6 +14,11 @@ export default function Home() {
   if (usuario.rol === "PLAYERO") {
     return <Navigate to="/vehiculos" replace />;
   }
+  if (usuario.rol === "SUPERVISOR") {
+    return <Navigate to="/supervisor" replace />;
+  }
+
+  console.log(usuario);
 
   return (
     <PageLayout>
@@ -67,6 +72,16 @@ export default function Home() {
                   className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
                 >
                   Barreras
+                </Link>
+              </li>
+            )}
+            {usuario.rol === "SISTEMAS" && (
+              <li className="flex w-1/2">
+                <Link
+                  to="/vehiculos"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
+                >
+                  Vehículos
                 </Link>
               </li>
             )}

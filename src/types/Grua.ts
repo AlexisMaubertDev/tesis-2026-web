@@ -6,7 +6,7 @@ export interface Grua {
   patente: string;
   numero: number;
   modelo: string;
-  estado: ["DISPONIBLE", "EN_SERVICIO", "FUERA_DE_SERVICIO", "MANTENIMIENTO"];
+  estado: "DISPONIBLE" | "EN_SERVICIO" | "FUERA_DE_SERVICIO" | "MANTENIMIENTO";
   observaciones: string | null;
   incidencias: string | null;
 }
