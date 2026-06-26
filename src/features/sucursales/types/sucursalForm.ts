@@ -18,15 +18,15 @@ export interface NuevaSucursalForm {
   id?: string;
   nombre: string;
   direccion: string;
-  cajas: CajaForm[];
-  barreras: BarreraForm[];
-  gruas: GruaForm[];
+  Cajas: CajaForm[];
+  Barreras: BarreraForm[];
+  Gruas: GruaForm[];
 }
 
 export const defaultSucursalForm: NuevaSucursalForm = {
   nombre: "",
   direccion: "",
-  cajas: [],
-  barreras: [],
-  gruas: [],
+  Cajas: [],
+  Barreras: [],
+  Gruas: [],
 };

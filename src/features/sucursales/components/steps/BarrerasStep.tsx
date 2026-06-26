@@ -17,8 +17,8 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
   const addBarrera = () => {
     setForm((prev) => ({
       ...prev,
-      barreras: [
-        ...prev.barreras,
+      Barreras: [
+        ...prev.Barreras,
         {
           ubicacion: "",
         },
@@ -29,7 +29,7 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
   const updateBarrera = (idx: number, field: string, value: string) => {
     setForm((prev) => ({
       ...prev,
-      barreras: prev.barreras.map((b, index) =>
+      Barreras: prev.Barreras.map((b, index) =>
         index === idx ? { ...b, [field]: value } : b,
       ),
     }));
@@ -38,7 +38,7 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
   const removeCaja = (idx: number) => {
     setForm((prev) => ({
       ...prev,
-      barreras: prev.barreras.filter((c, index) => index !== idx),
+      Barreras: prev.Barreras.filter((c, index) => index !== idx),
     }));
   };
 
@@ -56,7 +56,7 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
           </span>
         </CallToActionButton>
       </div>
-      {form.barreras.length > 0 ? (
+      {form.Barreras.length > 0 ? (
         <table className="w-full table border-collapse text-xs">
           <thead className="bg-cerulean-600 text-white text-left">
             <tr className="text-sm border-b border-cerulean-400">
@@ -68,7 +68,7 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
           </thead>
 
           <tbody className="bg-cerulean-50 text-xs">
-            {form.barreras.map((barrera, index) => {
+            {form.Barreras.map((barrera, index) => {
               return (
                 <tr key={index}>
                   <td className="border-r border-b border-cerulean-200 px-2 py-2">
@@ -109,8 +109,8 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
           type="button"
           handleSubmit={next}
           disabled={
-            form.barreras.length === 0 ||
-            form.barreras.some((b) => b.ubicacion === "")
+            form.Barreras.length === 0 ||
+            form.Barreras.some((b) => b.ubicacion === "")
           }
         >
           Siguiente

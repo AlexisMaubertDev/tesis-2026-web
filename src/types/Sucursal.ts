@@ -1,5 +1,5 @@
 export interface Sucursal {
-  id: string;
+  id?: string;
   nombre: string;
   direccion: string;
 }

@@ -9,6 +9,14 @@ export const obtenerSucursales = async (token: string) => {
   });
   return res.data;
 };
+export const obtenerSucursal = async (token: string, id: string) => {
+  const res = await api.get(`/sucursales/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
 
 export const crearSucursal = async (
   token: string,

@@ -18,8 +18,8 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
   const addCaja = () => {
     setForm((prev) => ({
       ...prev,
-      cajas: [
-        ...prev.cajas,
+      Cajas: [
+        ...prev.Cajas,
         {
           numero_caja: 0,
           referencia: "",
@@ -32,7 +32,7 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
   const updateCaja = (numero_caja: number, field: string, value: string) => {
     setForm((prev) => ({
       ...prev,
-      cajas: prev.cajas.map((c) =>
+      Cajas: prev.Cajas.map((c) =>
         c.numero_caja === numero_caja ? { ...c, [field]: value } : c,
       ),
     }));
@@ -41,7 +41,7 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
   const removeCaja = (numero_caja: number) => {
     setForm((prev) => ({
       ...prev,
-      cajas: prev.cajas.filter((c) => c.numero_caja !== numero_caja),
+      Cajas: prev.Cajas.filter((c) => c.numero_caja !== numero_caja),
     }));
   };
 
@@ -60,7 +60,7 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
         </CallToActionButton>
       </div>
 
-      {form.cajas.length > 0 ? (
+      {form.Cajas.length > 0 ? (
         <table className="w-full table border-collapse text-xs">
           <thead className="bg-cerulean-600 text-white text-left">
             <tr className="text-sm border-b border-cerulean-400">
@@ -76,7 +76,7 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
           </thead>
 
           <tbody className="bg-cerulean-50 text-xs">
-            {form.cajas.map((caja, index) => {
+            {form.Cajas.map((caja, index) => {
               caja.numero_caja = index + 1;
               return (
                 <tr key={index}>
@@ -146,8 +146,8 @@ export default function CajasStep({ form, setForm, next, back }: Props) {
           type="button"
           handleSubmit={next}
           disabled={
-            form.cajas.length === 0 ||
-            form.cajas.some((c) => !c.referencia || !c.referencia_pago)
+            form.Cajas.length === 0 ||
+            form.Cajas.some((c) => !c.referencia || !c.referencia_pago)
           }
         >
           Siguiente

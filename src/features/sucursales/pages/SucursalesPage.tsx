@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { Sucursal } from "../../../types/Sucursal";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
-import NuevaSucursalModal from "../components/SucursalModal";
+import SucursalModal from "../components/SucursalModal";
 import { obtenerSucursales } from "../services/sucursalesService";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 
@@ -18,6 +18,10 @@ export default function SucursalesPage() {
     null,
   );
 
+  const handleEdit = (sucursal: Sucursal) => {
+    setSelectedSucursal(sucursal);
+    setModalOpen(true);
+  };
   useEffect(() => {
     if (!token) return;
 
@@ -63,25 +67,14 @@ export default function SucursalesPage() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <SucursalesTable
-              sucursales={sucursales}
-              setSelectedSucursal={setSelectedSucursal}
-              setModalOpen={setModalOpen}
-            />
+            <SucursalesTable sucursales={sucursales} handleEdit={handleEdit} />
           </section>
         </main>
         {modalOpen && (
-          <NuevaSucursalModal
+          <SucursalModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
-            initialData={{
-              id: selectedSucursal?.id || "",
-              nombre: selectedSucursal?.nombre || "",
-              direccion: selectedSucursal?.direccion || "",
-              cajas: [],
-              barreras: [],
-              gruas: [],
-            }}
+            initialData={selectedSucursal}
           />
         )}
       </MainLayout>

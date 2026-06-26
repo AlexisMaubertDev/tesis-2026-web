@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Step, StepLabel, Stepper, Modal } from "@mui/material";
 
 import DatosGeneralesStep from "./steps/DatosGeneralesStep";
@@ -12,20 +12,25 @@ import {
   type NuevaSucursalForm,
   defaultSucursalForm,
 } from "../types/sucursalForm";
-import { crearSucursal, editarSucursal } from "../services/sucursalesService";
+import {
+  crearSucursal,
+  editarSucursal,
+  obtenerSucursal,
+} from "../services/sucursalesService";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import type { Sucursal } from "../../../types/Sucursal";
 
 interface SucursalModalProps {
   open: boolean;
   onClose: () => void;
-  initialData?: NuevaSucursalForm;
+  initialData?: Sucursal | null;
 }
 
 const steps = ["Datos Generales", "Cajas", "Barreras", "Grúas", "Resumen"];
 
-export default function NuevaSucursalModal({
+export default function SucursalModal({
   open,
   onClose,
   initialData,
@@ -34,9 +39,7 @@ export default function NuevaSucursalModal({
   const [activeStep, setActiveStep] = useState(0);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
-  const [form, setForm] = useState<NuevaSucursalForm>(
-    initialData ?? defaultSucursalForm,
-  );
+  const [form, setForm] = useState<NuevaSucursalForm>(defaultSucursalForm);
 
   const nextStep = () => {
     setActiveStep((prev) => prev + 1);
@@ -46,11 +49,11 @@ export default function NuevaSucursalModal({
     setActiveStep((prev) => prev - 1);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setActiveStep(0);
-    setForm(initialData ?? defaultSucursalForm);
+    setForm(defaultSucursalForm);
     onClose();
-  };
+  }, [onClose]);
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -60,7 +63,7 @@ export default function NuevaSucursalModal({
       await crearNuevaSucursal();
     }
     setLoading(false);
-    //handleClose();
+    handleClose();
   };
 
   const crearNuevaSucursal = async () => {
@@ -108,6 +111,28 @@ export default function NuevaSucursalModal({
     }
   };
 
+  useEffect(() => {
+    if (initialData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      const obtenerSucursalPorId = async () => {
+        try {
+          const res = await obtenerSucursal(token!, initialData.id!);
+          console.log(res);
+          setForm(res.data);
+        } catch (error) {
+          console.error(error);
+          dispatch(
+            showError(
+              "No se pudo obtener la sucursal. Intenta nuevamente más tarde.",
+            ),
+          );
+          handleClose();
+        }
+      };
+      obtenerSucursalPorId();
+    }
+  }, [initialData, token, dispatch, handleClose]);
+
   return (
     <Modal open={open} onClose={handleClose}>
       <div className="absolute top-1/2 left-1/2  max-w-4/5 md:max-w-6xl -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-8 shadow-lg font-sans overflow-auto max-h-screen">
@@ -122,11 +147,11 @@ export default function NuevaSucursalModal({
             {steps.map((label, index) => (
               <Step key={label}>
                 <StepLabel>
-                  {index === 1 && `Cajas (${form.cajas.length})`}
+                  {index === 1 && `Cajas (${form.Cajas.length})`}
 
-                  {index === 2 && `Barreras (${form.barreras.length})`}
+                  {index === 2 && `Barreras (${form.Barreras.length})`}
 
-                  {index === 3 && `Grúas (${form.gruas.length})`}
+                  {index === 3 && `Grúas (${form.Gruas.length})`}
 
                   {index !== 1 && index !== 2 && index !== 3 && label}
                 </StepLabel>

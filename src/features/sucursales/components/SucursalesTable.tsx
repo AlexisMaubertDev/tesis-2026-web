@@ -9,19 +9,10 @@ import { Link } from "react-router-dom";
 
 type Props = {
   sucursales: Sucursal[];
-  setSelectedSucursal: (sucursal: Sucursal) => void;
-  setModalOpen: (open: boolean) => void;
+  handleEdit: (sucursal: Sucursal) => void;
 };
 
-export default function SucursalesTable({
-  sucursales,
-  setSelectedSucursal,
-  setModalOpen,
-}: Props) {
-  const handleEdit = (sucursal: Sucursal) => {
-    setSelectedSucursal(sucursal);
-    setModalOpen(true);
-  };
+export default function SucursalesTable({ sucursales, handleEdit }: Props) {
   return (
     <table className="w-full table border-collapse">
       <thead className="bg-cerulean-600 text-white text-left">

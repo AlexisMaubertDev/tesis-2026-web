@@ -14,15 +14,15 @@ export default function ResumenStep({ form, save, back, loading }: Props) {
       <h2 className="font-bold">Resumen</h2>
       <div className="flex gap-2">
         <p className="flex-1 bg-cerulean-50 border border-cerulean-200 rounded-lg p-2">
-          Cajas: {form.cajas.length}
+          Cajas: {form.Cajas.length}
         </p>
 
         <p className="flex-1 bg-cerulean-50 border border-cerulean-200 rounded-lg p-2">
-          Barreras: {form.barreras.length}
+          Barreras: {form.Barreras.length}
         </p>
 
         <p className="flex-1 bg-cerulean-50 border border-cerulean-200 rounded-lg p-2">
-          Grúas: {form.gruas.length}
+          Grúas: {form.Gruas.length}
         </p>
       </div>
 

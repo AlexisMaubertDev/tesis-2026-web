@@ -17,8 +17,8 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
   const addGrua = () => {
     setForm((prev) => ({
       ...prev,
-      gruas: [
-        ...prev.gruas,
+      Gruas: [
+        ...prev.Gruas,
         {
           patente: "",
           modelo: "",
@@ -31,7 +31,7 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
   const updateGrua = (idx: number, field: string, value: string) => {
     setForm((prev) => ({
       ...prev,
-      gruas: prev.gruas.map((g, index) =>
+      Gruas: prev.Gruas.map((g, index) =>
         index === idx ? { ...g, [field]: value } : g,
       ),
     }));
@@ -40,7 +40,7 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
   const removeGrua = (patente: string) => {
     setForm((prev) => ({
       ...prev,
-      gruas: prev.gruas.filter((g) => g.patente !== patente),
+      Gruas: prev.Gruas.filter((g) => g.patente !== patente),
     }));
   };
 
@@ -58,7 +58,7 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
           </span>
         </CallToActionButton>
       </div>
-      {form.gruas.length > 0 ? (
+      {form.Gruas.length > 0 ? (
         <table className="w-full table border-collapse text-xs">
           <thead className="bg-cerulean-600 text-white text-left">
             <tr className="text-sm border-b border-cerulean-400">
@@ -70,7 +70,7 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
           </thead>
 
           <tbody className="bg-cerulean-50 text-xs">
-            {form.gruas.map((grua, index) => {
+            {form.Gruas.map((grua, index) => {
               return (
                 <tr key={index}>
                   <td className="border-r border-b border-cerulean-200 px-2 py-2">
@@ -130,8 +130,8 @@ export default function GruasStep({ form, setForm, next, back }: Props) {
           type="button"
           handleSubmit={next}
           disabled={
-            form.gruas.length === 0 ||
-            form.gruas.some(
+            form.Gruas.length === 0 ||
+            form.Gruas.some(
               (grua) =>
                 grua.patente === "" || grua.numero === 0 || grua.modelo === "",
             )
