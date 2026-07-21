@@ -27,3 +27,24 @@ export const eliminarUsuario = async (token: string, legajo: string) => {
   });
   return res.data;
 };
+
+export const obtenerTurnoCajasUsuario = async (token: string) => {
+  const res = await api.get("/turno_caja/usuario/abiertas", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const empezarTurno_Caja = async (
+  token: string,
+  data: { id_caja: string; turno: string },
+) => {
+  const res = await api.post(`/turno_caja/empezar_turno`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};

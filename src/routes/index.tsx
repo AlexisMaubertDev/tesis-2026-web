@@ -11,6 +11,7 @@ import CajasPage from "../features/cajas/pages/CajasPage.tsx";
 import BarrerasPage from "../features/barreras/pages/BarrerasPage.tsx";
 import SupervisorPage from "../features/supervisor/pages/SupervisorPage.tsx";
 import UsuariosSupervisorPage from "../features/supervisor/pages/UsuariosSupervisorPage.tsx";
+import CajerosPage from "../features/cajeros/pages/CajerosPage.tsx";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +34,14 @@ export default function AppRoutes() {
               <SistemasRoute>
                 <UsuariosPage />
               </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cajeros"
+          element={
+            <ProtectedRoute>
+              <CajerosPage />
             </ProtectedRoute>
           }
         />

@@ -6,6 +6,7 @@ import { Link, Navigate } from "react-router-dom";
 
 export default function Home() {
   const { usuario } = useSelector((state: RootState) => state.auth);
+  console.log(usuario);
 
   if (!usuario) {
     return <Navigate to="/login" replace />;
@@ -14,11 +15,12 @@ export default function Home() {
   if (usuario.rol === "PLAYERO") {
     return <Navigate to="/vehiculos" replace />;
   }
+  if (usuario.rol === "CAJERO") {
+    return <Navigate to="/cajeros" replace />;
+  }
   if (usuario.rol === "SUPERVISOR") {
     return <Navigate to="/supervisor" replace />;
   }
-
-  console.log(usuario);
 
   return (
     <PageLayout>

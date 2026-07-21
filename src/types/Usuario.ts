@@ -21,4 +21,5 @@ export interface Turno_Caja {
   apertura: Date;
   Caja: Caja;
   Usuario: Usuario;
+  turno: string;
 }

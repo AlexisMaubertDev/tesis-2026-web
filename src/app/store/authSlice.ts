@@ -24,8 +24,14 @@ const authSlice = createSlice({
         state.usuario.Turno_Caja = action.payload;
       }
     },
+    terminarTurnoCaja: (state) => {
+      if (state.usuario) {
+        state.usuario.Turno_Caja = null;
+      }
+    },
   },
 });
 
-export const { loginSuccess, logout, empezarTurnoCaja } = authSlice.actions;
+export const { loginSuccess, logout, empezarTurnoCaja, terminarTurnoCaja } =
+  authSlice.actions;
 export default authSlice.reducer;

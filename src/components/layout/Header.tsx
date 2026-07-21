@@ -36,29 +36,6 @@ export default function Header() {
           >
             {usuario.nombre + " " + usuario.apellido}
           </Link>
-          {(usuario.rol === "CAJERO" || usuario.rol === "PLAYERO") && (
-            <button
-              className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"
-              onClick={() => {
-                localStorage.removeItem("token");
-                window.location.reload();
-              }}
-            >
-              Empezar turno
-            </button>
-          )}
-          {(usuario.rol === "CAJERO" || usuario.rol === "PLAYERO") &&
-            usuario.Turno_Caja && (
-              <button
-                className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  window.location.reload();
-                }}
-              >
-                Terminar turno
-              </button>
-            )}
 
           <button
             className="text-slate-100 hover:text-cerulean-300 transition-colors duration-300 cursor-pointer"

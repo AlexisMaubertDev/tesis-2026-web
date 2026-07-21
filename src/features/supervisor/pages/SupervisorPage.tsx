@@ -28,7 +28,7 @@ export default function SupervisorPage() {
 
     const cargarCajas = async () => {
       try {
-        const res = await obtenerCajasSucursal(token, usuario.Sucursal.id);
+        const res = await obtenerCajasSucursal(token, usuario.Sucursal.id!);
         setCajas(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -62,7 +62,10 @@ export default function SupervisorPage() {
               <h1 className=" sm:text-lg font-bold uppercase self-center">
                 {usuario.Sucursal.nombre}
               </h1>
-              <span className="text-sm"> {usuario.Sucursal.direccion}</span>
+              <span className="text-sm text-nowrap">
+                {" "}
+                {usuario.Sucursal.direccion}
+              </span>
             </div>
             <ul className="flex w-full gap-2 sm:justify-end flex-wrap">
               <li>
@@ -107,10 +110,29 @@ export default function SupervisorPage() {
             </ul>
           </section>
           {/* CAJAS */}
-          <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full p-4 mt-4 mx-4 gap-4">
-            <h1 className=" sm:text-lg font-bold uppercase self-center">
-              Cajas
-            </h1>
+          <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
+              <h1 className=" sm:text-lg  font-bold uppercase self-center">
+                Cajas
+              </h1>
+            </div>
+            <ul className="flex  justify-start items-start lg:items-center w-full  gap-4">
+              {cajas.map((caja) => (
+                <li
+                  key={caja.id}
+                  className="flex flex-col gap-2 bg-cerulean-200 rounded shadow p-4 w-full sm:w-auto"
+                >
+                  <span className="font-bold">Caja N°: {caja.numero_caja}</span>
+                  <p>
+                    {" "}
+                    <span className="font-bold">
+                      Referencia:
+                    </span> {caja.referencia}
+                  </p>
+                  <span>Puerto: {caja.puerto}</span>
+                </li>
+              ))}
+            </ul>
           </section>
           <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full p-4 mt-4 mx-4 gap-4">
             <h1 className=" sm:text-lg font-bold uppercase self-center">
