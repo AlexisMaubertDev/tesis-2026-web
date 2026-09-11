@@ -7,6 +7,7 @@ export interface Caja {
   referencia: string;
   referencia_pago: string;
   Sucursal: Sucursal;
+  Turno_Cajas: Turno_Caja[];
 }
 
 export interface CajaActiva extends Caja {

@@ -7,17 +7,17 @@ import type { Caja } from "../../../types/Caja";
 import PageLayout from "../../../components/layout/PageLayout";
 import MainLayout from "../../../components/layout/MainLayout";
 import SelectCajas from "../components/SelectCajas";
-import { obtenerTurnoCajasUsuario } from "../../usuarios/services/usuariosService";
+import { cerrarTurno_Caja } from "../../usuarios/services/usuariosService";
 import { terminarTurnoCaja } from "../../../app/store/authSlice";
+import CallToActionButton from "../../../components/ui/CallToActionButton";
+import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
   const [cajas, setCajas] = useState<Caja[]>([]);
-  const [turnoCajas, setTurnoCajas] = useState<Caja[]>([]);
+  // const [turnoCajas, setTurnoCajas] = useState<Caja[]>([]);
 
   const dispatch = useDispatch();
-
-  console.log(usuario);
 
   if (!usuario) {
     return <Navigate to="/login" replace />;
@@ -42,8 +42,6 @@ export default function CajerosPage() {
     //   }
     // };
 
-    // dispatch(terminarTurnoCaja());
-
     const cargarCajas = async () => {
       try {
         const res = await obtenerCajasSucursal(token, usuario.Sucursal.id!);
@@ -59,12 +57,36 @@ export default function CajerosPage() {
     cargarCajas();
   }, [token, usuario.Sucursal.id]);
 
+  console.log("Cajas disponibles:", cajas);
+  const handleCerrarTurno = async () => {
+    console.log("cerrar turno");
+
+    try {
+      await cerrarTurno_Caja(token!, usuario.Turno_Caja!.id!);
+
+      dispatch(terminarTurnoCaja());
+
+      dispatch(showSuccess("Turno cerrado correctamente"));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error(error.response?.data);
+      dispatch(showError(error.response?.data?.message));
+    }
+  };
+
   return (
     <PageLayout>
       <MainLayout>
         <main className="flex flex-col justify-start items-center py-4 px-4">
           {!usuario.Turno_Caja ? (
-            <SelectCajas cajas={cajas} />
+            <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
+                <h1 className=" sm:text-lg  font-bold uppercase self-center">
+                  Cajas - {usuario.Sucursal.nombre}
+                </h1>
+              </div>
+              <SelectCajas cajas={cajas} />
+            </section>
           ) : (
             <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">
               <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
@@ -73,6 +95,13 @@ export default function CajerosPage() {
                 </h1>
                 <h2>Turno: {usuario.Turno_Caja.turno}</h2>
                 <h2>Referencia: {usuario.Turno_Caja.Caja.referencia}</h2>
+
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={handleCerrarTurno}
+                >
+                  Cerrar Turno
+                </CallToActionButton>
               </div>
             </section>
           )}

@@ -35,7 +35,6 @@ export default function SelectCajas({ cajas }: Props) {
       dispatch(showSuccess("Turno iniciado correctamente"));
 
       handleCloseModal(false);
-      window.location.reload();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       dispatch(showError(error.response?.data?.message));
@@ -54,29 +53,28 @@ export default function SelectCajas({ cajas }: Props) {
   };
 
   return (
-    <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
-        <h1 className=" sm:text-lg  font-bold uppercase self-center">Cajas</h1>
-      </div>
-      <ul className="flex  justify-start items-start lg:items-center w-full  gap-4">
-        {cajas.map((caja) => (
-          <li
-            key={caja.id}
-            className="flex flex-col gap-2 bg-cerulean-200 rounded shadow p-4 w-full sm:w-auto"
-          >
-            <span className="font-bold">Caja N°: {caja.numero_caja}</span>
-            <p>
-              <span className="font-bold">Referencia:</span> {caja.referencia}
-            </p>
+    <ul className="flex  justify-start items-start lg:items-center w-full  gap-4">
+      {cajas.map((caja) => (
+        <li
+          key={caja.id}
+          className="flex flex-col gap-2 bg-cerulean-100 rounded shadow p-4 w-full sm:w-auto"
+        >
+          <span className="font-bold">Caja N°: {caja.numero_caja}</span>
+          <p>
+            <span className="font-bold">Referencia:</span> {caja.referencia}
+          </p>
+          {caja.Turno_Cajas.length > 0 ? (
+            <span className="text-red-500 font-bold">Caja ocupada</span>
+          ) : (
             <CallToActionButton
               type="button"
               handleSubmit={() => handleSeleccionarCaja(caja)}
             >
               Empezar turno
             </CallToActionButton>
-          </li>
-        ))}
-      </ul>
+          )}
+        </li>
+      ))}
       <ChoiceModal
         open={modalOpen}
         setOpen={handleCloseModal}
@@ -103,11 +101,12 @@ export default function SelectCajas({ cajas }: Props) {
               { value: "Noche", label: "Noche" },
             ]}
           />
+
           <CallToActionButton type="button" handleSubmit={handleEmpezarTurno}>
             Empezar Turno
           </CallToActionButton>
         </div>
       </Modal>
-    </section>
+    </ul>
   );
 }
