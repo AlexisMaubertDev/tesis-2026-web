@@ -3,11 +3,12 @@ import MainLayout from "../components/layout/MainLayout";
 import PageLayout from "../components/layout/PageLayout";
 import type { RootState } from "../app/store";
 import { Link, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import api from "../services/api";
 
 export default function Home() {
   const { usuario } = useSelector((state: RootState) => state.auth);
   console.log(usuario);
-
   if (!usuario) {
     return <Navigate to="/login" replace />;
   }
@@ -21,6 +22,18 @@ export default function Home() {
   if (usuario.rol === "SUPERVISOR") {
     return <Navigate to="/supervisor" replace />;
   }
+  async function data() {
+    try {
+      const res = await api.get("/test/", {});
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    data();
+  }, []);
 
   return (
     <PageLayout>
