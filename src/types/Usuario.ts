@@ -1,4 +1,5 @@
 import type { Caja } from "./Caja";
+import type { Turno_Grua } from "./Grua";
 import type { Sucursal } from "./Sucursal";
 
 export interface Usuario {
@@ -14,6 +15,9 @@ export interface Usuario {
   Sucursal: Sucursal;
   rol: "PLAYERO" | "CAJERO" | "SUPERVISOR" | "SISTEMAS";
   Turno_Caja?: Turno_Caja | null;
+  turno_caja_activo?: Turno_Caja | null;
+  turno_grua_enganchador_activo?: Turno_Grua | null;
+  turno_grua_chofer_activo?: Turno_Grua | null;
 }
 
 export interface Turno_Caja {

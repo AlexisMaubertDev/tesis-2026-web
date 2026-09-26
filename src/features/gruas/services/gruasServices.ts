@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import type { Turno_Grua } from "../../../types/Grua";
 import type { GruaForm } from "../components/GruaModal";
 
 export const obtenerGruas = async (token: string) => {
@@ -25,5 +26,45 @@ export const obtenerGruasSucursal = async (token: string, id: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
+  return res.data;
+};
+
+export const asignarGrua = async (token: string, data: Turno_Grua) => {
+  const res = await api.post("/gruas/asignar", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+export const finalizarTurnosSucursal = async (token: string, id: string) => {
+  console.log(id);
+  const res = await api.put(
+    `/turno_grua/finalizar/${id}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return res.data;
+};
+
+export const agregarIncidencia = async (
+  token: string,
+  incidencias: string,
+  id: string,
+) => {
+  const res = await api.put(
+    `/turno_grua/${id}/incidencias`,
+    { incidencias },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
   return res.data;
 };

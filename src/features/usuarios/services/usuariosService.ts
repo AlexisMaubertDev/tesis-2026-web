@@ -10,6 +10,15 @@ export const obtenerUsuarios = async (token: string) => {
   return res.data;
 };
 
+export const obtenerGrueros = async (token: string) => {
+  const res = await api.get("/usuarios/grueros", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
 export const crearUsuario = async (token: string, usuarioData: Usuario) => {
   const res = await api.post("/usuarios", usuarioData, {
     headers: {
