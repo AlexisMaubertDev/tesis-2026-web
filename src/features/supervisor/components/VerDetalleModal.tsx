@@ -6,7 +6,10 @@ import { es } from "date-fns/locale";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useState } from "react";
 import TextArea from "../../../components/ui/TextArea";
-import { agregarIncidencia } from "../../gruas/services/gruasServices";
+import {
+  agregarIncidencia,
+  terminarTurno,
+} from "../../gruas/services/gruasServices";
 import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { showSuccess } from "../../../app/store/snackbarSlice";
@@ -65,6 +68,22 @@ export default function VerDetalleModal({
           error?.response?.data?.error || "Error al agregar incidencia",
         );
       }
+    }
+  };
+
+  const handleTerminarTurno = async () => {
+    try {
+      const res = await terminarTurno(
+        token!,
+        grua?.turno_grua_activo?.id || "",
+      );
+      console.log(res);
+      onSuccess!();
+      dispatch(showSuccess("Turno finalizado con exito"));
+    } catch (error: { response: { data: { error: string } } }) {
+      setErrorIncidencia(
+        error?.response?.data?.error || "Error al terminar el turno",
+      );
     }
   };
 
@@ -156,6 +175,12 @@ export default function VerDetalleModal({
               handleSubmit={() => handleAgregarIncidencias()}
             >
               Agregar incidencia
+            </CallToActionButton>
+            <CallToActionButton
+              type="button"
+              handleSubmit={handleTerminarTurno}
+            >
+              Terminar este turno
             </CallToActionButton>
             <CallToActionButton
               type="button"

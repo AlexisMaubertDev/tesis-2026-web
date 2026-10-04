@@ -68,3 +68,17 @@ export const agregarIncidencia = async (
   );
   return res.data;
 };
+
+
+export const terminarTurno = async (token: string, id: string) => {
+  const res = await api.put(
+    `/turno_grua/${id}/finalizar`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return res.data;
+};
