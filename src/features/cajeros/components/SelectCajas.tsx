@@ -6,9 +6,11 @@ import { useState } from "react";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
 import { empezarTurno_Caja } from "../../usuarios/services/usuariosService";
 import { empezarTurnoCaja } from "../../../app/store/authSlice";
-import { Modal } from "@mui/material";
+import { Modal, Tooltip } from "@mui/material";
 import SelectInput from "../../../components/ui/SelectInput";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import CircleIcon from "@mui/icons-material/Circle";
+import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 
 type Props = {
   cajas: Caja[];
@@ -29,7 +31,6 @@ export default function SelectCajas({ cajas }: Props) {
         id_caja: cajaSeleccionada.id!,
         turno,
       });
-      console.log(res.data);
 
       dispatch(empezarTurnoCaja(res.data));
       dispatch(showSuccess("Turno iniciado correctamente"));
@@ -37,6 +38,7 @@ export default function SelectCajas({ cajas }: Props) {
       handleCloseModal(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error(error.response?.data);
       dispatch(showError(error.response?.data?.message));
     }
   };
@@ -57,22 +59,39 @@ export default function SelectCajas({ cajas }: Props) {
       {cajas.map((caja) => (
         <li
           key={caja.id}
-          className="flex flex-col gap-2 bg-cerulean-100 rounded shadow p-4 w-full sm:w-auto"
+          className="flex  bg-cerulean-200 rounded shadow p-4 w-full sm:w-auto"
         >
-          <span className="font-bold">Caja N°: {caja.numero_caja}</span>
-          <p>
-            <span className="font-bold">Referencia:</span> {caja.referencia}
-          </p>
-          {caja.Turno_Cajas.length > 0 ? (
-            <span className="text-red-500 font-bold">Caja ocupada</span>
-          ) : (
-            <CallToActionButton
-              type="button"
-              handleSubmit={() => handleSeleccionarCaja(caja)}
-            >
-              Empezar turno
-            </CallToActionButton>
-          )}
+          <div className="flex flex-col gap-2">
+            <span className="font-bold">Caja N°: {caja.numero_caja}</span>
+            <p>
+              <span className="font-bold mr-1">Referencia:</span>
+              {caja.referencia}
+            </p>
+            {caja.turno_caja_activo ? (
+              <span className=" font-bold">
+                {formatDateFullWithHs(
+                  caja.turno_caja_activo?.apertura.toString(),
+                )}
+              </span>
+            ) : (
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => handleSeleccionarCaja(caja)}
+              >
+                Empezar turno
+              </CallToActionButton>
+            )}
+          </div>
+          <div className="-mr-2 -mt-2">
+            <Tooltip title={caja.turno_caja_activo ? "Operando" : "Cerrada"}>
+              <CircleIcon
+                className={
+                  caja.turno_caja_activo ? "text-green-500" : "text-red-500"
+                }
+                fontSize="small"
+              />
+            </Tooltip>
+          </div>
         </li>
       ))}
       <ChoiceModal
@@ -96,9 +115,9 @@ export default function SelectCajas({ cajas }: Props) {
             value={turno}
             onChange={(e) => setTurno(e.target.value)}
             options={[
-              { value: "Mañana", label: "Mañana" },
-              { value: "Tarde", label: "Tarde" },
-              { value: "Noche", label: "Noche" },
+              { value: "1", label: "Mañana" },
+              { value: "2", label: "Tarde" },
+              { value: "3", label: "Noche" },
             ]}
           />
 

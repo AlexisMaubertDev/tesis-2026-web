@@ -73,7 +73,6 @@ export default function SupervisorPage() {
     return <Navigate to="/" replace />;
   }
 
-  // 2. Ejecutar refrescarDatos al finalizar el turno con éxito
   const finalizarTurno = async () => {
     try {
       const res = await finalizarTurnosSucursal(token!, usuario.Sucursal.id!);
@@ -162,6 +161,12 @@ export default function SupervisorPage() {
                       <span className="font-bold mr-1">Referencia:</span>
                       {caja.referencia}
                     </p>
+                    <CallToActionButton
+                      type="button"
+                      handleSubmit={() => setVerDetalleModal()}
+                    >
+                      Ver detalle
+                    </CallToActionButton>
                   </div>
                   <div className="-mr-2 -mt-2">
                     <Tooltip
@@ -188,12 +193,14 @@ export default function SupervisorPage() {
               <h1 className="sm:text-lg font-bold uppercase self-center">
                 Grúas
               </h1>
-              <CallToActionButton
-                type="button"
-                handleSubmit={() => setFinalizar(true)}
-              >
-                Finalizar turnos
-              </CallToActionButton>
+              {gruas.some((grua) => grua.estado === "EN_SERVICIO") && (
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={() => setFinalizar(true)}
+                >
+                  Finalizar turnos
+                </CallToActionButton>
+              )}
             </div>
             <ul className="flex justify-start items-start lg:items-center w-full gap-4">
               {gruas.map((grua) => (

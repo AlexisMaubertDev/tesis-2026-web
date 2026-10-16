@@ -1,8 +1,5 @@
 import { Modal } from "@mui/material";
 import type { Grua } from "../../../types/Grua";
-import { format } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
-import { es } from "date-fns/locale";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useState } from "react";
 import TextArea from "../../../components/ui/TextArea";
@@ -13,6 +10,7 @@ import {
 import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { showSuccess } from "../../../app/store/snackbarSlice";
+import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 
 type Props = {
   open: boolean;
@@ -27,13 +25,7 @@ export default function VerDetalleModal({
   grua,
   onSuccess,
 }: Props) {
-  const DEFAULT_TIMEZONE = "America/Argentina/Buenos_Aires";
 
-  function formatDateFullWithHs(dateString: string | null | undefined): string {
-    if (!dateString) return "";
-    const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);
-    return `${format(date, "dd/MM/yyyy HH:mm", { locale: es })}hs`;
-  }
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
@@ -63,7 +55,9 @@ export default function VerDetalleModal({
         setNuevaIncidencia("");
         onSuccess!();
         dispatch(showSuccess("Incidencia agregada con exito"));
-      } catch (error: { response: { data: { error: string } } }) {
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
         setErrorIncidencia(
           error?.response?.data?.error || "Error al agregar incidencia",
         );
@@ -80,7 +74,8 @@ export default function VerDetalleModal({
       console.log(res);
       onSuccess!();
       dispatch(showSuccess("Turno finalizado con exito"));
-    } catch (error: { response: { data: { error: string } } }) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       setErrorIncidencia(
         error?.response?.data?.error || "Error al terminar el turno",
       );
