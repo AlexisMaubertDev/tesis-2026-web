@@ -20,11 +20,15 @@ export default function VehiculosTable({
   onEditar,
   onDeleted,
 }: Props) {
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, usuario } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const [vehiculoAEliminar, setVehiculoAEliminar] = useState<Vehiculo | null>(
     null,
   );
+
+  // El backend sólo permite editar/eliminar a SUPERVISOR y SISTEMAS (RF24).
+  const puedeGestionar =
+    usuario?.rol === "SUPERVISOR" || usuario?.rol === "SISTEMAS";
 
   const handleDelete = async () => {
     if (!vehiculoAEliminar?.id) {
@@ -65,7 +69,9 @@ export default function VehiculosTable({
             <th className="border-r px-2 py-2 border-cerulean-400">Marca</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Modelo</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Color</th>
-            <th className="px-2 py-2 border-cerulean-400">Acciones</th>
+            {puedeGestionar && (
+              <th className="px-2 py-2 border-cerulean-400">Acciones</th>
+            )}
           </tr>
         </thead>
 
@@ -85,27 +91,29 @@ export default function VehiculosTable({
                 {vehiculo.color || "-"}
               </td>
 
-              <td className="border-b border-cerulean-200 px-2 py-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
-                    onClick={() => onEditar(vehiculo)}
-                  >
-                    <Tooltip title="Editar">
-                      <EditIcon />
-                    </Tooltip>
-                  </button>
+              {puedeGestionar && (
+                <td className="border-b border-cerulean-200 px-2 py-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
+                      onClick={() => onEditar(vehiculo)}
+                    >
+                      <Tooltip title="Editar">
+                        <EditIcon />
+                      </Tooltip>
+                    </button>
 
-                  <button
-                    className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer"
-                    onClick={() => setVehiculoAEliminar(vehiculo)}
-                  >
-                    <Tooltip title="Eliminar">
-                      <DeleteIcon />
-                    </Tooltip>
-                  </button>
-                </div>
-              </td>
+                    <button
+                      className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer"
+                      onClick={() => setVehiculoAEliminar(vehiculo)}
+                    >
+                      <Tooltip title="Eliminar">
+                        <DeleteIcon />
+                      </Tooltip>
+                    </button>
+                  </div>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
