@@ -22,9 +22,9 @@ type VehiculoForm = {
 };
 
 const buildFormData = (vehiculo: Vehiculo | null): VehiculoForm => ({
-  marca: vehiculo?.marca ?? "",
-  modelo: vehiculo?.modelo ?? "",
-  color: vehiculo?.color ?? "",
+  marca: (vehiculo?.marca ?? "").toUpperCase(),
+  modelo: (vehiculo?.modelo ?? "").toUpperCase(),
+  color: (vehiculo?.color ?? "").toUpperCase(),
 });
 
 export default function EditarVehiculoModal({
@@ -41,9 +41,11 @@ export default function EditarVehiculoModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Igual que en el alta de acarreo del móvil: los datos del vehículo se
+  // escriben y se guardan en mayúsculas.
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value.toUpperCase() }));
   };
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -91,9 +93,14 @@ export default function EditarVehiculoModal({
         setError(null);
         onClose();
       }}
-      sx={{ padding: 4 }}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 2,
+      }}
     >
-      <div className="absolute top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
         <h2 className="text-center font-bold uppercase">Editar Vehículo</h2>
         <p className="text-center text-xs text-cerulean-700 mt-1">
           {`Patente ${vehiculo?.patente ?? "-"} (no editable). Sólo se puede modificar la marca, el modelo y el color.`}

@@ -113,15 +113,7 @@ export default function VehiculosTable({
                   : "-"}
               </td>
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
-                <span
-                  className={
-                    vehiculo.en_playa
-                      ? "text-green-700 font-semibold"
-                      : "text-red-700"
-                  }
-                >
-                  {vehiculo.en_playa ? "Sí" : "No"}
-                </span>
+                {vehiculo.en_playa ? "Sí" : "No"}
               </td>
 
               <td className="border-b border-cerulean-200 px-2 py-2">

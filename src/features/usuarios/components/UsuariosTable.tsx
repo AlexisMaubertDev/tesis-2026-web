@@ -1,6 +1,7 @@
 import type { Usuario } from "../../../types/Usuario";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
@@ -14,6 +15,7 @@ type Props = {
   usuarios: Usuario[];
   onEditar: (usuario: Usuario) => void;
   onCambiarRol: (usuario: Usuario) => void;
+  onVerDetalle: (usuario: Usuario) => void;
   onDeleted?: () => void;
 };
 
@@ -21,6 +23,7 @@ export default function UsuariosTable({
   usuarios,
   onEditar,
   onCambiarRol,
+  onVerDetalle,
   onDeleted,
 }: Props) {
   const [modalOpen, setModalOpen] = useState<string | null>(null);
@@ -118,6 +121,15 @@ export default function UsuariosTable({
               <td className="border-b border-cerulean-200 px-2 py-2">
                 <div className="flex items-center gap-2">
                   <button
+                    className="text-san-marino-700 hover:text-san-marino-400 transition-colors duration-300 cursor-pointer"
+                    onClick={() => onVerDetalle(usuario)}
+                  >
+                    <Tooltip title="Ver detalle">
+                      <VisibilityIcon />
+                    </Tooltip>
+                  </button>
+
+                  <button
                     className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
                     onClick={() => onEditar(usuario)}
                   >
@@ -207,6 +219,15 @@ export default function UsuariosTable({
 
             {/* Actions */}
             <div className="flex justify-end gap-4 mt-5 border-t pt-4">
+              <button
+                className="text-san-marino-700 hover:text-san-marino-400 transition-colors duration-300 cursor-pointer"
+                onClick={() => onVerDetalle(usuario)}
+              >
+                <Tooltip title="Ver detalle">
+                  <VisibilityIcon />
+                </Tooltip>
+              </button>
+
               <button
                 className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
                 onClick={() => onEditar(usuario)}

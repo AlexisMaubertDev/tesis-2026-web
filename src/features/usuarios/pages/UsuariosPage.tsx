@@ -9,6 +9,7 @@ import UsuariosTable from "../components/UsuariosTable.tsx";
 import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
 import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
 import CambiarRolModal from "../components/CambiarRolModal.tsx";
+import UsuarioDetalleModal from "../components/UsuarioDetalleModal.tsx";
 import { showError } from "../../../app/store/snackbarSlice.ts";
 import Search from "../../../components/ui/Search.tsx";
 import FilterMenu from "../components/FilterMenu.tsx";
@@ -22,6 +23,52 @@ export type FiltrosUsuarios = {
   trabajaDomingos: boolean | null;
   bloqueados: boolean;
 };
+
+// La búsqueda es por nombre, apellido, email, dni o legajo. `legajo` y `dni`
+// llegan como número desde la API, por eso también se comparan como texto.
+const coincideBusqueda = (usuario: Usuario, texto: string) => {
+  const buscado = texto.trim().toLowerCase();
+
+  if (!buscado) return true;
+
+  return (
+    usuario.nombre.toLowerCase().includes(buscado) ||
+    usuario.apellido.toLowerCase().includes(buscado) ||
+    (usuario.email ?? "").toLowerCase().includes(buscado) ||
+    String(usuario.legajo).toLowerCase().includes(buscado) ||
+    String(usuario.dni).toLowerCase().includes(buscado)
+  );
+};
+
+const coincideFiltros = (
+  usuario: Usuario,
+  filtros: FiltrosUsuarios,
+): boolean => {
+  const cumpleSucursal =
+    filtros.sucursales.length === 0 ||
+    filtros.sucursales.includes(usuario.Sucursal.nombre);
+
+  const cumpleTurno =
+    filtros.turnos.length === 0 || filtros.turnos.includes(usuario.numero_turno);
+
+  const cumpleDomingos =
+    !filtros.trabajaDomingos || usuario.trabaja_domingo === true;
+
+  const cumpleBloqueados = !filtros.bloqueados || usuario.bloqueado === true;
+
+  return cumpleSucursal && cumpleTurno && cumpleDomingos && cumpleBloqueados;
+};
+
+/** Aplica el texto del buscador y el menú de filtros sobre los usuarios. */
+const aplicarFiltrosUsuarios = (
+  usuarios: Usuario[],
+  texto: string,
+  filtros: FiltrosUsuarios,
+) =>
+  usuarios.filter(
+    (usuario) =>
+      coincideBusqueda(usuario, texto) && coincideFiltros(usuario, filtros),
+  );
 
 export default function UsuariosPage() {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -39,6 +86,7 @@ export default function UsuariosPage() {
   const [nuevoUsuarioModalOpen, setNuevoUsuarioModalOpen] = useState(false);
   const [usuarioAEditar, setUsuarioAEditar] = useState<Usuario | null>(null);
   const [usuarioCambioRol, setUsuarioCambioRol] = useState<Usuario | null>(null);
+  const [usuarioDetalle, setUsuarioDetalle] = useState<Usuario | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [search, setSearch] = useState("");
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
@@ -68,48 +116,8 @@ export default function UsuariosPage() {
     cargarUsuarios();
   }, [token, dispatch, refreshKey]);
 
-  const buscarUsuarios = () => {
-    const texto = search.trim().toLowerCase();
-
-    if (!texto) {
-      setUsuariosFiltrados(usuarios);
-      return;
-    }
-
-    const resultados = usuarios.filter((usuario) => {
-      return (
-        usuario.nombre.toLowerCase().includes(texto) ||
-        usuario.apellido.toLowerCase().includes(texto) ||
-        usuario.email!.toLowerCase().includes(texto) ||
-        usuario.legajo.toLowerCase().includes(texto) ||
-        usuario.dni.toLowerCase().includes(texto)
-      );
-    });
-
-    setUsuariosFiltrados(resultados);
-  };
-
-  const filtrarUsuarios = (usuarios: Usuario[], filtros: FiltrosUsuarios) => {
-    return usuarios.filter((usuario) => {
-      const cumpleSucursal =
-        filtros.sucursales.length === 0 ||
-        filtros.sucursales.includes(usuario.Sucursal.nombre);
-
-      const cumpleTurno =
-        filtros.turnos.length === 0 ||
-        filtros.turnos.includes(usuario.numero_turno);
-
-      const cumpleDomingos =
-        !filtros.trabajaDomingos || usuario.trabaja_domingo === true;
-
-      const cumpleBloqueados =
-        !filtros.bloqueados || usuario.bloqueado === true;
-
-      return (
-        cumpleSucursal && cumpleTurno && cumpleDomingos && cumpleBloqueados
-      );
-    });
-  };
+  const buscarUsuarios = () =>
+    setUsuariosFiltrados(aplicarFiltrosUsuarios(usuarios, search, filtros));
 
   useEffect(() => {
     if (!token) return;
@@ -128,28 +136,8 @@ export default function UsuariosPage() {
   }, [token]);
 
   useEffect(() => {
-    let resultado = [...usuarios];
-
-    // Búsqueda
-    if (search.trim()) {
-      const texto = search.toLowerCase();
-
-      resultado = resultado.filter((usuario) => {
-        return (
-          usuario.nombre.toLowerCase().includes(texto) ||
-          usuario.apellido.toLowerCase().includes(texto) ||
-          usuario.email?.toLowerCase().includes(texto) ||
-          usuario.legajo.toString().toLowerCase().includes(texto) ||
-          usuario.dni.toString().toLowerCase().includes(texto)
-        );
-      });
-    }
-
-    // Filtros
-    resultado = filtrarUsuarios(resultado, filtros);
-
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUsuariosFiltrados(resultado);
+    setUsuariosFiltrados(aplicarFiltrosUsuarios(usuarios, search, filtros));
   }, [usuarios, search, filtros]);
 
   useEffect(() => {
@@ -221,6 +209,7 @@ export default function UsuariosPage() {
               usuarios={usuariosFiltrados}
               onEditar={setUsuarioAEditar}
               onCambiarRol={setUsuarioCambioRol}
+              onVerDetalle={setUsuarioDetalle}
               onDeleted={recargar}
             />
           </section>
@@ -252,6 +241,15 @@ export default function UsuariosPage() {
               usuario={usuarioCambioRol}
               onClose={() => setUsuarioCambioRol(null)}
               onSuccess={recargar}
+            />
+          )}
+
+          {usuarioDetalle && (
+            <UsuarioDetalleModal
+              key={usuarioDetalle.legajo}
+              open
+              usuario={usuarioDetalle}
+              onClose={() => setUsuarioDetalle(null)}
             />
           )}
         </main>
