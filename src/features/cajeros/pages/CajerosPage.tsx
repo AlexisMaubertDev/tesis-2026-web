@@ -11,36 +11,16 @@ import { cerrarTurno_Caja } from "../../usuarios/services/usuariosService";
 import { terminarTurnoCaja } from "../../../app/store/authSlice";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import { getTurnoLabel } from "../../../app/constants/turnos";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
   const [cajas, setCajas] = useState<Caja[]>([]);
-  // const [turnoCajas, setTurnoCajas] = useState<Caja[]>([]);
 
   const dispatch = useDispatch();
 
-  if (!usuario) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (usuario.rol !== "CAJERO") {
-    return <Navigate to="/" replace />;
-  }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    if (!token) return;
-
-    // const obtenerTurnoCajas = async () => {
-    //   try {
-    //     const res = await obtenerTurnoCajasUsuario(token);
-    //     console.log(res.data);
-    //     setTurnoCajas(res.data);
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   } catch (error: any) {
-    //     console.error(error.response?.data);
-    //   }
-    // };
+    if (!token || !usuario) return;
 
     const cargarCajas = async () => {
       try {
@@ -52,15 +32,18 @@ export default function CajerosPage() {
       }
     };
 
-    // obtenerTurnoCajas();
-
     cargarCajas();
-  }, [token, usuario.Sucursal.id]);
+  }, [token, usuario]);
 
-  console.log("Cajas disponibles:", cajas);
+  if (!usuario) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (usuario.rol !== "CAJERO") {
+    return <Navigate to="/" replace />;
+  }
+
   const handleCerrarTurno = async () => {
-    console.log("cerrar turno");
-
     try {
       await cerrarTurno_Caja(token!, usuario.Turno_Caja!.id!);
 
@@ -93,7 +76,9 @@ export default function CajerosPage() {
                 <h1 className=" sm:text-lg  font-bold uppercase self-center">
                   Caja N°: {usuario.Turno_Caja.Caja.numero_caja}
                 </h1>
-                <h2>Turno: {usuario.Turno_Caja.turno}</h2>
+                <h2>
+                  Turno: {getTurnoLabel(usuario.Turno_Caja.turno)}
+                </h2>
                 <h2>Referencia: {usuario.Turno_Caja.Caja.referencia}</h2>
 
                 <CallToActionButton

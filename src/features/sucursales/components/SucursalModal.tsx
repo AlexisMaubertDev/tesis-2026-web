@@ -113,11 +113,9 @@ export default function SucursalModal({
 
   useEffect(() => {
     if (initialData) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       const obtenerSucursalPorId = async () => {
         try {
           const res = await obtenerSucursal(token!, initialData.id!);
-          console.log(res);
           setForm(res.data);
         } catch (error) {
           console.error(error);

@@ -30,7 +30,7 @@ export type CajaForm = {
   referencia_pago: string;
 };
 
-const initialFormData: Caja = {
+const initialFormData: CajaForm = {
   Sucursal: { id: "", nombre: "", direccion: "" },
   numero_caja: 1,
   referencia: "",
@@ -41,7 +41,7 @@ export default function CajaModal({ open, onClose, caja, onSuccess }: Props) {
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.auth);
   const [sucursales, setSucursales] = useState([]);
-  const [formData, setFormData] = useState<Caja>(initialFormData);
+  const [formData, setFormData] = useState<CajaForm>(initialFormData);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +97,7 @@ export default function CajaModal({ open, onClose, caja, onSuccess }: Props) {
 
     try {
       if (caja) {
-        await editarCaja(token!, formData);
+        await editarCaja(token!, { ...formData, id: caja.id });
 
         dispatch(showSuccess("Caja modificada con éxito"));
       } else {
@@ -107,6 +107,7 @@ export default function CajaModal({ open, onClose, caja, onSuccess }: Props) {
       }
 
       setFormData(initialFormData);
+      onSuccess?.();
       onClose();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,7 +163,7 @@ export default function CajaModal({ open, onClose, caja, onSuccess }: Props) {
               name="id_sucursal"
               value={formData.Sucursal.id}
               options={sucursales.map((sucursal: Sucursal) => ({
-                value: sucursal.id,
+                value: sucursal.id ?? "",
                 label: sucursal.nombre,
               }))}
               onChange={(e) => {

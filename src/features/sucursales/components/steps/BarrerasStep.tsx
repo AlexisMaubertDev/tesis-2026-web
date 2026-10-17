@@ -35,10 +35,10 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
     }));
   };
 
-  const removeCaja = (idx: number) => {
+  const removeBarrera = (idx: number) => {
     setForm((prev) => ({
       ...prev,
-      Barreras: prev.Barreras.filter((c, index) => index !== idx),
+      Barreras: prev.Barreras.filter((_, index) => index !== idx),
     }));
   };
 
@@ -87,7 +87,7 @@ export default function BarrerasStep({ form, setForm, next, back }: Props) {
                   </td>
 
                   <td className="border-b border-cerulean-200 px-2 py-2">
-                    <IconButton onClick={() => removeCaja(index)}>
+                    <IconButton onClick={() => removeBarrera(index)}>
                       <DeleteIcon />
                     </IconButton>
                   </td>

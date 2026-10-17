@@ -11,11 +11,18 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import storageModule from "redux-persist/lib/storage";
+
+// `redux-persist/lib/storage` es CommonJS: sus tipos lo declaran como `WebStorage`,
+// pero en dev Vite sirve el default como el objeto de modulo ({ __esModule, default }).
+// Se usa el mismo fallback que aplica el interop de Vite para cubrir ambos casos.
+const storage =
+  (storageModule as unknown as { default?: typeof storageModule }).default ??
+  storageModule;
 
 const persistConfig = {
   key: "root",
-  storage: storage.default,
+  storage,
   blacklist: ["snackbar"],
 };
 

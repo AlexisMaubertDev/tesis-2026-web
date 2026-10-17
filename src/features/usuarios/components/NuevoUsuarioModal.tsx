@@ -61,8 +61,7 @@ export default function NuevoUsuarioModal({
     setLoading(true);
 
     try {
-      const res = await crearUsuario(token!, formData);
-      console.log(res);
+      await crearUsuario(token!, formData);
 
       dispatch(showSuccess("Usuario creado con exito"));
 

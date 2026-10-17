@@ -1,5 +1,5 @@
 import api from "../../../services/api";
-import type { Caja } from "../../../types/Caja";
+import type { CajaForm } from "../components/CajaModal";
 
 export const obtenerCajas = async (token: string) => {
   const res = await api.get("/cajas", {
@@ -19,7 +19,7 @@ export const obtenerCajasSucursal = async (token: string, id: string) => {
   return res.data;
 };
 
-export const crearCaja = async (token: string, data: Omit<Caja, "id">) => {
+export const crearCaja = async (token: string, data: CajaForm) => {
   const res = await api.post("/cajas", data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -28,7 +28,10 @@ export const crearCaja = async (token: string, data: Omit<Caja, "id">) => {
   return res.data;
 };
 
-export const editarCaja = async (token: string, data: Caja) => {
+export const editarCaja = async (
+  token: string,
+  data: CajaForm & { id: string },
+) => {
   const res = await api.put(`/cajas/${data.id}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,

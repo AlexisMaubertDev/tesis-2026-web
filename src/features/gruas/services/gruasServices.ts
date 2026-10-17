@@ -39,7 +39,6 @@ export const asignarGrua = async (token: string, data: Turno_Grua) => {
 };
 
 export const finalizarTurnosSucursal = async (token: string, id: string) => {
-  console.log(id);
   const res = await api.put(
     `/turno_grua/finalizar/${id}`,
     {},

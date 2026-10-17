@@ -17,6 +17,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import { Tooltip } from "@mui/material";
 import AsignarGruaModal from "../components/AsignarGruaModal";
 import VerDetalleModal from "../components/VerDetalleModal";
+import VerDetalleCajaModal from "../components/VerDetalleCajaModal";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 
@@ -41,6 +42,7 @@ export default function SupervisorPage() {
 
   const [asignarModal, setAsignarModal] = useState<Grua | null>(null);
   const [verDetalleModal, setVerDetalleModal] = useState<Grua | null>(null);
+  const [detalleCaja, setDetalleCaja] = useState<Caja | null>(null);
   const [finalizar, setFinalizar] = useState<boolean>(false);
 
   const dispatch = useDispatch();
@@ -75,8 +77,7 @@ export default function SupervisorPage() {
 
   const finalizarTurno = async () => {
     try {
-      const res = await finalizarTurnosSucursal(token!, usuario.Sucursal.id!);
-      console.log(res);
+      await finalizarTurnosSucursal(token!, usuario.Sucursal.id!);
       dispatch(showSuccess("Turnos finalizados con éxito"));
       await refrescarDatos(); // <--- RECARGA DATOS
     } catch (error) {
@@ -163,7 +164,7 @@ export default function SupervisorPage() {
                     </p>
                     <CallToActionButton
                       type="button"
-                      handleSubmit={() => setVerDetalleModal()}
+                      handleSubmit={() => setDetalleCaja(caja)}
                     >
                       Ver detalle
                     </CallToActionButton>
@@ -271,6 +272,16 @@ export default function SupervisorPage() {
               setVerDetalleModal(null);
               refrescarDatos(); // <--- RECARGA DATOS TRAS ACCIÓN EN DETALLE
             }}
+          />
+        )}
+
+        {detalleCaja && (
+          <VerDetalleCajaModal
+            open={detalleCaja !== null}
+            setOpen={(boolean) => {
+              if (!boolean) setDetalleCaja(null);
+            }}
+            caja={detalleCaja}
           />
         )}
 

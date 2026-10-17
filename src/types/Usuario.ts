@@ -13,7 +13,7 @@ export interface Usuario {
   trabaja_domingo: boolean;
   bloqueado: boolean;
   Sucursal: Sucursal;
-  rol: "PLAYERO" | "CAJERO" | "SUPERVISOR" | "SISTEMAS";
+  rol: "PLAYERO" | "CAJERO" | "SUPERVISOR" | "SISTEMAS" | "GRUERO";
   Turno_Caja?: Turno_Caja | null;
   turno_caja_activo?: Turno_Caja | null;
   turno_grua_enganchador_activo?: Turno_Grua | null;

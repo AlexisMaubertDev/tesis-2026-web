@@ -67,11 +67,7 @@ export default function VerDetalleModal({
 
   const handleTerminarTurno = async () => {
     try {
-      const res = await terminarTurno(
-        token!,
-        grua?.turno_grua_activo?.id || "",
-      );
-      console.log(res);
+      await terminarTurno(token!, grua?.turno_grua_activo?.id || "");
       onSuccess!();
       dispatch(showSuccess("Turno finalizado con exito"));
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

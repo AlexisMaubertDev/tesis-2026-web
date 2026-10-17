@@ -14,7 +14,7 @@ export default function SelectInput({
   options,
   disabled,
 }: {
-  value: string | number | null;
+  value?: string | number | null;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   placeholder: string;
   name: string;

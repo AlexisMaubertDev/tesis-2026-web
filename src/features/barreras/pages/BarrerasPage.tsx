@@ -11,7 +11,6 @@ import { obtenerBarreras } from "../services/barrerasService";
 
 export default function BarrerasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [barreras, setBarreras] = useState<Barrera[]>([]);
 
   useEffect(() => {
@@ -43,13 +42,6 @@ export default function BarrerasPage() {
               handleSubmit={() => window.location.reload()}
             >
               Refrescar
-            </CallToActionButton>
-
-            <CallToActionButton
-              type="button"
-              handleSubmit={() => setModalOpen(true)}
-            >
-              Agregar Grúa
             </CallToActionButton>
           </div>
         </section>

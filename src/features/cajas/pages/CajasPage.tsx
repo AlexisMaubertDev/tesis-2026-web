@@ -14,6 +14,7 @@ export default function CajasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [cajas, setCajas] = useState<Caja[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const cargarCajas = async () => {
@@ -25,8 +26,9 @@ export default function CajasPage() {
         console.error(error.response?.message);
       }
     };
+
     cargarCajas();
-  }, [token]);
+  }, [token, refreshKey]);
 
   return (
     <PageLayout>
@@ -61,6 +63,7 @@ export default function CajasPage() {
           <NuevaCajaModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
+            onSuccess={() => setRefreshKey((n) => n + 1)}
           />
         </main>
       </MainLayout>

@@ -21,7 +21,15 @@ type Props = {
   onSuccess?: () => void;
 };
 
-export type GruaForm = Omit<Grua, "id">;
+export type GruaForm = {
+  Sucursal: Sucursal;
+  patente: string;
+  modelo: string;
+  numero: number;
+  estado: Grua["estado"];
+  observaciones: string | null;
+  incidencias: string | null;
+};
 
 const initialFormData: GruaForm = {
   Sucursal: {
@@ -107,12 +115,12 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
     setLoading(true);
 
     try {
-      const res = await crearGrua(token!, formData);
-      console.log(res);
+      await crearGrua(token!, formData);
 
       dispatch(showSuccess("Grúa creada con éxito"));
 
       setFormData(initialFormData);
+      onSuccess?.();
       onClose();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,7 +176,7 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
               name="id_sucursal"
               value={formData.Sucursal.id}
               options={sucursales.map((sucursal: Sucursal) => ({
-                value: sucursal.id,
+                value: sucursal.id ?? "",
                 label: sucursal.nombre,
               }))}
               onChange={(e) => {

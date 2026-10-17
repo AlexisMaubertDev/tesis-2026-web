@@ -14,6 +14,7 @@ export default function GruasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [gruas, setGruas] = useState<Grua[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const cargarGruas = async () => {
@@ -25,8 +26,9 @@ export default function GruasPage() {
         console.error(error.message);
       }
     };
+
     cargarGruas();
-  }, [token]);
+  }, [token, refreshKey]);
 
   return (
     <PageLayout>
@@ -61,6 +63,7 @@ export default function GruasPage() {
           <NuevaGruaModal
             open={modalOpen}
             onClose={() => setModalOpen(false)}
+            onSuccess={() => setRefreshKey((n) => n + 1)}
           />
         </main>
       </MainLayout>

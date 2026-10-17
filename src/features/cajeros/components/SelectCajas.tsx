@@ -11,6 +11,7 @@ import SelectInput from "../../../components/ui/SelectInput";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import CircleIcon from "@mui/icons-material/Circle";
 import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
+import { getTurnoLabel, TURNOS_OPTIONS } from "../../../app/constants/turnos";
 
 type Props = {
   cajas: Caja[];
@@ -69,9 +70,9 @@ export default function SelectCajas({ cajas }: Props) {
             </p>
             {caja.turno_caja_activo ? (
               <span className=" font-bold">
-                {formatDateFullWithHs(
+                {`${getTurnoLabel(caja.turno_caja_activo.turno)} - ${formatDateFullWithHs(
                   caja.turno_caja_activo?.apertura.toString(),
-                )}
+                )}`}
               </span>
             ) : (
               <CallToActionButton
@@ -114,11 +115,7 @@ export default function SelectCajas({ cajas }: Props) {
             placeholder="Turno"
             value={turno}
             onChange={(e) => setTurno(e.target.value)}
-            options={[
-              { value: "1", label: "Mañana" },
-              { value: "2", label: "Tarde" },
-              { value: "3", label: "Noche" },
-            ]}
+            options={TURNOS_OPTIONS}
           />
 
           <CallToActionButton type="button" handleSubmit={handleEmpezarTurno}>
