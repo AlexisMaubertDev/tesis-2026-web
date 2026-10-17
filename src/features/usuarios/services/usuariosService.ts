@@ -37,6 +37,19 @@ export const eliminarUsuario = async (token: string, legajo: string) => {
   return res.data;
 };
 
+export const editarUsuario = async (
+  token: string,
+  legajo: string,
+  usuario: Partial<Omit<Usuario, "id">> & { password?: string },
+) => {
+  const res = await api.put(`/usuarios/${legajo}`, usuario, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
 export const obtenerTurnoCajasUsuario = async (token: string) => {
   const res = await api.get("/turno_caja/usuario/abiertas", {
     headers: {

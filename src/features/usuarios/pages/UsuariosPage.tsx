@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import UsuariosTable from "../components/UsuariosTable.tsx";
 import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
 import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
+import CambiarRolModal from "../components/CambiarRolModal.tsx";
 import { showError } from "../../../app/store/snackbarSlice.ts";
 import Search from "../../../components/ui/Search.tsx";
 import FilterMenu from "../components/FilterMenu.tsx";
@@ -36,9 +37,14 @@ export default function UsuariosPage() {
     bloqueados: false,
   });
   const [nuevoUsuarioModalOpen, setNuevoUsuarioModalOpen] = useState(false);
+  const [usuarioAEditar, setUsuarioAEditar] = useState<Usuario | null>(null);
+  const [usuarioCambioRol, setUsuarioCambioRol] = useState<Usuario | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [search, setSearch] = useState("");
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const dispatch = useDispatch();
+
+  const recargar = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
     if (!token) return;
@@ -60,7 +66,7 @@ export default function UsuariosPage() {
     };
 
     cargarUsuarios();
-  }, [token, dispatch]);
+  }, [token, dispatch, refreshKey]);
 
   const buscarUsuarios = () => {
     const texto = search.trim().toLowerCase();
@@ -197,10 +203,7 @@ export default function UsuariosPage() {
                   sucursales={sucursales}
                 />
               </div>
-              <CallToActionButton
-                type="button"
-                handleSubmit={() => window.location.reload()}
-              >
+              <CallToActionButton type="button" handleSubmit={recargar}>
                 Refrescar
               </CallToActionButton>
 
@@ -214,14 +217,43 @@ export default function UsuariosPage() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <UsuariosTable usuarios={usuariosFiltrados} />
+            <UsuariosTable
+              usuarios={usuariosFiltrados}
+              onEditar={setUsuarioAEditar}
+              onCambiarRol={setUsuarioCambioRol}
+              onDeleted={recargar}
+            />
           </section>
 
-          <NuevoUsuarioModal
-            open={nuevoUsuarioModalOpen}
-            onClose={() => setNuevoUsuarioModalOpen(false)}
-            sucursales={sucursales}
-          />
+          {nuevoUsuarioModalOpen && (
+            <NuevoUsuarioModal
+              open
+              onClose={() => setNuevoUsuarioModalOpen(false)}
+              sucursales={sucursales}
+              onSuccess={recargar}
+            />
+          )}
+
+          {usuarioAEditar && (
+            <NuevoUsuarioModal
+              key={usuarioAEditar.legajo}
+              open
+              usuario={usuarioAEditar}
+              onClose={() => setUsuarioAEditar(null)}
+              sucursales={sucursales}
+              onSuccess={recargar}
+            />
+          )}
+
+          {usuarioCambioRol && (
+            <CambiarRolModal
+              key={usuarioCambioRol.legajo}
+              open
+              usuario={usuarioCambioRol}
+              onClose={() => setUsuarioCambioRol(null)}
+              onSuccess={recargar}
+            />
+          )}
         </main>
       </MainLayout>
     </PageLayout>

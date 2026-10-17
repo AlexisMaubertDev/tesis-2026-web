@@ -8,13 +8,15 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
 import SelectInput from "../../../components/ui/SelectInput.tsx";
-import { crearUsuario } from "../services/usuariosService.ts";
+import { crearUsuario, editarUsuario } from "../services/usuariosService.ts";
 import { verificarCampos } from "../utils/verificarCampos.ts";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   sucursales: { id: string; nombre: string; direccion: string }[];
+  usuario?: Usuario | null;
+  onSuccess?: () => void;
 };
 
 export type UsuarioForm = Usuario & {
@@ -40,31 +42,76 @@ const initialFormData: UsuarioForm = {
   trabaja_domingo: false,
 };
 
+const buildFormData = (usuario?: Usuario | null): UsuarioForm => {
+  if (!usuario) return initialFormData;
+
+  return {
+    id: usuario.id ?? "",
+    nombre: usuario.nombre,
+    apellido: usuario.apellido,
+    dni: usuario.dni,
+    email: usuario.email ?? "",
+    password: "",
+    rol: usuario.rol,
+    legajo: usuario.legajo,
+    Sucursal: {
+      id: usuario.Sucursal?.id ?? "",
+      nombre: usuario.Sucursal?.nombre ?? "",
+      direccion: usuario.Sucursal?.direccion ?? "",
+    },
+    numero_turno: usuario.numero_turno,
+    bloqueado: usuario.bloqueado,
+    trabaja_domingo: usuario.trabaja_domingo,
+  };
+};
+
 export default function NuevoUsuarioModal({
   open,
   onClose,
   sucursales,
+  usuario = null,
+  onSuccess,
 }: Props) {
   const { token } = useSelector((state: RootState) => state.auth);
-  const [formData, setFormData] = useState<UsuarioForm>(initialFormData);
+  const [formData, setFormData] = useState<UsuarioForm>(() =>
+    buildFormData(usuario),
+  );
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const dispatch = useDispatch();
+  const esEdicion = usuario !== null;
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    if (!verificarCampos(formData, setError)) return;
+    if (!verificarCampos(formData, setError, !esEdicion)) return;
 
     setLoading(true);
 
     try {
-      await crearUsuario(token!, formData);
+      if (esEdicion && usuario) {
+        await editarUsuario(token!, usuario.legajo, {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          dni: formData.dni,
+          numero_turno: formData.numero_turno,
+          trabaja_domingo: formData.trabaja_domingo,
+          email: formData.email,
+          rol: formData.rol,
+          Sucursal: formData.Sucursal,
+          ...(formData.password.trim() ? { password: formData.password } : {}),
+        });
 
-      dispatch(showSuccess("Usuario creado con exito"));
+        dispatch(showSuccess("Usuario actualizado con exito"));
+      } else {
+        await crearUsuario(token!, formData);
 
+        dispatch(showSuccess("Usuario creado con exito"));
+      }
+
+      onSuccess?.();
       onClose();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +119,9 @@ export default function NuevoUsuarioModal({
       console.error(err);
       setError(
         err.response?.data?.message ||
-          "Error al crear usuario. Intenta nuevamente más tarde.",
+          (esEdicion
+            ? "Error al editar usuario. Intenta nuevamente más tarde."
+            : "Error al crear usuario. Intenta nuevamente más tarde."),
       );
     } finally {
       setLoading(false);
@@ -88,14 +137,16 @@ export default function NuevoUsuarioModal({
     <Modal
       open={open}
       onClose={() => {
-        setFormData(initialFormData);
+        setFormData(buildFormData(usuario));
         setError(null);
         onClose();
       }}
       sx={{ padding: 4 }}
     >
       <div className="absolute top-1/2 md:top-1/3 left-1/2 w-full max-w-4/5 md:max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
-        <h2 className="text-center font-bold uppercase">Crear Usuario</h2>
+        <h2 className="text-center font-bold uppercase">
+          {esEdicion ? "Editar Usuario" : "Crear Usuario"}
+        </h2>
         <form
           className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
           onSubmit={handleSubmit}
@@ -146,6 +197,7 @@ export default function NuevoUsuarioModal({
               type="number"
               onChange={handleChange}
               value={formData.legajo}
+              disabled={esEdicion}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -162,7 +214,9 @@ export default function NuevoUsuarioModal({
           </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="password" className="text-xs font-semibold">
-              Contraseña
+              {esEdicion
+                ? "Contraseña (vacío = sin cambios)"
+                : "Contraseña"}
             </label>
             <TextInput
               placeholder="Contraseña"
@@ -271,7 +325,13 @@ export default function NuevoUsuarioModal({
           )}
           <div className="flex flex-col md:col-span-2 gap-1 md:mx-auto">
             <CallToActionButton type="submit" disabled={loading}>
-              {loading ? "Creando..." : "Crear Usuario"}
+              {loading
+                ? esEdicion
+                  ? "Guardando..."
+                  : "Creando..."
+                : esEdicion
+                  ? "Guardar cambios"
+                  : "Crear Usuario"}
             </CallToActionButton>
           </div>
         </form>

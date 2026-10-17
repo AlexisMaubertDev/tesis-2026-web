@@ -3,6 +3,7 @@ import type { UsuarioForm } from "../components/NuevoUsuarioModal";
 export const verificarCampos = (
   formData: UsuarioForm,
   setError: (error: string | null) => void,
+  requirePassword = true,
 ): boolean => {
   if (!formData.nombre.trim()) {
     setError("El campo 'Nombre' es obligatorio");
@@ -38,24 +39,28 @@ export const verificarCampos = (
     setError("Ingresar un email valido");
     return false;
   }
-  if (!formData.password.trim()) {
+  const passwordIngresada = formData.password.trim().length > 0;
+
+  if (!passwordIngresada && requirePassword) {
     setError("El campo 'Contraseña' es obligatorio");
     return false;
   }
 
-  if (formData.password.length < 8) {
-    setError("La contraseña debe tener al menos 8 caracteres");
-    return false;
-  }
+  if (passwordIngresada) {
+    if (formData.password.length < 8) {
+      setError("La contraseña debe tener al menos 8 caracteres");
+      return false;
+    }
 
-  if (!/[A-Z]/.test(formData.password)) {
-    setError("La contraseña debe contener al menos una mayúscula");
-    return false;
-  }
+    if (!/[A-Z]/.test(formData.password)) {
+      setError("La contraseña debe contener al menos una mayúscula");
+      return false;
+    }
 
-  if (!/\d/.test(formData.password)) {
-    setError("La contraseña debe contener al menos un número");
-    return false;
+    if (!/\d/.test(formData.password)) {
+      setError("La contraseña debe contener al menos un número");
+      return false;
+    }
   }
 
   if (!formData.Sucursal.nombre || !formData.Sucursal.nombre!.trim()) {

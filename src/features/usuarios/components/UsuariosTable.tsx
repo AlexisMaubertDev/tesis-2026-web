@@ -12,9 +12,17 @@ import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 
 type Props = {
   usuarios: Usuario[];
+  onEditar: (usuario: Usuario) => void;
+  onCambiarRol: (usuario: Usuario) => void;
+  onDeleted?: () => void;
 };
 
-export default function UsuariosTable({ usuarios }: Props) {
+export default function UsuariosTable({
+  usuarios,
+  onEditar,
+  onCambiarRol,
+  onDeleted,
+}: Props) {
   const [modalOpen, setModalOpen] = useState<string | null>(null);
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
@@ -26,6 +34,7 @@ export default function UsuariosTable({ usuarios }: Props) {
       setModalOpen(null);
       if (res.success) {
         dispatch(showSuccess("Usuario eliminado con exito"));
+        onDeleted?.();
       } else {
         dispatch(
           showError(
@@ -108,7 +117,10 @@ export default function UsuariosTable({ usuarios }: Props) {
 
               <td className="border-b border-cerulean-200 px-2 py-2">
                 <div className="flex items-center gap-2">
-                  <button className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer">
+                  <button
+                    className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
+                    onClick={() => onEditar(usuario)}
+                  >
                     <Tooltip title="Editar">
                       <EditIcon />
                     </Tooltip>
@@ -123,7 +135,10 @@ export default function UsuariosTable({ usuarios }: Props) {
                     </Tooltip>
                   </button>
 
-                  <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
+                  <button
+                    className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer"
+                    onClick={() => onCambiarRol(usuario)}
+                  >
                     <Tooltip title="Cambiar rol">
                       <AdminPanelSettingsIcon />
                     </Tooltip>
@@ -192,7 +207,10 @@ export default function UsuariosTable({ usuarios }: Props) {
 
             {/* Actions */}
             <div className="flex justify-end gap-4 mt-5 border-t pt-4">
-              <button className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer">
+              <button
+                className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
+                onClick={() => onEditar(usuario)}
+              >
                 <Tooltip title="Editar">
                   <EditIcon />
                 </Tooltip>
@@ -207,7 +225,10 @@ export default function UsuariosTable({ usuarios }: Props) {
                 </Tooltip>
               </button>
 
-              <button className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer">
+              <button
+                className="text-blue-700 hover:text-blue-400 transition-colors duration-300 cursor-pointer"
+                onClick={() => onCambiarRol(usuario)}
+              >
                 <Tooltip title="Cambiar rol">
                   <AdminPanelSettingsIcon />
                 </Tooltip>

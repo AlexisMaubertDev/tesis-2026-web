@@ -4,13 +4,18 @@ import PageLayout from "../../../components/layout/PageLayout";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import type { Vehiculo } from "../../../types/Vehiculo";
 import VehiculosTable from "../components/VehiculosTable";
+import EditarVehiculoModal from "../components/EditarVehiculoModal";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
 import { obtenerVehiculos } from "../services/vehiculosService";
 
 export default function VehiculosPage() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [vehiculoAEditar, setVehiculoAEditar] = useState<Vehiculo | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useSelector((state: RootState) => state.auth);
+
+  const recargar = () => setRefreshKey((k) => k + 1);
 
   useEffect(() => {
     if (!token) return;
@@ -26,7 +31,7 @@ export default function VehiculosPage() {
     };
 
     cargarVehiculos();
-  }, [token]);
+  }, [token, refreshKey]);
 
   return (
     <PageLayout>
@@ -47,9 +52,23 @@ export default function VehiculosPage() {
                 No se encontraron vehículos
               </p>
             ) : (
-              <VehiculosTable vehiculos={vehiculos} />
+              <VehiculosTable
+                vehiculos={vehiculos}
+                onEditar={setVehiculoAEditar}
+                onDeleted={recargar}
+              />
             )}
           </section>
+
+          {vehiculoAEditar && (
+            <EditarVehiculoModal
+              key={vehiculoAEditar.id ?? vehiculoAEditar.patente}
+              open
+              vehiculo={vehiculoAEditar}
+              onClose={() => setVehiculoAEditar(null)}
+              onSuccess={recargar}
+            />
+          )}
         </main>
       </MainLayout>
     </PageLayout>
