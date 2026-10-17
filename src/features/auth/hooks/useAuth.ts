@@ -11,7 +11,16 @@ export const useAuth = () => {
       console.error(response.message || "Login failed");
       return;
     }
-    dispatch(loginSuccess(response.data));
+    // Defensa: el hash nunca debe llegar al store (se persiste en localStorage),
+    // aunque la API lo devolviera por error.
+    const usuario = response.data.usuario
+      ? ({ ...response.data.usuario } as AuthState["usuario"] & {
+          password?: string;
+        })
+      : null;
+    if (usuario) delete usuario.password;
+
+    dispatch(loginSuccess({ ...response.data, usuario }));
   };
 
   const signOut = () => {
