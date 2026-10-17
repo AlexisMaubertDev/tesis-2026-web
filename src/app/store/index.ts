@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice.ts";
+import authReducer, { logout } from "./authSlice.ts";
 import snackbarReducer from "./snackbarSlice.ts";
+import { isTokenExpired } from "../utils/token.ts";
 import {
   persistStore,
   persistReducer,
@@ -44,7 +45,15 @@ export const store = configureStore({
   devTools: true,
 });
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store, null, () => {
+  // Una vez rehidratada la sesión: si el token guardado ya venció, se cierra en
+  // el cliente. Si no, el usuario queda "logueado" con un token muerto y toda
+  // acción (incluso cerrar sesión) falla con 401.
+  const { token } = store.getState().auth;
+  if (token && isTokenExpired(token)) {
+    store.dispatch(logout());
+  }
+});
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

@@ -3,7 +3,6 @@ import type { RootState } from "../../app/store";
 import { Link, Navigate } from "react-router-dom";
 import { logout } from "../../app/store/authSlice";
 import { logoutRequest } from "../../features/auth/services/authService";
-import { showError } from "../../app/store/snackbarSlice";
 
 export default function Header() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
@@ -15,13 +14,15 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      const res = await logoutRequest(token);
-      console.log(res);
-
-      dispatch(logout());
+      await logoutRequest(token);
     } catch (error) {
+      // Si el token ya no vale, el interceptor de `api` cierra la sesión y
+      // avisa. Ante cualquier otro error (por ejemplo, red caída) igual se
+      // cierra en el cliente: no tiene sentido dejar al usuario atrapado
+      // dentro de la app por un fallo del servidor.
       console.error(error);
-      dispatch(showError("Error al cerrar sesión"));
+    } finally {
+      dispatch(logout());
     }
   };
 
