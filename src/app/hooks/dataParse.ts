@@ -23,3 +23,11 @@ export function formatTime(dateString: string | null | undefined): string {
   const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);
   return format(date, "HH:mm", { locale: es });
 }
+
+// Fecha en formato `yyyy-MM-dd` (el que usan los <input type="date">), calculada
+// en la zona horaria del país para poder compararla con los filtros.
+export function toFechaInput(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);
+  return format(date, "yyyy-MM-dd");
+}

@@ -16,14 +16,12 @@ type Props = {
 };
 
 type VehiculoForm = {
-  patente: string;
   marca: string;
   modelo: string;
   color: string;
 };
 
 const buildFormData = (vehiculo: Vehiculo | null): VehiculoForm => ({
-  patente: vehiculo?.patente ?? "",
   marca: vehiculo?.marca ?? "",
   modelo: vehiculo?.modelo ?? "",
   color: vehiculo?.color ?? "",
@@ -58,7 +56,6 @@ export default function EditarVehiculoModal({
     }
 
     if (
-      !formData.patente.trim() ||
       !formData.marca.trim() ||
       !formData.modelo.trim() ||
       !formData.color.trim()
@@ -70,6 +67,7 @@ export default function EditarVehiculoModal({
     setLoading(true);
 
     try {
+      // Sólo se envían marca, modelo y color: la patente no se edita.
       await editarVehiculo(token!, vehiculo.id, formData);
 
       dispatch(showSuccess("Vehículo actualizado con exito"));
@@ -97,22 +95,13 @@ export default function EditarVehiculoModal({
     >
       <div className="absolute top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
         <h2 className="text-center font-bold uppercase">Editar Vehículo</h2>
+        <p className="text-center text-xs text-cerulean-700 mt-1">
+          {`Patente ${vehiculo?.patente ?? "-"} (no editable). Sólo se puede modificar la marca, el modelo y el color.`}
+        </p>
         <form
           className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col gap-1">
-            <label htmlFor="patente" className="text-xs font-semibold">
-              Patente
-            </label>
-            <TextInput
-              placeholder="Patente"
-              name="patente"
-              type="text"
-              onChange={handleChange}
-              value={formData.patente}
-            />
-          </div>
           <div className="flex flex-col gap-1">
             <label htmlFor="marca" className="text-xs font-semibold">
               Marca

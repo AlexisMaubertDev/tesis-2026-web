@@ -31,3 +31,15 @@ export const eliminarVehiculo = async (token: string, id: string) => {
   });
   return res.data;
 };
+
+export const obtenerAcarreosPorPatente = async (
+  token: string,
+  patente: string,
+) => {
+  const res = await api.get(`/acarreos/patente/${encodeURIComponent(patente)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};

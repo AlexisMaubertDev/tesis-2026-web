@@ -1,19 +1,83 @@
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import MainLayout from "../../../components/layout/MainLayout";
 import PageLayout from "../../../components/layout/PageLayout";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
+import CallToActionButton from "../../../components/ui/CallToActionButton";
+import Search from "../../../components/ui/Search";
+import type { RootState } from "../../../app/store";
+import { showError } from "../../../app/store/snackbarSlice";
+import { toFechaInput } from "../../../app/hooks/dataParse";
+import type { Sucursal } from "../../../types/Sucursal";
 import type { Vehiculo } from "../../../types/Vehiculo";
+import { obtenerSucursales } from "../../sucursales/services/sucursalesService";
 import VehiculosTable from "../components/VehiculosTable";
 import EditarVehiculoModal from "../components/EditarVehiculoModal";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../app/store";
+import VehiculoDetalleModal from "../components/VehiculoDetalleModal";
+import VehiculosFiltros from "../components/VehiculosFiltros";
 import { obtenerVehiculos } from "../services/vehiculosService";
 
+export type FiltrosVehiculos = {
+  sucursales: string[];
+  enPlaya: boolean | null;
+  fechaDesde: string;
+  fechaHasta: string;
+};
+
+const FILTROS_VACIOS: FiltrosVehiculos = {
+  sucursales: [],
+  enPlaya: null,
+  fechaDesde: "",
+  fechaHasta: "",
+};
+
+// La búsqueda y los filtros se aplican sobre los datos que ya devolvió el
+// servidor (la tabla ya viene ordenada: primero los que están en playa y
+// después por fecha del último acarreo).
+const aplicarFiltros = (
+  lista: Vehiculo[],
+  texto: string,
+  filtros: FiltrosVehiculos,
+) => {
+  const busqueda = texto.trim().toLowerCase();
+
+  return lista.filter((vehiculo) => {
+    const cumpleBusqueda =
+      !busqueda ||
+      vehiculo.patente.toLowerCase().includes(busqueda) ||
+      vehiculo.modelo.toLowerCase().includes(busqueda);
+
+    const cumpleSucursal =
+      filtros.sucursales.length === 0 ||
+      (!!vehiculo.Sucursal &&
+        filtros.sucursales.includes(vehiculo.Sucursal.nombre));
+
+    const cumplePlaya =
+      filtros.enPlaya === null || vehiculo.en_playa === filtros.enPlaya;
+
+    // La fecha se compara como texto `yyyy-MM-dd` en la zona horaria local, para
+    // que coincida con la que se muestra en la tabla.
+    const fecha = toFechaInput(vehiculo.ultimo_acarreo);
+    const cumpleDesde =
+      !filtros.fechaDesde || (fecha !== "" && fecha >= filtros.fechaDesde);
+    const cumpleHasta =
+      !filtros.fechaHasta || (fecha !== "" && fecha <= filtros.fechaHasta);
+
+    return cumpleBusqueda && cumpleSucursal && cumplePlaya && cumpleDesde && cumpleHasta;
+  });
+};
+
 export default function VehiculosPage() {
-  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-  const [vehiculoAEditar, setVehiculoAEditar] = useState<Vehiculo | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>([]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [filtros, setFiltros] = useState<FiltrosVehiculos>(FILTROS_VACIOS);
+  const [search, setSearch] = useState("");
+  const [vehiculoAEditar, setVehiculoAEditar] = useState<Vehiculo | null>(null);
+  const [vehiculoDetalle, setVehiculoDetalle] = useState<Vehiculo | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const recargar = () => setRefreshKey((k) => k + 1);
 
@@ -26,12 +90,41 @@ export default function VehiculosPage() {
         setVehiculos(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        console.error(error.response?.message);
+        dispatch(
+          showError(
+            error.response?.data?.message ||
+              "Error al cargar vehículos. Intenta nuevamente más tarde.",
+          ),
+        );
       }
     };
 
     cargarVehiculos();
-  }, [token, refreshKey]);
+  }, [token, dispatch, refreshKey]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const cargarSucursales = async () => {
+      try {
+        const res = await obtenerSucursales(token);
+        setSucursales(res.data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error(error.response?.data);
+      }
+    };
+
+    cargarSucursales();
+  }, [token]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVehiculosFiltrados(aplicarFiltros(vehiculos, search, filtros));
+  }, [vehiculos, search, filtros]);
+
+  const buscarVehiculos = () =>
+    setVehiculosFiltrados(aplicarFiltros(vehiculos, search, filtros));
 
   return (
     <PageLayout>
@@ -44,17 +137,36 @@ export default function VehiculosPage() {
             <h1 className=" sm:text-lg font-bold uppercase self-center">
               Vehiculos
             </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
+              <div className="flex gap-2 w-full sm:col-span-2">
+                <Search
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onSearch={buscarVehiculos}
+                  title="Buscar por patente o modelo"
+                />
+                <VehiculosFiltros
+                  sucursales={sucursales}
+                  filtros={filtros}
+                  setFiltros={setFiltros}
+                />
+              </div>
+              <CallToActionButton type="button" handleSubmit={recargar}>
+                Refrescar
+              </CallToActionButton>
+            </div>
           </section>
-          <section className="flex flex-col md:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 gap-4">
-            {vehiculos.length === 0 ? (
+
+          <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-auto">
+            {vehiculosFiltrados.length === 0 ? (
               <p className="text-center text-cerulean-600 font-bold">
                 No se encontraron vehículos
               </p>
             ) : (
               <VehiculosTable
-                vehiculos={vehiculos}
+                vehiculos={vehiculosFiltrados}
                 onEditar={setVehiculoAEditar}
+                onVerMas={setVehiculoDetalle}
                 onDeleted={recargar}
               />
             )}
@@ -67,6 +179,15 @@ export default function VehiculosPage() {
               vehiculo={vehiculoAEditar}
               onClose={() => setVehiculoAEditar(null)}
               onSuccess={recargar}
+            />
+          )}
+
+          {vehiculoDetalle && (
+            <VehiculoDetalleModal
+              key={vehiculoDetalle.id ?? vehiculoDetalle.patente}
+              open
+              vehiculo={vehiculoDetalle}
+              onClose={() => setVehiculoDetalle(null)}
             />
           )}
         </main>
