@@ -8,14 +8,18 @@ import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import TextInput from "../../../components/ui/TextInput";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import { formatCurrency, redondearImporte } from "../../../app/utils/money";
 import type { Acarreo } from "../../../types/Acarreo";
+import type { Tarifa } from "../../../types/Tarifa";
 import { obtenerAcarreosPorPatente } from "../../vehiculos/services/vehiculosService";
+import { obtenerTarifaVigente } from "../../tarifas/services/tarifasService";
 import { crearCobro } from "../services/cobrosService";
 
 /**
  * Formulario de cobro del cajero: se llega desde el buscador por patente
- * (acción "Cobrar" de un vehículo INGRESADO). Registra el cobro y vuelve al
- * home del cajero.
+ * (acción "Cobrar" de un vehículo INGRESADO). El total lo calcula la tarifa
+ * vigente (acarreo + estadía × estadías) y el cajero lo reparte entre efectivo
+ * y Mercado Pago. Registra el cobro y vuelve al home del cajero.
  */
 export default function CobroPage() {
   const { patente = "" } = useParams();
@@ -26,6 +30,9 @@ export default function CobroPage() {
   const [acarreo, setAcarreo] = useState<Acarreo | null>(null);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
+
+  const [tarifa, setTarifa] = useState<Tarifa | null>(null);
+  const [cargandoTarifa, setCargandoTarifa] = useState(true);
 
   const [estadias, setEstadias] = useState("");
   const [efectivo, setEfectivo] = useState("");
@@ -69,13 +76,51 @@ export default function CobroPage() {
     };
   }, [token, patente]);
 
-  // El total se calcula como la suma de los medios de pago (efectivo + MP).
+  // La tarifa vigente define el importe automático del cobro.
+  useEffect(() => {
+    if (!token) return;
+
+    let activo = true;
+
+    const cargarTarifa = async () => {
+      setCargandoTarifa(true);
+
+      try {
+        const res = await obtenerTarifaVigente(token);
+        if (activo) setTarifa(res.data);
+      } catch {
+        if (activo) setTarifa(null);
+      } finally {
+        if (activo) setCargandoTarifa(false);
+      }
+    };
+
+    cargarTarifa();
+
+    return () => {
+      activo = false;
+    };
+  }, [token]);
+
+  const estadiasNum = estadias.trim() === "" ? 0 : Number(estadias);
+  const estadiasValidas = Number.isInteger(estadiasNum) && estadiasNum >= 0;
+
+  // Total automático: acarreo + estadía × cantidad de estadías.
   const total = useMemo(() => {
+    if (!tarifa || !estadiasValidas) return 0;
+    return redondearImporte(
+      Number(tarifa.acarreo) + Number(tarifa.estadia) * estadiasNum,
+    );
+  }, [tarifa, estadiasNum, estadiasValidas]);
+
+  const sumaPagos = useMemo(() => {
     const e = Number(efectivo || 0);
     const m = Number(mp || 0);
     const suma = (Number.isFinite(e) ? e : 0) + (Number.isFinite(m) ? m : 0);
-    return Math.round(suma * 100) / 100;
+    return redondearImporte(suma);
   }, [efectivo, mp]);
+
+  const diferencia = redondearImporte(total - sumaPagos);
 
   if (!usuario) {
     return <Navigate to="/login" replace />;
@@ -90,6 +135,18 @@ export default function CobroPage() {
   const handleSubmit = async () => {
     if (!acarreo) return;
 
+    if (!tarifa) {
+      setErrorForm(
+        "No hay una tarifa vigente configurada. Comunicate con Sistemas.",
+      );
+      return;
+    }
+
+    if (!Number.isInteger(Number(estadias)) && estadias !== "") {
+      setErrorForm("Las estadías deben ser un número entero mayor o igual a cero.");
+      return;
+    }
+
     const e = Number(efectivo || 0);
     const m = Number(mp || 0);
 
@@ -98,16 +155,10 @@ export default function CobroPage() {
       return;
     }
 
-    if (total <= 0) {
-      setErrorForm("El total del cobro debe ser mayor a cero.");
-      return;
-    }
-
-    if (
-      estadias !== "" &&
-      (!Number.isInteger(Number(estadias)) || Number(estadias) < 0)
-    ) {
-      setErrorForm("Las estadías deben ser un número entero mayor o igual a cero.");
+    if (diferencia !== 0) {
+      setErrorForm(
+        `El total a abonar es ${formatCurrency(total)}: el efectivo y Mercado Pago deben sumar exactamente ese importe.`,
+      );
       return;
     }
 
@@ -117,8 +168,7 @@ export default function CobroPage() {
     try {
       await crearCobro(token!, {
         id_acarreo: acarreo.id,
-        estadias: estadias === "" ? null : Number(estadias),
-        total,
+        estadias: estadias === "" ? 0 : Number(estadias),
         efectivo: e,
         mp: m,
         numero_factura: numeroFactura.trim() === "" ? null : numeroFactura.trim(),
@@ -176,7 +226,7 @@ export default function CobroPage() {
               </div>
             )}
 
-            {acarreo && (
+            {!cargando && acarreo && (
               <div className="bg-cerulean-100 rounded shadow p-4 flex flex-col gap-4">
                 <div>
                   <h2 className="text-lg font-bold text-cerulean-900">
@@ -189,83 +239,131 @@ export default function CobroPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                    Estadías (opcional)
-                    <TextInput
-                      value={estadias}
-                      onChange={(e) => setEstadias(e.target.value)}
-                      placeholder="Cantidad de estadías"
-                      name="estadias"
-                      type="number"
-                      disabled={enviando}
-                    />
-                  </label>
+                {cargandoTarifa ? (
+                  <p className="text-sm text-cerulean-700">
+                    Cargando tarifa...
+                  </p>
+                ) : !tarifa ? (
+                  <p className="text-xs text-scarlet-rush-700">
+                    No hay una tarifa vigente configurada: no se puede calcular
+                    el cobro. Comunicate con Sistemas.
+                  </p>
+                ) : (
+                  <>
+                    <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900">
+                      <p className="font-bold uppercase">Tarifa vigente</p>
+                      <p>
+                        Acarreo {formatCurrency(tarifa.acarreo)} + estadía{" "}
+                        {formatCurrency(tarifa.estadia)} por día
+                      </p>
+                    </div>
 
-                  <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                    N° de factura (opcional)
-                    <TextInput
-                      value={numeroFactura}
-                      onChange={(e) => setNumeroFactura(e.target.value)}
-                      placeholder="Número de factura"
-                      name="numero_factura"
-                      type="text"
-                      disabled={enviando}
-                    />
-                  </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                        Estadías (opcional)
+                        <TextInput
+                          value={estadias}
+                          onChange={(e) => setEstadias(e.target.value)}
+                          placeholder="Cantidad de estadías"
+                          name="estadias"
+                          type="number"
+                          disabled={enviando}
+                        />
+                      </label>
 
-                  <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                    Efectivo
-                    <TextInput
-                      value={efectivo}
-                      onChange={(e) => setEfectivo(e.target.value)}
-                      placeholder="Monto en efectivo"
-                      name="efectivo"
-                      type="number"
-                      disabled={enviando}
-                    />
-                  </label>
+                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                        N° de factura (opcional)
+                        <TextInput
+                          value={numeroFactura}
+                          onChange={(e) => setNumeroFactura(e.target.value)}
+                          placeholder="Número de factura"
+                          name="numero_factura"
+                          type="text"
+                          disabled={enviando}
+                        />
+                      </label>
 
-                  <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                    Mercado Pago
-                    <TextInput
-                      value={mp}
-                      onChange={(e) => setMp(e.target.value)}
-                      placeholder="Monto por Mercado Pago"
-                      name="mp"
-                      type="number"
-                      disabled={enviando}
-                    />
-                  </label>
-                </div>
+                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                        Efectivo
+                        <TextInput
+                          value={efectivo}
+                          onChange={(e) => setEfectivo(e.target.value)}
+                          placeholder="Monto en efectivo"
+                          name="efectivo"
+                          type="number"
+                          disabled={enviando}
+                        />
+                      </label>
 
-                <div className="flex justify-between items-center bg-cerulean-200 rounded-lg p-3">
-                  <span className="text-sm font-bold uppercase">Total</span>
-                  <span className="text-lg font-bold text-cerulean-900">
-                    ${total.toFixed(2)}
-                  </span>
-                </div>
+                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                        Mercado Pago
+                        <TextInput
+                          value={mp}
+                          onChange={(e) => setMp(e.target.value)}
+                          placeholder="Monto por Mercado Pago"
+                          name="mp"
+                          type="number"
+                          disabled={enviando}
+                        />
+                      </label>
+                    </div>
 
-                {errorForm && (
-                  <p className="text-xs text-red-900">{errorForm}</p>
+                    <div className="flex flex-col gap-1 bg-cerulean-200 rounded-lg p-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-cerulean-800">
+                          {tarifa
+                            ? `${formatCurrency(tarifa.acarreo)} + ${formatCurrency(tarifa.estadia)} × ${estadias === "" ? 0 : estadias}`
+                            : ""}
+                        </span>
+                        <span className="text-sm font-bold uppercase">
+                          Total {formatCurrency(total)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-cerulean-800">
+                          Efectivo + Mercado Pago
+                        </span>
+                        <span
+                          className={
+                            diferencia === 0
+                              ? "text-emerald-700 font-bold"
+                              : "text-scarlet-rush-700 font-bold"
+                          }
+                        >
+                          {formatCurrency(sumaPagos)}
+                        </span>
+                      </div>
+                      {diferencia !== 0 && (
+                        <p className="text-xs text-scarlet-rush-700">
+                          {diferencia > 0
+                            ? `Faltan ${formatCurrency(diferencia)}`
+                            : `Sobran ${formatCurrency(Math.abs(diferencia))}`}
+                        </p>
+                      )}
+                    </div>
+
+                    {errorForm && (
+                      <p className="text-xs text-red-900">{errorForm}</p>
+                    )}
+
+                    <div className="flex justify-end gap-3">
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={volver}
+                        disabled={enviando}
+                      >
+                        Volver
+                      </CallToActionButton>
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={handleSubmit}
+                        disabled={enviando || diferencia !== 0}
+                      >
+                        {enviando ? "Registrando..." : "Registrar cobro"}
+                      </CallToActionButton>
+                    </div>
+                  </>
                 )}
-
-                <div className="flex gap-2 justify-end">
-                  <CallToActionButton
-                    type="button"
-                    handleSubmit={volver}
-                    disabled={enviando}
-                  >
-                    Cancelar
-                  </CallToActionButton>
-                  <CallToActionButton
-                    type="button"
-                    handleSubmit={handleSubmit}
-                    disabled={enviando}
-                  >
-                    {enviando ? "Registrando..." : "Registrar cobro"}
-                  </CallToActionButton>
-                </div>
               </div>
             )}
           </section>

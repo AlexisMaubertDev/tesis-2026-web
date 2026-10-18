@@ -77,6 +77,16 @@ export default function Home() {
             {usuario.rol === "SISTEMAS" && (
               <li className="flex w-1/2">
                 <Link
+                  to="/tarifas"
+                  className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
+                >
+                  Tarifas
+                </Link>
+              </li>
+            )}
+            {usuario.rol === "SISTEMAS" && (
+              <li className="flex w-1/2">
+                <Link
                   to="/vehiculos"
                   className="w-full bg-scarlet-rush-500 text-white uppercase px-8 py-4 rounded hover:bg-scarlet-rush-700 transition-colors cursor-pointer text-center duration-300 "
                 >

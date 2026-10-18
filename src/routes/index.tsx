@@ -14,6 +14,7 @@ import SupervisorPage from "../features/supervisor/pages/SupervisorPage.tsx";
 import UsuariosSupervisorPage from "../features/supervisor/pages/UsuariosSupervisorPage.tsx";
 import CajerosPage from "../features/cajeros/pages/CajerosPage.tsx";
 import CobroPage from "../features/cobros/pages/CobroPage.tsx";
+import TarifasPage from "../features/tarifas/pages/TarifasPage.tsx";
 import AcercaDe from "../pages/AcercaDe.tsx";
 
 export default function AppRoutes() {
@@ -108,6 +109,16 @@ export default function AppRoutes() {
             <ProtectedRoute>
               <SistemasRoute>
                 <BarrerasPage />
+              </SistemasRoute>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tarifas"
+          element={
+            <ProtectedRoute>
+              <SistemasRoute>
+                <TarifasPage />
               </SistemasRoute>
             </ProtectedRoute>
           }
