@@ -111,7 +111,7 @@ export default function BuscarVehiculoPatente() {
           <Row etiqueta="Modelo" valor={vehiculo.modelo} />
           <Row etiqueta="Color" valor={vehiculo.color} />
           <Row etiqueta="Sucursal" valor={vehiculo.Sucursal?.nombre ?? "-"} />
-          <Row etiqueta="En playa" valor={vehiculo.en_playa ? "Sí" : "No"} />
+          <Row etiqueta="Estado" valor={vehiculo.ultimo_acarreo_estado ?? "-"} />
           <Row
             etiqueta="Cantidad de acarreos"
             valor={String(vehiculo.cantidad_acarreos ?? 0)}
@@ -120,11 +120,7 @@ export default function BuscarVehiculoPatente() {
             etiqueta="Último acarreo"
             valor={
               vehiculo.ultimo_acarreo
-                ? `${formatDateHours(vehiculo.ultimo_acarreo)}${
-                    vehiculo.ultimo_acarreo_estado
-                      ? ` (${vehiculo.ultimo_acarreo_estado})`
-                      : ""
-                  }`
+                ? formatDateHours(vehiculo.ultimo_acarreo)
                 : "Sin acarreos"
             }
           />

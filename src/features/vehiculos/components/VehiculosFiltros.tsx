@@ -8,7 +8,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import React from "react";
+import { ESTADOS_ACARREO } from "../../../app/constants/estados";
 import type { Sucursal } from "../../../types/Sucursal";
+import type { EstadoAcarreo } from "../../../types/Vehiculo";
 import type { FiltrosVehiculos } from "../pages/VehiculosPage";
 
 type Props = {
@@ -19,7 +21,7 @@ type Props = {
 
 const FILTROS_VACIOS: FiltrosVehiculos = {
   sucursales: [],
-  enPlaya: null,
+  estados: [],
   fechaDesde: "",
   fechaHasta: "",
 };
@@ -51,16 +53,18 @@ export default function VehiculosFiltros({
     }));
   };
 
-  const toggleEnPlaya = (valor: boolean) => {
+  const toggleEstado = (estado: EstadoAcarreo) => {
     setFiltros((prev) => ({
       ...prev,
-      enPlaya: prev.enPlaya === valor ? null : valor,
+      estados: prev.estados.includes(estado)
+        ? prev.estados.filter((item) => item !== estado)
+        : [...prev.estados, estado],
     }));
   };
 
   const filtrosActivos =
     filtros.sucursales.length +
-    (filtros.enPlaya !== null ? 1 : 0) +
+    filtros.estados.length +
     (filtros.fechaDesde || filtros.fechaHasta ? 1 : 0);
 
   return (
@@ -134,32 +138,23 @@ export default function VehiculosFiltros({
         ))}
         <Divider />
         <ListSubheader className="bg-cerulean-300! text-cerulean-50!">
-          En playa
+          Estado
         </ListSubheader>
-        <MenuItem
-          dense
-          onClick={() => {
-            toggleEnPlaya(true);
-            handleClose();
-          }}
-        >
-          <ListItemIcon>
-            <Checkbox size="small" checked={filtros.enPlaya === true} />
-          </ListItemIcon>
-          <p className="text-xs">Sí</p>
-        </MenuItem>
-        <MenuItem
-          dense
-          onClick={() => {
-            toggleEnPlaya(false);
-            handleClose();
-          }}
-        >
-          <ListItemIcon>
-            <Checkbox size="small" checked={filtros.enPlaya === false} />
-          </ListItemIcon>
-          <p className="text-xs">No</p>
-        </MenuItem>
+        {ESTADOS_ACARREO.map((estado) => (
+          <MenuItem
+            dense
+            key={estado}
+            onClick={() => {
+              toggleEstado(estado);
+              handleClose();
+            }}
+          >
+            <ListItemIcon>
+              <Checkbox size="small" checked={filtros.estados.includes(estado)} />
+            </ListItemIcon>
+            <p className="text-xs">{estado}</p>
+          </MenuItem>
+        ))}
         <Divider />
         <ListSubheader className="bg-cerulean-300! text-cerulean-50!">
           Fecha del último acarreo

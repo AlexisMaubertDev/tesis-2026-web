@@ -97,14 +97,14 @@ export default function VehiculoDetalleModal({
             valor={String(vehiculo?.cantidad_acarreos ?? 0)}
           />
           <DetailItem
-            etiqueta="En playa"
-            valor={vehiculo?.en_playa ? "Sí" : "No"}
+            etiqueta="Estado"
+            valor={vehiculo?.ultimo_acarreo_estado ?? "-"}
           />
           <DetailItem
             etiqueta="Último acarreo"
             valor={
               vehiculo?.ultimo_acarreo
-                ? `${formatDateFullWithHs(vehiculo.ultimo_acarreo)} (${vehiculo.ultimo_acarreo_estado})`
+                ? formatDateFullWithHs(vehiculo.ultimo_acarreo)
                 : "Sin acarreos"
             }
           />

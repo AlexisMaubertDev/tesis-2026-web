@@ -16,6 +16,17 @@ export const obtenerBarrerasSucursal = async (token: string, id: string) => {
   return res.data;
 };
 
+/**
+ * Turno de barrera activo del usuario autenticado (lo usa el home del playero).
+ * Devuelve `null` en `data` si el playero no tiene una barrera asignada.
+ */
+export const obtenerMiTurnoBarrera = async (token: string) => {
+  const res = await api.get("/barreras/mi-turno", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
 export const asignarBarrera = async (
   token: string,
   data: {

@@ -43,3 +43,29 @@ export const obtenerAcarreosPorPatente = async (
   });
   return res.data;
 };
+
+/**
+ * Ingreso a playa desde la barrera: el acarreo ACARREADO pasa a INGRESADO.
+ * La usa el home del playero.
+ */
+export const ingresarAcarreoAPlaya = async (token: string, acarreoId: string) => {
+  const res = await api.put(
+    `/acarreos/${acarreoId}/ingresar`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};
+
+/**
+ * Salida de playa desde la barrera: el acarreo COBRADO (abonado) pasa a
+ * EGRESADO. La usa el home del playero.
+ */
+export const egresarAcarreo = async (token: string, acarreoId: string) => {
+  const res = await api.put(
+    `/acarreos/${acarreoId}/egresar`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};

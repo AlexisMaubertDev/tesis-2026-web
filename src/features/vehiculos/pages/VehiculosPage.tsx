@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import PageLayout from "../../../components/layout/PageLayout";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
@@ -8,28 +9,45 @@ import Search from "../../../components/ui/Search";
 import type { RootState } from "../../../app/store";
 import { showError } from "../../../app/store/snackbarSlice";
 import { toFechaInput } from "../../../app/hooks/dataParse";
+import { ESTADOS_ACARREO } from "../../../app/constants/estados";
 import type { Sucursal } from "../../../types/Sucursal";
-import type { Vehiculo } from "../../../types/Vehiculo";
+import type { EstadoAcarreo, Vehiculo } from "../../../types/Vehiculo";
+import type { Turno_Barrera } from "../../../types/Barrera";
 import { obtenerSucursales } from "../../sucursales/services/sucursalesService";
+import { obtenerMiTurnoBarrera } from "../../barreras/services/barrerasService";
 import VehiculosTable from "../components/VehiculosTable";
 import EditarVehiculoModal from "../components/EditarVehiculoModal";
 import VehiculoDetalleModal from "../components/VehiculoDetalleModal";
 import VehiculosFiltros from "../components/VehiculosFiltros";
+import PlayeroHome from "../components/PlayeroHome";
 import { obtenerVehiculos } from "../services/vehiculosService";
 
 export type FiltrosVehiculos = {
   sucursales: string[];
-  enPlaya: boolean | null;
+  estados: EstadoAcarreo[];
   fechaDesde: string;
   fechaHasta: string;
 };
 
 const FILTROS_VACIOS: FiltrosVehiculos = {
   sucursales: [],
-  enPlaya: null,
+  estados: [],
   fechaDesde: "",
   fechaHasta: "",
 };
+
+// Arma los filtros a partir de la URL. El home del playero enlaza a
+// `/vehiculos?estado=INGRESADO&sucursal=<nombre>` para prefiltrar la tabla.
+// `estado` se puede repetir para seleccionar más de un estado.
+const filtrosDesdeParams = (params: URLSearchParams): FiltrosVehiculos => ({
+  ...FILTROS_VACIOS,
+  estados: params
+    .getAll("estado")
+    .filter((estado): estado is EstadoAcarreo =>
+      (ESTADOS_ACARREO as string[]).includes(estado),
+    ),
+  sucursales: params.get("sucursal") ? [params.get("sucursal")!] : [],
+});
 
 // La búsqueda y los filtros se aplican sobre los datos que ya devolvió el
 // servidor (la tabla ya viene ordenada: primero los que están en playa y
@@ -52,8 +70,10 @@ const aplicarFiltros = (
       (!!vehiculo.Sucursal &&
         filtros.sucursales.includes(vehiculo.Sucursal.nombre));
 
-    const cumplePlaya =
-      filtros.enPlaya === null || vehiculo.en_playa === filtros.enPlaya;
+    const cumpleEstado =
+      filtros.estados.length === 0 ||
+      (!!vehiculo.ultimo_acarreo_estado &&
+        filtros.estados.includes(vehiculo.ultimo_acarreo_estado));
 
     // La fecha se compara como texto `yyyy-MM-dd` en la zona horaria local, para
     // que coincida con la que se muestra en la tabla.
@@ -63,23 +83,36 @@ const aplicarFiltros = (
     const cumpleHasta =
       !filtros.fechaHasta || (fecha !== "" && fecha <= filtros.fechaHasta);
 
-    return cumpleBusqueda && cumpleSucursal && cumplePlaya && cumpleDesde && cumpleHasta;
+    return (
+      cumpleBusqueda && cumpleSucursal && cumpleEstado && cumpleDesde && cumpleHasta
+    );
   });
 };
 
-export default function VehiculosPage() {
+/** Tabla de vehículos: el comportamiento original de la pantalla. */
+function VehiculosTabla() {
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
-  const [filtros, setFiltros] = useState<FiltrosVehiculos>(FILTROS_VACIOS);
+  const [filtros, setFiltros] = useState<FiltrosVehiculos>(() =>
+    filtrosDesdeParams(searchParams),
+  );
   const [search, setSearch] = useState("");
   const [vehiculoAEditar, setVehiculoAEditar] = useState<Vehiculo | null>(null);
   const [vehiculoDetalle, setVehiculoDetalle] = useState<Vehiculo | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const recargar = () => setRefreshKey((k) => k + 1);
+
+  // Si la URL trae filtros (por ejemplo, desde el home del playero), se
+  // sincronizan con el estado local.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFiltros(filtrosDesdeParams(searchParams));
+  }, [searchParams]);
 
   useEffect(() => {
     if (!token) return;
@@ -194,4 +227,78 @@ export default function VehiculosPage() {
       </MainLayout>
     </PageLayout>
   );
+}
+
+/**
+ * Pantalla `/vehiculos`. Si el usuario es un playero con turno de barrera
+ * activo (y no llegó con filtros por URL) se muestra su home; en cualquier
+ * otro caso, la tabla de vehículos.
+ */
+export default function VehiculosPage() {
+  const { usuario, token } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+
+  const esPlayero = usuario?.rol === "PLAYERO";
+  const tieneFiltrosUrl =
+    searchParams.has("estado") || searchParams.has("sucursal");
+
+  const [turno, setTurno] = useState<Turno_Barrera | null>(null);
+  const [cargandoTurno, setCargandoTurno] = useState(esPlayero);
+
+  useEffect(() => {
+    if (!esPlayero || !token || tieneFiltrosUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCargandoTurno(false);
+      return;
+    }
+
+    let activo = true;
+
+    const cargarTurno = async () => {
+      setCargandoTurno(true);
+      try {
+        const res = await obtenerMiTurnoBarrera(token);
+        if (activo) setTurno(res.data ?? null);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (activo) {
+          dispatch(
+            showError(
+              error.response?.data?.message ||
+                "No se pudo cargar el turno de barrera.",
+            ),
+          );
+        }
+      } finally {
+        if (activo) setCargandoTurno(false);
+      }
+    };
+
+    cargarTurno();
+
+    return () => {
+      activo = false;
+    };
+  }, [esPlayero, token, tieneFiltrosUrl, dispatch]);
+
+  if (esPlayero && !tieneFiltrosUrl) {
+    if (cargandoTurno) {
+      return (
+        <PageLayout>
+          <MainLayout>
+            <main className="flex flex-col justify-start items-center py-4 px-4 w-full">
+              <p className="text-sm text-cerulean-700 mt-4">Cargando...</p>
+            </main>
+          </MainLayout>
+        </PageLayout>
+      );
+    }
+
+    if (turno) {
+      return <PlayeroHome turno={turno} />;
+    }
+  }
+
+  return <VehiculosTabla />;
 }

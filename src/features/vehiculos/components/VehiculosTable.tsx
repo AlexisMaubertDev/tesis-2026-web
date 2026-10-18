@@ -84,7 +84,7 @@ export default function VehiculosTable({
             <th className="border-r px-2 py-2 border-cerulean-400">
               Último acarreo
             </th>
-            <th className="border-r px-2 py-2 border-cerulean-400">En playa</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Estado</th>
             <th className="px-2 py-2 border-cerulean-400">Acciones</th>
           </tr>
         </thead>
@@ -116,7 +116,7 @@ export default function VehiculosTable({
                   : "-"}
               </td>
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
-                {vehiculo.en_playa ? "Sí" : "No"}
+                {vehiculo.ultimo_acarreo_estado ?? "-"}
               </td>
 
               <td className="border-b border-cerulean-200 px-2 py-2">
