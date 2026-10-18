@@ -1,7 +1,7 @@
 import { Modal } from "@mui/material";
 import type { Grua, Turno_Grua } from "../../../types/Grua";
 import type { Usuario } from "../../../types/Usuario";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SelectInput from "../../../components/ui/SelectInput";
 import TextInput from "../../../components/ui/TextInput";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
@@ -9,6 +9,7 @@ import TextArea from "../../../components/ui/TextArea";
 import { obtenerGrueros } from "../../usuarios/services/usuariosService";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
+import { getTurnoLabel } from "../../../app/constants/turnos";
 import { asignarGrua } from "../../gruas/services/gruasServices";
 import { showSuccess } from "../../../app/store/snackbarSlice";
 
@@ -35,12 +36,64 @@ export default function AsignarGruaModal({
     observaciones: "",
   };
   const { token } = useSelector((state: RootState) => state.auth);
+  const usuario = useSelector((state: RootState) => state.auth.usuario);
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
   const [formData, setFormData] = useState(initialState);
   const [fetching, setFetching] = useState(false);
   const dispatch = useDispatch();
 
   const [error, setError] = useState<string | null>(null);
+
+  // Turno que define el grupo prioritario: el seleccionado en el modal, o por
+  // defecto el turno del supervisor si todavía no se eligió ninguno.
+  const prioridadTurno = formData.turno || String(usuario?.numero_turno ?? "");
+
+  // Opciones de grueros agrupadas: primero los del turno prioritario (y dentro
+  // de ellos, los de la sucursal de la grúa), y después el resto. Se mantiene
+  // la agrupación por Sucursal dentro de cada bloque.
+  const opcionesGrueros = useMemo(() => {
+    const esDeLaSucursalDeLaGrua = (u: Usuario) =>
+      !!grua?.Sucursal?.id && u.Sucursal?.id === grua.Sucursal.id;
+
+    const porSucursalYLegajo = (a: Usuario, b: Usuario) => {
+      const sa = a.Sucursal?.nombre ?? "Sin Sucursal";
+      const sb = b.Sucursal?.nombre ?? "Sin Sucursal";
+      if (sa !== sb) return sa.localeCompare(sb);
+      return String(a.legajo).localeCompare(String(b.legajo));
+    };
+
+    const prioritarios = usuariosFiltrados
+      .filter((u) => String(u.numero_turno) === prioridadTurno)
+      .sort((a, b) => {
+        // La sucursal de la grúa primero; después el resto por sucursal.
+        if (esDeLaSucursalDeLaGrua(a) !== esDeLaSucursalDeLaGrua(b)) {
+          return esDeLaSucursalDeLaGrua(a) ? -1 : 1;
+        }
+        return porSucursalYLegajo(a, b);
+      });
+
+    const otros = usuariosFiltrados
+      .filter((u) => String(u.numero_turno) !== prioridadTurno)
+      .sort(porSucursalYLegajo);
+
+    const etiquetaTurno = prioridadTurno
+      ? getTurnoLabel(prioridadTurno)
+      : "este turno";
+
+    const aOpcion = (u: Usuario, bloque: "prioritario" | "otro") => ({
+      value: u.id,
+      label: `${u.nombre} ${u.apellido}`,
+      group:
+        bloque === "prioritario"
+          ? `${etiquetaTurno} — ${u.Sucursal?.nombre || "Sin Sucursal"}`
+          : `Otros turnos — ${u.Sucursal?.nombre || "Sin Sucursal"}`,
+    });
+
+    return [
+      ...prioritarios.map((u) => aOpcion(u, "prioritario")),
+      ...otros.map((u) => aOpcion(u, "otro")),
+    ];
+  }, [usuariosFiltrados, prioridadTurno, grua]);
 
   const handleClose = () => {
     setOpen(false);
@@ -134,11 +187,7 @@ export default function AsignarGruaModal({
               onChange={(e) =>
                 setFormData({ ...formData, id_chofer: e.target.value })
               }
-              options={usuariosFiltrados.map((usuario) => ({
-                value: usuario.id,
-                label: `${usuario.nombre} ${usuario.apellido}`,
-                group: usuario.Sucursal?.nombre || "Sin Sucursal",
-              }))}
+              options={opcionesGrueros}
               placeholder="Seleccionar chofer"
               name="id_chofer"
               disabled={fetching}
@@ -149,11 +198,7 @@ export default function AsignarGruaModal({
               onChange={(e) =>
                 setFormData({ ...formData, id_enganchador: e.target.value })
               }
-              options={usuariosFiltrados.map((usuario) => ({
-                value: usuario.id,
-                label: `${usuario.nombre} ${usuario.apellido}`,
-                group: usuario.Sucursal?.nombre || "Sin Sucursal",
-              }))}
+              options={opcionesGrueros}
               placeholder="Seleccionar enganchador"
               name="id_enganchador"
               disabled={fetching}
