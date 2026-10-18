@@ -94,7 +94,6 @@ export default function SucursalModal({
   const editarSucursalExistente = async () => {
     try {
       const res = await editarSucursal(token!, form);
-      console.log(res);
 
       if (res.success) {
         dispatch(showSuccess("Sucursal editada con exito"));
