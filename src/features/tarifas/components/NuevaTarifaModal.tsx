@@ -130,7 +130,7 @@ export default function NuevaTarifaModal({
 
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold">
-              Tarifa de estadía (por día)
+              Tarifa de estadía (cada 12 horas)
             </label>
             <TextInput
               placeholder="Importe de cada estadía"

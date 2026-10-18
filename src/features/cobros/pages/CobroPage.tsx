@@ -8,18 +8,22 @@ import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import TextInput from "../../../components/ui/TextInput";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 import { formatCurrency, redondearImporte } from "../../../app/utils/money";
 import type { Acarreo } from "../../../types/Acarreo";
-import type { Tarifa } from "../../../types/Tarifa";
 import { obtenerAcarreosPorPatente } from "../../vehiculos/services/vehiculosService";
-import { obtenerTarifaVigente } from "../../tarifas/services/tarifasService";
-import { crearCobro } from "../services/cobrosService";
+import {
+  crearCobro,
+  obtenerPreviewCobro,
+  type PreviewCobro,
+} from "../services/cobrosService";
 
 /**
  * Formulario de cobro del cajero: se llega desde el buscador por patente
- * (acción "Cobrar" de un vehículo INGRESADO). El total lo calcula la tarifa
- * vigente (acarreo + estadía × estadías) y el cajero lo reparte entre efectivo
- * y Mercado Pago. Registra el cobro y vuelve al home del cajero.
+ * (acción "Cobrar" de un vehículo INGRESADO). El total lo calcula el servidor a
+ * partir de la tarifa vigente y de las **estadías automáticas por reloj** (una
+ * cada 12 horas desde el acarreo, con tope de 70): el cajero sólo reparte el
+ * pago entre efectivo y Mercado Pago. Registra el cobro y vuelve al home.
  */
 export default function CobroPage() {
   const { patente = "" } = useParams();
@@ -31,87 +35,100 @@ export default function CobroPage() {
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
 
-  const [tarifa, setTarifa] = useState<Tarifa | null>(null);
-  const [cargandoTarifa, setCargandoTarifa] = useState(true);
+  const [preview, setPreview] = useState<PreviewCobro | null>(null);
+  const [cargandoPreview, setCargandoPreview] = useState(false);
+  const [errorPreview, setErrorPreview] = useState<string | null>(null);
+  // Al incrementarlo se vuelve a calcular el total (el reloj avanza).
+  const [previewKey, setPreviewKey] = useState(0);
 
-  const [estadias, setEstadias] = useState("");
   const [efectivo, setEfectivo] = useState("");
   const [mp, setMp] = useState("");
   const [numeroFactura, setNumeroFactura] = useState("");
+
   const [enviando, setEnviando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
+  // 1) El acarreo INGRESADO de la patente buscada.
   useEffect(() => {
-    if (!token || !patente) return;
-
     let activo = true;
 
-    const cargar = async () => {
+    const cargarAcarreo = async () => {
+      if (!token || !patente) {
+        setCargando(false);
+        return;
+      }
+
       setCargando(true);
-      setErrorCarga(null);
 
       try {
         const res = await obtenerAcarreosPorPatente(token, patente);
-        const acarreos = res.data as Acarreo[];
-        // El cobro aplica al acarreo que está en la playa (INGRESADO).
-        const ingresado = acarreos.find((a) => a.estado === "INGRESADO") ?? null;
-        if (activo) setAcarreo(ingresado);
+        if (!activo) return;
+
+        const ingresado = (res.data as Acarreo[]).find(
+          (a) => a.estado === "INGRESADO",
+        );
+
+        setAcarreo(ingresado ?? null);
+        setErrorCarga(null);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
-        if (activo) {
-          setErrorCarga(
-            err.response?.data?.message ||
-              "No se pudo cargar el vehículo. Intentá nuevamente más tarde.",
-          );
-        }
+        if (!activo) return;
+        setErrorCarga(
+          err.response?.data?.message ||
+            "No se pudo cargar el vehículo. Intentá nuevamente más tarde.",
+        );
       } finally {
         if (activo) setCargando(false);
       }
     };
 
-    cargar();
+    cargarAcarreo();
 
     return () => {
       activo = false;
     };
   }, [token, patente]);
 
-  // La tarifa vigente define el importe automático del cobro.
+  // 2) El total del cobro lo calcula el servidor (tarifa vigente + estadías).
   useEffect(() => {
-    if (!token) return;
-
     let activo = true;
+    const idAcarreo = acarreo?.id;
 
-    const cargarTarifa = async () => {
-      setCargandoTarifa(true);
+    const cargarPreview = async () => {
+      if (!token || !idAcarreo) {
+        setPreview(null);
+        return;
+      }
+
+      setCargandoPreview(true);
 
       try {
-        const res = await obtenerTarifaVigente(token);
-        if (activo) setTarifa(res.data);
-      } catch {
-        if (activo) setTarifa(null);
+        const res = await obtenerPreviewCobro(token, idAcarreo);
+        if (!activo) return;
+        setPreview(res.data as PreviewCobro);
+        setErrorPreview(null);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        if (!activo) return;
+        setErrorPreview(
+          err.response?.data?.message ||
+            "No se pudo calcular el total. Intentá nuevamente.",
+        );
       } finally {
-        if (activo) setCargandoTarifa(false);
+        if (activo) setCargandoPreview(false);
       }
     };
 
-    cargarTarifa();
+    cargarPreview();
 
     return () => {
       activo = false;
     };
-  }, [token]);
+  }, [acarreo, token, previewKey]);
 
-  const estadiasNum = estadias.trim() === "" ? 0 : Number(estadias);
-  const estadiasValidas = Number.isInteger(estadiasNum) && estadiasNum >= 0;
-
-  // Total automático: acarreo + estadía × cantidad de estadías.
-  const total = useMemo(() => {
-    if (!tarifa || !estadiasValidas) return 0;
-    return redondearImporte(
-      Number(tarifa.acarreo) + Number(tarifa.estadia) * estadiasNum,
-    );
-  }, [tarifa, estadiasNum, estadiasValidas]);
+  const tarifa = preview?.tarifa ?? null;
+  const estadias = preview?.estadias ?? 0;
+  const total = preview?.total ?? 0;
 
   const sumaPagos = useMemo(() => {
     const e = Number(efectivo || 0);
@@ -131,21 +148,10 @@ export default function CobroPage() {
   }
 
   const volver = () => navigate("/cajeros");
+  const recalcular = () => setPreviewKey((n) => n + 1);
 
   const handleSubmit = async () => {
-    if (!acarreo) return;
-
-    if (!tarifa) {
-      setErrorForm(
-        "No hay una tarifa vigente configurada. Comunicate con Sistemas.",
-      );
-      return;
-    }
-
-    if (!Number.isInteger(Number(estadias)) && estadias !== "") {
-      setErrorForm("Las estadías deben ser un número entero mayor o igual a cero.");
-      return;
-    }
+    if (!acarreo || !tarifa) return;
 
     const e = Number(efectivo || 0);
     const m = Number(mp || 0);
@@ -168,10 +174,10 @@ export default function CobroPage() {
     try {
       await crearCobro(token!, {
         id_acarreo: acarreo.id,
-        estadias: estadias === "" ? 0 : Number(estadias),
         efectivo: e,
         mp: m,
-        numero_factura: numeroFactura.trim() === "" ? null : numeroFactura.trim(),
+        numero_factura:
+          numeroFactura.trim() === "" ? null : numeroFactura.trim(),
       });
 
       dispatch(showSuccess("Cobro registrado con éxito"));
@@ -183,12 +189,15 @@ export default function CobroPage() {
         "No se pudo registrar el cobro. Intentá nuevamente más tarde.";
       setErrorForm(message);
       dispatch(showError(message));
+      // El total pudo cambiar (el reloj avanza): se recalcula.
+      recalcular();
     } finally {
       setEnviando(false);
     }
   };
 
   const vehiculo = acarreo?.Vehiculo ?? null;
+  const fechaAcarreo = preview?.fecha_acarreo ?? acarreo?.fecha_acarreo ?? null;
 
   return (
     <PageLayout>
@@ -237,52 +246,80 @@ export default function CobroPage() {
                       .filter(Boolean)
                       .join(" - ") || "Sin datos del vehículo"}
                   </p>
+                  <p className="mt-1 text-xs text-cerulean-800">
+                    <span className="font-semibold">
+                      Fecha y hora del acarreo:
+                    </span>{" "}
+                    {fechaAcarreo
+                      ? formatDateFullWithHs(fechaAcarreo)
+                      : "Sin registrar"}
+                  </p>
                 </div>
 
-                {cargandoTarifa ? (
+                {cargandoPreview && (
                   <p className="text-sm text-cerulean-700">
-                    Cargando tarifa...
+                    Calculando el total...
                   </p>
-                ) : !tarifa ? (
+                )}
+
+                {!cargandoPreview && errorPreview && (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs text-scarlet-rush-700">
+                      {errorPreview}
+                    </p>
+                    <div>
+                      <CallToActionButton type="button" handleSubmit={recalcular}>
+                        Recalcular
+                      </CallToActionButton>
+                    </div>
+                  </div>
+                )}
+
+                {!cargandoPreview && !errorPreview && !tarifa && (
                   <p className="text-xs text-scarlet-rush-700">
                     No hay una tarifa vigente configurada: no se puede calcular
                     el cobro. Comunicate con Sistemas.
                   </p>
-                ) : (
+                )}
+
+                {!cargandoPreview && !errorPreview && tarifa && preview && (
                   <>
-                    <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900">
+                    <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900 flex flex-col gap-1">
                       <p className="font-bold uppercase">Tarifa vigente</p>
                       <p>
                         Acarreo {formatCurrency(tarifa.acarreo)} + estadía{" "}
-                        {formatCurrency(tarifa.estadia)} por día
+                        {formatCurrency(tarifa.estadia)} cada{" "}
+                        {preview.horas_por_estadia} horas
+                      </p>
+                      <p className="text-cerulean-700">
+                        Las estadías se calculan solas: se cobra una cada{" "}
+                        {preview.horas_por_estadia} horas desde el acarreo (hasta{" "}
+                        {preview.max_estadias}).
                       </p>
                     </div>
 
+                    <div className="flex flex-col gap-1 bg-cerulean-200 rounded-lg p-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-cerulean-800">
+                          Acarreo {formatCurrency(tarifa.acarreo)} +{" "}
+                          {formatCurrency(tarifa.estadia)} × {estadias}
+                        </span>
+                        <span className="font-semibold text-cerulean-900">
+                          Estadías: {estadias}
+                          {preview.tope_estadias ? " (máximo)" : ""}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold uppercase">
+                          Total
+                        </span>
+                        <span className="text-sm font-bold uppercase">
+                          {formatCurrency(total)}
+                        </span>
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                        Estadías (opcional)
-                        <TextInput
-                          value={estadias}
-                          onChange={(e) => setEstadias(e.target.value)}
-                          placeholder="Cantidad de estadías"
-                          name="estadias"
-                          type="number"
-                          disabled={enviando}
-                        />
-                      </label>
-
-                      <label className="flex flex-col gap-1 text-xs font-bold uppercase">
-                        N° de factura (opcional)
-                        <TextInput
-                          value={numeroFactura}
-                          onChange={(e) => setNumeroFactura(e.target.value)}
-                          placeholder="Número de factura"
-                          name="numero_factura"
-                          type="text"
-                          disabled={enviando}
-                        />
-                      </label>
-
                       <label className="flex flex-col gap-1 text-xs font-bold uppercase">
                         Efectivo
                         <TextInput
@@ -306,41 +343,42 @@ export default function CobroPage() {
                           disabled={enviando}
                         />
                       </label>
+
+                      <label className="flex flex-col gap-1 text-xs font-bold uppercase sm:col-span-2">
+                        N° de factura (opcional)
+                        <TextInput
+                          value={numeroFactura}
+                          onChange={(e) => setNumeroFactura(e.target.value)}
+                          placeholder="Número de factura"
+                          name="numero_factura"
+                          type="text"
+                          disabled={enviando}
+                        />
+                      </label>
                     </div>
 
-                    <div className="flex flex-col gap-1 bg-cerulean-200 rounded-lg p-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-cerulean-800">
-                          {tarifa
-                            ? `${formatCurrency(tarifa.acarreo)} + ${formatCurrency(tarifa.estadia)} × ${estadias === "" ? 0 : estadias}`
-                            : ""}
-                        </span>
-                        <span className="text-sm font-bold uppercase">
-                          Total {formatCurrency(total)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-cerulean-800">
-                          Efectivo + Mercado Pago
-                        </span>
-                        <span
-                          className={
-                            diferencia === 0
-                              ? "text-emerald-700 font-bold"
-                              : "text-scarlet-rush-700 font-bold"
-                          }
-                        >
-                          {formatCurrency(sumaPagos)}
-                        </span>
-                      </div>
-                      {diferencia !== 0 && (
-                        <p className="text-xs text-scarlet-rush-700">
-                          {diferencia > 0
-                            ? `Faltan ${formatCurrency(diferencia)}`
-                            : `Sobran ${formatCurrency(Math.abs(diferencia))}`}
-                        </p>
-                      )}
+                    <div className="flex justify-between items-center text-xs bg-cerulean-200 rounded-lg p-3">
+                      <span className="text-cerulean-800">
+                        Efectivo + Mercado Pago
+                      </span>
+                      <span
+                        className={
+                          diferencia === 0
+                            ? "text-emerald-700 font-bold"
+                            : "text-scarlet-rush-700 font-bold"
+                        }
+                      >
+                        {formatCurrency(sumaPagos)}
+                      </span>
                     </div>
+
+                    {diferencia !== 0 && (
+                      <p className="text-xs text-scarlet-rush-700">
+                        {diferencia > 0
+                          ? `Faltan ${formatCurrency(diferencia)}`
+                          : `Sobran ${formatCurrency(Math.abs(diferencia))}`}
+                      </p>
+                    )}
 
                     {errorForm && (
                       <p className="text-xs text-red-900">{errorForm}</p>

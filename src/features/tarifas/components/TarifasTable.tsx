@@ -21,7 +21,9 @@ export default function TarifasTable({ tarifas }: Props) {
       <thead className="bg-cerulean-600 text-white text-left">
         <tr className="text-sm border-b border-cerulean-400">
           <th className="border-r px-2 py-2 border-cerulean-400">Acarreo</th>
-          <th className="border-r px-2 py-2 border-cerulean-400">Estadía</th>
+          <th className="border-r px-2 py-2 border-cerulean-400">
+            Estadía (12 h)
+          </th>
           <th className="border-r px-2 py-2 border-cerulean-400">Vigente</th>
           <th className="border-r px-2 py-2 border-cerulean-400">
             Vigente desde
