@@ -50,6 +50,14 @@ export interface AcarreoBarrera {
 export interface Acarreo {
   id: string;
   id_vehiculo: string;
+  /** Vehículo del acarreo (lo incluye `GET /acarreos/patente/:patente`). */
+  Vehiculo?: {
+    id: string;
+    patente: string;
+    marca: string;
+    modelo: string;
+    color: string;
+  } | null;
   fecha_acarreo: string;
   fecha_ingreso: string | null;
   fecha_egreso: string | null;

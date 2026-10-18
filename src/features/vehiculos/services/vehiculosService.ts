@@ -69,3 +69,20 @@ export const egresarAcarreo = async (token: string, acarreoId: string) => {
   );
   return res.data;
 };
+
+/**
+ * Salida sin cargo: un acarreo INGRESADO pasa a SIN_CARGO guardando el motivo.
+ * Sólo el supervisor (o sistemas) puede autorizarla.
+ */
+export const sacarSinCargo = async (
+  token: string,
+  acarreoId: string,
+  motivo: string,
+) => {
+  const res = await api.put(
+    `/acarreos/${acarreoId}/sin-cargo`,
+    { motivo },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};

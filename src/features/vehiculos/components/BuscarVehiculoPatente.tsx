@@ -5,6 +5,7 @@ import type { RootState } from "../../../app/store";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { formatDateHours } from "../../../app/hooks/dataParse";
 import type { Vehiculo } from "../../../types/Vehiculo";
+import SinCargoModal from "../../cobros/components/SinCargoModal";
 import { obtenerVehiculos } from "../services/vehiculosService";
 
 /** Fila "etiqueta / valor" del resultado, con el diseño del móvil. */
@@ -21,11 +22,16 @@ function Row({ etiqueta, valor }: { etiqueta: string; valor: string }) {
 
 /**
  * Buscador por patente estilo móvil: se escribe la patente, se busca y, si
- * existe, se muestra una tarjeta con los datos del vehículo y un botón para
- * abrir su historial de acarreos. Lo usan las pantallas de cajero y supervisor.
+ * existe, se muestra una tarjeta con los datos del vehículo y las acciones
+ * disponibles. Lo usan las pantallas de cajero y supervisor:
+ *
+ * - Cajero: si el vehículo está INGRESADO, "Cobrar" (abre el formulario de cobro).
+ * - Supervisor: si el vehículo está INGRESADO, "Sacar sin cargo" (modal con motivo).
+ *
+ * Ambos tienen siempre "Ver historial".
  */
 export default function BuscarVehiculoPatente() {
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, usuario } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
 
   const [patente, setPatente] = useState("");
@@ -33,18 +39,19 @@ export default function BuscarVehiculoPatente() {
   const [buscado, setBuscado] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sinCargoAbierto, setSinCargoAbierto] = useState(false);
+
+  const esCajero = usuario?.rol === "CAJERO";
+  const esSupervisor = usuario?.rol === "SUPERVISOR";
+  const puedeCobrar = vehiculo?.ultimo_acarreo_estado === "INGRESADO";
 
   const irAlHistorial = (p: string) =>
     navigate(`/vehiculos/${encodeURIComponent(p)}/historial`);
 
-  const handleBuscar = async () => {
-    const consulta = patente.trim().toUpperCase();
+  const irACobrar = (p: string) =>
+    navigate(`/cajeros/cobrar/${encodeURIComponent(p)}`);
 
-    if (!consulta) {
-      setError("Ingresá una patente");
-      return;
-    }
-
+  const buscar = async (consulta: string) => {
     setLoading(true);
     setError(null);
     setVehiculo(null);
@@ -66,6 +73,17 @@ export default function BuscarVehiculoPatente() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBuscar = () => {
+    const consulta = patente.trim().toUpperCase();
+
+    if (!consulta) {
+      setError("Ingresá una patente");
+      return;
+    }
+
+    buscar(consulta);
   };
 
   return (
@@ -125,16 +143,41 @@ export default function BuscarVehiculoPatente() {
             }
           />
 
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             <CallToActionButton
               type="button"
               handleSubmit={() => irAlHistorial(vehiculo.patente)}
             >
               Ver historial
             </CallToActionButton>
+
+            {puedeCobrar && esCajero && (
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => irACobrar(vehiculo.patente)}
+              >
+                Cobrar
+              </CallToActionButton>
+            )}
+
+            {puedeCobrar && esSupervisor && (
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => setSinCargoAbierto(true)}
+              >
+                Sacar sin cargo
+              </CallToActionButton>
+            )}
           </div>
         </div>
       )}
+
+      <SinCargoModal
+        open={sinCargoAbierto}
+        setOpen={setSinCargoAbierto}
+        vehiculo={vehiculo}
+        onSuccess={() => buscar(patente.trim().toUpperCase())}
+      />
     </div>
   );
 }
