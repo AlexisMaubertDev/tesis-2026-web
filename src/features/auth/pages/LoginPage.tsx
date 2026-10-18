@@ -1,4 +1,6 @@
 import { useState } from "react";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { loginRequest } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -11,6 +13,7 @@ import type { RootState } from "../../../app/store";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ dni: null, password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { usuario } = useSelector((state: RootState) => state.auth);
   const { login } = useAuth();
@@ -79,13 +82,28 @@ export default function LoginPage() {
               onChange={handleChange}
             />
 
-            <TextInput
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              value={credentials.password}
-              onChange={handleChange}
-            />
+            <div className="relative">
+              <TextInput
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Contraseña"
+                value={credentials.password}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-cerulean-700 hover:text-cerulean-900"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <VisibilityOffIcon fontSize="small" />
+                ) : (
+                  <VisibilityIcon fontSize="small" />
+                )}
+              </button>
+            </div>
           </div>
           <div className="flex w-full justify-center">
             <CallToActionButton type="submit" disabled={loading}>
