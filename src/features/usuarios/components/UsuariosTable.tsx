@@ -3,10 +3,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import Tooltip from "@mui/material/Tooltip";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useState } from "react";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
-import { eliminarUsuario } from "../services/usuariosService";
+import { bloquearUsuario, eliminarUsuario } from "../services/usuariosService";
 import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
@@ -17,6 +20,7 @@ type Props = {
   onCambiarRol: (usuario: Usuario) => void;
   onVerDetalle: (usuario: Usuario) => void;
   onDeleted?: () => void;
+  onRefrescar?: () => void;
 };
 
 export default function UsuariosTable({
@@ -25,10 +29,46 @@ export default function UsuariosTable({
   onCambiarRol,
   onVerDetalle,
   onDeleted,
+  onRefrescar,
 }: Props) {
   const [modalOpen, setModalOpen] = useState<string | null>(null);
+  const [legajoBloqueando, setLegajoBloqueando] = useState<string | null>(null);
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+
+  const handleToggleBloqueo = async (usuario: Usuario) => {
+    const nuevoEstado = !usuario.bloqueado;
+    setLegajoBloqueando(usuario.legajo);
+
+    try {
+      const res = await bloquearUsuario(token!, usuario.legajo, nuevoEstado);
+
+      dispatch(
+        showSuccess(
+          res.message ||
+            (nuevoEstado
+              ? "Usuario bloqueado exitosamente"
+              : "Usuario desbloqueado exitosamente"),
+        ),
+      );
+
+      if (onRefrescar) {
+        onRefrescar();
+      } else {
+        onDeleted?.();
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      dispatch(
+        showError(
+          error.response?.data?.message ||
+            "Error al cambiar el estado del usuario. Intenta nuevamente más tarde.",
+        ),
+      );
+    } finally {
+      setLegajoBloqueando(null);
+    }
+  };
 
   const handleDelete = async (legajo: string) => {
     try {
@@ -139,6 +179,31 @@ export default function UsuariosTable({
                   </button>
 
                   <button
+                    className={
+                      "transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed " +
+                      (usuario.bloqueado
+                        ? "text-emerald-700 hover:text-emerald-500"
+                        : "text-amber-600 hover:text-amber-400")
+                    }
+                    disabled={legajoBloqueando === usuario.legajo}
+                    onClick={() => handleToggleBloqueo(usuario)}
+                  >
+                    <Tooltip
+                      title={usuario.bloqueado ? "Desbloquear" : "Bloquear"}
+                    >
+                      <span className="inline-flex items-center">
+                        {legajoBloqueando === usuario.legajo ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : usuario.bloqueado ? (
+                          <LockOpenIcon />
+                        ) : (
+                          <LockIcon />
+                        )}
+                      </span>
+                    </Tooltip>
+                  </button>
+
+                  <button
                     className="text-rose-700 hover:text-rose-400 transition-colors duration-300 cursor-pointer"
                     onClick={() => setModalOpen(usuario.legajo)}
                   >
@@ -234,6 +299,29 @@ export default function UsuariosTable({
               >
                 <Tooltip title="Editar">
                   <EditIcon />
+                </Tooltip>
+              </button>
+
+              <button
+                className={
+                  "transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed " +
+                  (usuario.bloqueado
+                    ? "text-emerald-700 hover:text-emerald-500"
+                    : "text-amber-600 hover:text-amber-400")
+                }
+                disabled={legajoBloqueando === usuario.legajo}
+                onClick={() => handleToggleBloqueo(usuario)}
+              >
+                <Tooltip title={usuario.bloqueado ? "Desbloquear" : "Bloquear"}>
+                  <span className="inline-flex items-center">
+                    {legajoBloqueando === usuario.legajo ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : usuario.bloqueado ? (
+                      <LockOpenIcon />
+                    ) : (
+                      <LockIcon />
+                    )}
+                  </span>
                 </Tooltip>
               </button>
 

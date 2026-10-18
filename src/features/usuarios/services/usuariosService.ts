@@ -59,6 +59,23 @@ export const editarUsuario = async (
   return res.data;
 };
 
+export const bloquearUsuario = async (
+  token: string,
+  legajo: string,
+  bloqueado: boolean,
+) => {
+  const res = await api.put(
+    `/usuarios/${legajo}/bloquear`,
+    { bloqueado },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return res.data;
+};
+
 export const obtenerTurnoCajasUsuario = async (token: string) => {
   const res = await api.get("/turno_caja/usuario/abiertas", {
     headers: {

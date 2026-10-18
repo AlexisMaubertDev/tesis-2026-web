@@ -211,6 +211,7 @@ export default function UsuariosPage() {
               onCambiarRol={setUsuarioCambioRol}
               onVerDetalle={setUsuarioDetalle}
               onDeleted={recargar}
+              onRefrescar={recargar}
             />
           </section>
 
