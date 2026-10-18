@@ -18,6 +18,7 @@ export interface Usuario {
   Turno_Caja?: Turno_Caja | null;
   turno_caja_activo?: Turno_Caja_Activo | null;
   turno_grua_enganchador_activo?: Turno_Grua | null;
+  turnos_barrera?: { turno_barrera?: { activo?: boolean } | null }[] | null;
   turno_grua_chofer_activo?: Turno_Grua | null;
 }
 

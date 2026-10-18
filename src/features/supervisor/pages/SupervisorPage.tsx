@@ -7,17 +7,21 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useCallback, useEffect, useState } from "react";
 import type { Caja } from "../../../types/Caja";
 import type { Grua } from "../../../types/Grua";
+import type { Barrera } from "../../../types/Barrera";
 import { obtenerCajasSucursal } from "../../cajas/services/cajasService";
 import {
   finalizarTurnosSucursal,
   obtenerGruasSucursal,
 } from "../../gruas/services/gruasServices";
+import { obtenerBarrerasSucursal, finalizarTodosTurnosBarrera } from "../../barreras/services/barrerasService";
 
 import CircleIcon from "@mui/icons-material/Circle";
 import { Tooltip } from "@mui/material";
 import AsignarGruaModal from "../components/AsignarGruaModal";
 import VerDetalleModal from "../components/VerDetalleModal";
 import VerDetalleCajaModal from "../components/VerDetalleCajaModal";
+import AsignarBarreraModal from "../../barreras/components/AsignarBarreraModal";
+import VerDetalleBarreraModal from "../../barreras/components/VerDetalleBarreraModal";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 
@@ -39,11 +43,16 @@ export default function SupervisorPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [gruas, setGruas] = useState<Grua[]>([]);
+  const [barreras, setBarreras] = useState<Barrera[]>([]);
 
   const [asignarModal, setAsignarModal] = useState<Grua | null>(null);
   const [verDetalleModal, setVerDetalleModal] = useState<Grua | null>(null);
   const [detalleCaja, setDetalleCaja] = useState<Caja | null>(null);
   const [finalizar, setFinalizar] = useState<boolean>(false);
+
+  const [asignarBarreraModal, setAsignarBarreraModal] = useState<Barrera | null>(null);
+  const [verDetalleBarreraModal, setVerDetalleBarreraModal] = useState<Barrera | null>(null);
+  const [finalizarBarreras, setFinalizarBarreras] = useState<boolean>(false);
 
   const dispatch = useDispatch();
 
@@ -51,12 +60,14 @@ export default function SupervisorPage() {
     if (!token || !usuario?.Sucursal?.id) return;
 
     try {
-      const [resCajas, resGruas] = await Promise.all([
+      const [resCajas, resGruas, resBarreras] = await Promise.all([
         obtenerCajasSucursal(token, usuario.Sucursal.id),
         obtenerGruasSucursal(token, usuario.Sucursal.id),
+        obtenerBarrerasSucursal(token, usuario.Sucursal.id),
       ]);
       setCajas(resCajas.data);
       setGruas(resGruas.data);
+      setBarreras(resBarreras.data);
     } catch (error) {
       console.error(error);
     }
@@ -85,6 +96,19 @@ export default function SupervisorPage() {
       dispatch(showError("Error al finalizar turnos"));
     } finally {
       setFinalizar(false);
+    }
+  };
+
+  const finalizarTurnosBarrera = async () => {
+    try {
+      await finalizarTodosTurnosBarrera(token!, usuario.Sucursal.id!);
+      dispatch(showSuccess("Turnos de barrera finalizados con éxito"));
+      await refrescarDatos();
+    } catch (error) {
+      console.error(error);
+      dispatch(showError("Error al finalizar turnos de barrera"));
+    } finally {
+      setFinalizarBarreras(false);
     }
   };
 
@@ -245,6 +269,68 @@ export default function SupervisorPage() {
               ))}
             </ul>
           </section>
+
+          {/* BARRERAS */}
+          <section className="flex flex-col max-w-6xl justify-between items-start lg:items-center w-full mt-4 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
+              <h1 className="sm:text-lg font-bold uppercase self-center">
+                Barreras
+              </h1>
+              {barreras.some((b) => b.turno_barrera_activo) && (
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={() => setFinalizarBarreras(true)}
+                >
+                  Finalizar turnos
+                </CallToActionButton>
+              )}
+            </div>
+            <ul className="flex justify-start items-start lg:items-center w-full gap-4 flex-wrap">
+              {barreras.map((barrera) => (
+                <li
+                  key={barrera.id}
+                  className="flex bg-cerulean-200 rounded shadow p-4 w-full sm:w-auto"
+                >
+                  <div className="flex flex-col gap-2">
+                    <span className="font-bold">{barrera.ubicacion}</span>
+                    <p>
+                      <span className="font-bold mr-1">Sucursal:</span>
+                      {barrera.Sucursal.nombre}
+                    </p>
+                    {barrera.turno_barrera_activo ? (
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => setVerDetalleBarreraModal(barrera)}
+                      >
+                        Ver detalle
+                      </CallToActionButton>
+                    ) : (
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => setAsignarBarreraModal(barrera)}
+                      >
+                        Asignar
+                      </CallToActionButton>
+                    )}
+                  </div>
+                  <div className="-mr-2 -mt-2">
+                    <Tooltip
+                      title={barrera.turno_barrera_activo ? "Operando" : "Disponible"}
+                    >
+                      <CircleIcon
+                        className={
+                          barrera.turno_barrera_activo
+                            ? "text-green-500"
+                            : "text-blue-500"
+                        }
+                        fontSize="small"
+                      />
+                    </Tooltip>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
         </main>
 
         {asignarModal && (
@@ -284,6 +370,44 @@ export default function SupervisorPage() {
             caja={detalleCaja}
           />
         )}
+
+        {asignarBarreraModal && (
+          <AsignarBarreraModal
+            open={asignarBarreraModal !== null}
+            setOpen={(v: boolean) => {
+              if (!v) setAsignarBarreraModal(null);
+            }}
+            barrera={asignarBarreraModal}
+            onSuccess={() => {
+              setAsignarBarreraModal(null);
+              refrescarDatos();
+            }}
+          />
+        )}
+
+        {verDetalleBarreraModal && (
+          <VerDetalleBarreraModal
+            open={verDetalleBarreraModal !== null}
+            setOpen={(v: boolean) => {
+              if (!v) setVerDetalleBarreraModal(null);
+            }}
+            barrera={verDetalleBarreraModal}
+            onSuccess={() => {
+              setVerDetalleBarreraModal(null);
+              refrescarDatos();
+            }}
+          />
+        )}
+
+        <ChoiceModal
+          open={finalizarBarreras}
+          setOpen={setFinalizarBarreras}
+          title="Finalizar turnos de barrera de esta sucursal"
+          subtitle="¿Desea finalizar los turnos?"
+          disabled={false}
+          confirm={finalizarTurnosBarrera}
+          cancel={() => setFinalizarBarreras(false)}
+        />
 
         <ChoiceModal
           open={finalizar}

@@ -19,6 +19,15 @@ export const obtenerGrueros = async (token: string) => {
   return res.data;
 };
 
+export const obtenerPlayeros = async (token: string) => {
+  const res = await api.get("/usuarios/playeros", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
 export const crearUsuario = async (token: string, usuarioData: Usuario) => {
   const res = await api.post("/usuarios", usuarioData, {
     headers: {
