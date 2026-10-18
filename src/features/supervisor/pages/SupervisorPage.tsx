@@ -14,6 +14,7 @@ import {
   obtenerGruasSucursal,
 } from "../../gruas/services/gruasServices";
 import { obtenerBarrerasSucursal, finalizarTodosTurnosBarrera } from "../../barreras/services/barrerasService";
+import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
 
 import CircleIcon from "@mui/icons-material/Circle";
 import { Tooltip } from "@mui/material";
@@ -163,6 +164,11 @@ export default function SupervisorPage() {
                 </CallToActionButton>
               </li>
             </ul>
+          </section>
+
+          {/* BUSCAR VEHÍCULO */}
+          <section className="flex flex-col max-w-6xl w-full mt-4 gap-4">
+            <BuscarVehiculoPatente />
           </section>
 
           {/* CAJAS */}

@@ -12,6 +12,14 @@ export function formatDateFullWithHs(
   return `${format(date, "dd/MM/yyyy HH:mm", { locale: es })}hs`;
 }
 
+// Fecha con hora en formato `dd/MM/yyyy HH:mm` (sin el sufijo "hs"). Lo usa
+// el historial de vehículos, que replica el diseño del móvil.
+export function formatDateHours(dateString: string | null | undefined): string {
+  if (!dateString) return "";
+  const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);
+  return format(date, "dd/MM/yyyy HH:mm", { locale: es });
+}
+
 export function formatDateFull(dateString: string | null | undefined): string {
   if (!dateString) return "";
   const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);

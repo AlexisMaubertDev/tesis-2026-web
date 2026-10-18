@@ -1,9 +1,11 @@
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import HistoryIcon from "@mui/icons-material/History";
 import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import type { RootState } from "../../../app/store";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
@@ -26,6 +28,7 @@ export default function VehiculosTable({
 }: Props) {
   const { token, usuario } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [vehiculoAEliminar, setVehiculoAEliminar] = useState<Vehiculo | null>(
     null,
   );
@@ -118,6 +121,20 @@ export default function VehiculosTable({
 
               <td className="border-b border-cerulean-200 px-2 py-2">
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="text-cerulean-700 hover:text-cerulean-500 transition-colors duration-300 cursor-pointer"
+                    onClick={() =>
+                      navigate(
+                        `/vehiculos/${encodeURIComponent(vehiculo.patente)}/historial`,
+                      )
+                    }
+                  >
+                    <Tooltip title="Ver historial">
+                      <HistoryIcon />
+                    </Tooltip>
+                  </button>
+
                   <button
                     type="button"
                     className="text-cerulean-700 hover:text-cerulean-500 transition-colors duration-300 cursor-pointer"

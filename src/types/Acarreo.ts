@@ -21,6 +21,7 @@ export interface AcarreoGrua {
   Grua?: {
     id: string;
     patente: string;
+    numero?: number;
     Sucursal?: Sucursal | null;
   } | null;
   chofer?: AcarreoUsuario | null;

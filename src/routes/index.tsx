@@ -5,6 +5,7 @@ import Home from "../pages/Home.tsx";
 import SistemasRoute from "./SistemasRoute.tsx";
 import UsuariosPage from "../features/usuarios/pages/UsuariosPage.tsx";
 import VehiculosPage from "../features/vehiculos/pages/VehiculosPage.tsx";
+import HistorialVehiculoPage from "../features/vehiculos/pages/HistorialVehiculoPage.tsx";
 import SucursalesPage from "../features/sucursales/pages/SucursalesPage.tsx";
 import GruasPage from "../features/gruas/pages/GruasPage.tsx";
 import CajasPage from "../features/cajas/pages/CajasPage.tsx";
@@ -107,6 +108,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <VehiculosPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vehiculos/:patente/historial"
+          element={
+            <ProtectedRoute>
+              <HistorialVehiculoPage />
             </ProtectedRoute>
           }
         />

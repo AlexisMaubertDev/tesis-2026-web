@@ -12,6 +12,7 @@ import { terminarTurnoCaja } from "../../../app/store/authSlice";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import { getTurnoLabel } from "../../../app/constants/turnos";
+import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
@@ -61,6 +62,10 @@ export default function CajerosPage() {
     <PageLayout>
       <MainLayout>
         <main className="flex flex-col justify-start items-center py-4 px-4">
+          <section className="w-full max-w-6xl mt-4">
+            <BuscarVehiculoPatente />
+          </section>
+
           {!usuario.Turno_Caja ? (
             <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">
               <div className="flex flex-col sm:flex-row justify-between items-start lg:items-center w-full bg-cerulean-100 rounded shadow p-4 gap-4">
