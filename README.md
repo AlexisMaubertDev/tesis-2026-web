@@ -1,75 +1,67 @@
-# React + TypeScript + Vite
+# ParkControl — Aplicación web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend web del sistema **ParkControl**: administración de una playa de acarreo de
+vehículos (gestión de usuarios, sucursales, cajas, barreras, grúas, vehículos,
+acarreos, cobros y auditoría). Para el detalle completo del sistema ver
+`CONTEXT.md`, `REQUIREMENTS.md` y `HALLAZGOS.md` en la raíz del proyecto.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + TypeScript
+- Vite (dev server y build)
+- Tailwind CSS + MUI (componentes puntuales)
+- Redux Toolkit + redux-persist (sesión)
+- React Router
 
-## React Compiler
+## Requisitos
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Node.js 20+ (probado con 20+; el backend corre con Node 20+).
+- El backend `tesis-2026-server` corriendo en `http://localhost:1337` (o el host que se ponga en `VITE_API_URL`).
 
-Note: This will impact Vite dev & build performances.
+## Variables de entorno
 
-## Expanding the ESLint configuration
+Copiar `.env.example` a `.env` y ajustar:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+| Variable | Descripción | Default |
+|---|---|---|
+| `VITE_API_URL` | URL base de la API del backend | `http://localhost:1337/api` |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+> En WSL la API puede no ser alcanzable por `localhost`; usar `http://172.25.16.1:1337/api` (host de Windows) si corresponde.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Scripts
+
+```bash
+npm run dev      # Servidor de desarrollo con HMR (http://localhost:5173)
+npm run build    # tsc -b + Vite build (output en dist/)
+npm run lint     # ESLint sobre src/
+npm run preview  # Sirve el build de dist/
 ```
+
+## Verificación antes de commitear
+
+```bash
+npm run lint && npm run build
+```
+
+Ambos deben pasar sin errores.
+
+## Estructura
+
+Feature-based (`src/features/<dominio>/`), con `pages/`, `components/`, `services/`, `types/`.
+El detalle de cada módulo está en `CONTEXT.md` §8.
+
+## Notas de desarrollo
+
+- **Finales de línea:** el repo fuerza LF mediante `.gitattributes`. No commitear CRLF.
+- **Persistencia de sesión:** redux-persist guarda la sesión en `localStorage["persist:root"]`. Si un
+  token vence o es inválido, el interceptor de `src/services/api.ts` cierra la sesión y redirige a
+  `/login`.
+- **Roles:** `PLAYERO`, `CAJERO`, `SUPERVISOR`, `SISTEMAS` (`src/app/constants/roles.ts`). Las
+  acciones de la UI se ocultan según el rol, y el backend valida con middlewares.
+- **Credenciales de prueba:** ver `CREDENCIALES.md` en la raíz del proyecto (no se versiona).
+- **Detección de cambios de schema:** el backend ya no sincroniza el schema al arrancar; si se
+  agregan columnas o modelos hay que correrlo a mano (ver `HALLAZGOS.md` §3).

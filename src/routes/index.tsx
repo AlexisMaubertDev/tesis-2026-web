@@ -12,6 +12,7 @@ import BarrerasPage from "../features/barreras/pages/BarrerasPage.tsx";
 import SupervisorPage from "../features/supervisor/pages/SupervisorPage.tsx";
 import UsuariosSupervisorPage from "../features/supervisor/pages/UsuariosSupervisorPage.tsx";
 import CajerosPage from "../features/cajeros/pages/CajerosPage.tsx";
+import AcercaDe from "../pages/AcercaDe.tsx";
 
 export default function AppRoutes() {
   return (
@@ -106,6 +107,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <VehiculosPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/acerca-de"
+          element={
+            <ProtectedRoute>
+              <AcercaDe />
             </ProtectedRoute>
           }
         />
