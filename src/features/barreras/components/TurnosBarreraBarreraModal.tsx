@@ -205,6 +205,7 @@ export default function TurnosBarreraBarreraModal({
         open={detalle !== null}
         onClose={() => setDetalle(null)}
         detalle={detalle}
+        onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
       />
     </>
   );

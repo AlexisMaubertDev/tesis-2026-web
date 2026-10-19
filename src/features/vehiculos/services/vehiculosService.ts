@@ -86,3 +86,20 @@ export const sacarSinCargo = async (
   );
   return res.data;
 };
+
+/**
+ * Agrega una incidencia al acarreo (el vehículo). Sólo el supervisor (o
+ * sistemas) puede agregarla.
+ */
+export const agregarIncidenciaAcarreo = async (
+  token: string,
+  acarreoId: string,
+  incidencias: string,
+) => {
+  const res = await api.put(
+    `/acarreos/${acarreoId}/incidencias`,
+    { incidencias },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};

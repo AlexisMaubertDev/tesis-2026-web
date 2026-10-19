@@ -103,7 +103,7 @@ export default function TurnosBarreraUsuarioModal({
 
           {usuario && (
             <p className="text-center text-sm font-semibold text-cerulean-900">
-              {usuario.nombre} {usuario.apellido} (Legajo {usuario.legajo})
+              {usuario.nombre} {usuario.apellido}
             </p>
           )}
 
@@ -132,7 +132,7 @@ export default function TurnosBarreraUsuarioModal({
                       Barrera
                     </th>
                     <th className="border-r px-2 py-1 border-cerulean-400">
-                      Turno
+                      Turnos
                     </th>
                     <th className="border-r px-2 py-1 border-cerulean-400">
                       Inicio
@@ -144,7 +144,7 @@ export default function TurnosBarreraUsuarioModal({
                       Estado
                     </th>
                     <th className="border-r px-2 py-1 border-cerulean-400">
-                      Acarreos
+                      Movimientos
                     </th>
                     <th className="px-2 py-1 border-cerulean-400">Acciones</th>
                   </tr>
@@ -168,7 +168,8 @@ export default function TurnosBarreraUsuarioModal({
                         {t.activo ? "Abierto" : "Cerrado"}
                       </td>
                       <td className="border-r border-b border-cerulean-200 px-2 py-1">
-                        {t.Acarreos?.length ?? 0}
+                        {(t.movimientos?.entradas ?? 0) +
+                          (t.movimientos?.salidas ?? 0)}
                       </td>
                       <td className="border-b border-cerulean-200 px-2 py-1">
                         <CallToActionButton
@@ -198,6 +199,7 @@ export default function TurnosBarreraUsuarioModal({
         open={detalle !== null}
         onClose={() => setDetalle(null)}
         detalle={detalle}
+        onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
       />
     </>
   );

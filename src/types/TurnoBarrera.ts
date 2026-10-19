@@ -32,16 +32,26 @@ export interface TurnoBarreraListado {
   }[];
   /** Sólo para contar los acarreos del turno en los listados. */
   Acarreos?: { id: string }[];
+  /** Entradas y salidas de vehículos de la barrera durante el turno. */
+  movimientos?: {
+    entradas: number;
+    salidas: number;
+  };
 }
 
 export interface TurnoBarreraDetalle {
   turno: TurnoBarreraListado;
+  /** Acarreos que ingresaron a la playa en este turno. */
   acarreos: Acarreo[];
+  /** Entradas y salidas de vehículos por la barrera durante el turno. */
+  movimientos: MovimientoBarrera[];
   totales: {
     /** Acarreos que ingresaron a la playa durante el turno. */
     ingresos: number;
     /** De ésos, los que además egresaron dentro de la ventana del turno. */
     egresos: number;
+    /** Autos que siguen en la playa (estado INGRESADO). */
+    enPlaya: number;
     porEstado: {
       ingresados: number;
       cobrados: number;
@@ -49,4 +59,12 @@ export interface TurnoBarreraDetalle {
       sinCargo: number;
     };
   };
+}
+
+/** Una entrada o una salida de un vehículo por una barrera. */
+export interface MovimientoBarrera {
+  id: string;
+  tipo: "ENTRADA" | "SALIDA";
+  fecha: string;
+  acarreo: Acarreo;
 }

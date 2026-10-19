@@ -100,7 +100,7 @@ export default function TurnosGruaUsuarioModal({
 
           {usuario && (
             <p className="text-center text-sm font-semibold text-cerulean-900">
-              {usuario.nombre} {usuario.apellido} (Legajo {usuario.legajo})
+              {usuario.nombre} {usuario.apellido}
             </p>
           )}
 
@@ -199,6 +199,7 @@ export default function TurnosGruaUsuarioModal({
         open={detalle !== null}
         onClose={() => setDetalle(null)}
         detalle={detalle}
+        onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
       />
     </>
   );

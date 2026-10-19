@@ -198,6 +198,7 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
         open={detalle !== null}
         onClose={() => setDetalle(null)}
         detalle={detalle}
+        onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
       />
     </>
   );
