@@ -121,7 +121,11 @@ export default function BuscarVehiculoPatente() {
           >
             {loading ? "Buscando..." : "Buscar"}
           </CallToActionButton>
-          <CallToActionButton type="button" handleSubmit={irAlaPlaya}>
+          <CallToActionButton
+            type="button"
+            className="whitespace-nowrap shrink-0"
+            handleSubmit={irAlaPlaya}
+          >
             Ver playa
           </CallToActionButton>
         </div>
