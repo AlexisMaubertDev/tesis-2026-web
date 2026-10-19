@@ -1,10 +1,18 @@
+import { useState } from "react";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import Tooltip from "@mui/material/Tooltip";
 import type { Usuario } from "../../../types/Usuario";
+import CallToActionButton from "../../../components/ui/CallToActionButton";
+import TurnosCajaUsuarioModal from "../../cajeros/components/TurnosCajaUsuarioModal";
 
 type Props = {
   usuarios: Usuario[];
 };
 
 export default function UsuariosSupervisorTable({ usuarios }: Props) {
+  // Usuario cuyos turnos de caja se están mirando (modal de turnos).
+  const [usuarioTurnos, setUsuarioTurnos] = useState<Usuario | null>(null);
+
   return (
     <>
       {/* Desktop */}
@@ -20,6 +28,7 @@ export default function UsuariosSupervisorTable({ usuarios }: Props) {
             <th className="border-r px-2 py-2 border-cerulean-400">Email</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Domingos</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Rol</th>
+            <th className="px-2 py-2 border-cerulean-400">Acciones</th>
           </tr>
         </thead>
 
@@ -52,6 +61,20 @@ export default function UsuariosSupervisorTable({ usuarios }: Props) {
               </td>
               <td className="border-r border-b border-cerulean-200 px-2 py-2">
                 {usuario.rol}
+              </td>
+              <td className="border-b border-cerulean-200 px-2 py-2">
+                {usuario.rol === "CAJERO" ? (
+                  <button
+                    className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"
+                    onClick={() => setUsuarioTurnos(usuario)}
+                  >
+                    <Tooltip title="Turnos de caja">
+                      <ReceiptLongIcon />
+                    </Tooltip>
+                  </button>
+                ) : (
+                  <span className="text-cerulean-400">-</span>
+                )}
               </td>
             </tr>
           ))}
@@ -109,9 +132,27 @@ export default function UsuariosSupervisorTable({ usuarios }: Props) {
                 <p>{usuario.trabaja_domingo ? "Sí" : "No"}</p>
               </div>
             </div>
+
+            {/* Actions */}
+            {usuario.rol === "CAJERO" && (
+              <div className="flex justify-end mt-5 border-t pt-4">
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={() => setUsuarioTurnos(usuario)}
+                >
+                  Turnos de caja
+                </CallToActionButton>
+              </div>
+            )}
           </div>
         ))}
       </div>
+
+      <TurnosCajaUsuarioModal
+        open={usuarioTurnos !== null}
+        onClose={() => setUsuarioTurnos(null)}
+        usuario={usuarioTurnos}
+      />
     </>
   );
 }

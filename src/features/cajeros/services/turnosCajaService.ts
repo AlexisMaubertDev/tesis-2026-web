@@ -8,6 +8,14 @@ export const obtenerTurnosCerrados = async (token: string) => {
   return res.data as { success: boolean; data: TurnoCajaCerrado[]; message: string };
 };
 
+/** Todos los turnos de caja de un usuario (abiertos y cerrados). */
+export const obtenerTurnosDeUsuario = async (token: string, idUsuario: string) => {
+  const res = await api.get(`/turno_caja/usuario/${idUsuario}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data as { success: boolean; data: TurnoCajaCerrado[]; message: string };
+};
+
 export const obtenerDetalleTurnoCaja = async (token: string, id: string) => {
   const res = await api.get(`/turno_caja/${id}/detalle`, {
     headers: { Authorization: `Bearer ${token}` },

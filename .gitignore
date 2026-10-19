@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Artefactos de compilación sueltos: el proyecto es TS, no se versionan .js
+# generados al lado de los .ts/.tsx (los emite el editor/compilador suelto).
+/src/**/*.js
+/vite.config.js
+
 .env
 .env.*.local
 !.env.example
