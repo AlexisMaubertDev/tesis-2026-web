@@ -4,6 +4,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import LocalParkingIcon from "@mui/icons-material/LocalParking";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import Tooltip from "@mui/material/Tooltip";
@@ -15,6 +17,8 @@ import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import TurnosCajaUsuarioModal from "../../cajeros/components/TurnosCajaUsuarioModal";
+import TurnosGruaUsuarioModal from "../../gruas/components/TurnosGruaUsuarioModal";
+import TurnosBarreraUsuarioModal from "../../barreras/components/TurnosBarreraUsuarioModal";
 
 type Props = {
   usuarios: Usuario[];
@@ -37,6 +41,13 @@ export default function UsuariosTable({
   const [legajoBloqueando, setLegajoBloqueando] = useState<string | null>(null);
   // Usuario cuyos turnos de caja se están mirando (modal de turnos).
   const [usuarioTurnos, setUsuarioTurnos] = useState<Usuario | null>(null);
+  // Gruero cuyos turnos de grúa se están mirando.
+  const [usuarioTurnosGrua, setUsuarioTurnosGrua] = useState<Usuario | null>(
+    null,
+  );
+  // Playero cuyos turnos de barrera se están mirando.
+  const [usuarioTurnosBarrera, setUsuarioTurnosBarrera] =
+    useState<Usuario | null>(null);
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
 
@@ -235,6 +246,28 @@ export default function UsuariosTable({
                       </Tooltip>
                     </button>
                   )}
+
+                  {usuario.rol === "GRUERO" && (
+                    <button
+                      className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"
+                      onClick={() => setUsuarioTurnosGrua(usuario)}
+                    >
+                      <Tooltip title="Turnos de grúa">
+                        <LocalShippingIcon />
+                      </Tooltip>
+                    </button>
+                  )}
+
+                  {usuario.rol === "PLAYERO" && (
+                    <button
+                      className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"
+                      onClick={() => setUsuarioTurnosBarrera(usuario)}
+                    >
+                      <Tooltip title="Turnos de barrera">
+                        <LocalParkingIcon />
+                      </Tooltip>
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -368,6 +401,28 @@ export default function UsuariosTable({
                   </Tooltip>
                 </button>
               )}
+
+              {usuario.rol === "GRUERO" && (
+                <button
+                  className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"
+                  onClick={() => setUsuarioTurnosGrua(usuario)}
+                >
+                  <Tooltip title="Turnos de grúa">
+                    <LocalShippingIcon />
+                  </Tooltip>
+                </button>
+              )}
+
+              {usuario.rol === "PLAYERO" && (
+                <button
+                  className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"
+                  onClick={() => setUsuarioTurnosBarrera(usuario)}
+                >
+                  <Tooltip title="Turnos de barrera">
+                    <LocalParkingIcon />
+                  </Tooltip>
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -392,6 +447,18 @@ export default function UsuariosTable({
         open={usuarioTurnos !== null}
         onClose={() => setUsuarioTurnos(null)}
         usuario={usuarioTurnos}
+      />
+
+      <TurnosGruaUsuarioModal
+        open={usuarioTurnosGrua !== null}
+        onClose={() => setUsuarioTurnosGrua(null)}
+        usuario={usuarioTurnosGrua}
+      />
+
+      <TurnosBarreraUsuarioModal
+        open={usuarioTurnosBarrera !== null}
+        onClose={() => setUsuarioTurnosBarrera(null)}
+        usuario={usuarioTurnosBarrera}
       />
     </>
   );

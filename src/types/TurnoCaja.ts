@@ -20,6 +20,8 @@ export interface TurnoCajaCerrado {
   incidencias: string | null;
   Caja?: CajaDelTurno | null;
   Usuario?: Pick<Usuario, "id" | "nombre" | "apellido" | "dni" | "rol"> | null;
+  /** Sólo presente en el historial de una caja (para contar los cobros). */
+  Cobros?: { id: string }[];
 }
 
 export interface TurnoCajaDetalle {
