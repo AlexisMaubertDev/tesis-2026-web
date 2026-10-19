@@ -1,5 +1,6 @@
 import api from "../../../services/api";
 import type { Tarifa } from "../../../types/Tarifa";
+import type { CobrosDelTurno } from "../../../types/Cobro";
 
 export type NuevoCobro = {
   id_acarreo: string;
@@ -42,4 +43,15 @@ export const crearCobro = async (token: string, cobro: NuevoCobro) => {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
+};
+
+/**
+ * Cobros del turno de caja abierto del cajero (con el acarreo, el vehículo y
+ * los totales del turno). Si no hay turno abierto devuelve la lista vacía.
+ */
+export const obtenerCobrosDeMiTurno = async (token: string) => {
+  const res = await api.get("/cobros/mi-turno", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data as { success: boolean; data: CobrosDelTurno; message: string };
 };

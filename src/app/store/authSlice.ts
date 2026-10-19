@@ -12,8 +12,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action: PayloadAction<AuthState>) => {
-      state.usuario = action.payload.usuario;
-      state.token = action.payload.token;
+      const { usuario, token } = action.payload;
+
+      // El turno de caja abierto viaja en el login como `turno_caja_activo`
+      // (así el cajero puede cobrar y cerrarlo aunque haya vuelto a entrar).
+      // Se espeja en `Turno_Caja`, que es lo que usa el resto de la app.
+      if (usuario?.turno_caja_activo && !usuario.Turno_Caja) {
+        usuario.Turno_Caja = usuario.turno_caja_activo;
+      }
+
+      state.usuario = usuario;
+      state.token = token;
     },
     logout: (state) => {
       state.usuario = null;
@@ -22,11 +31,13 @@ const authSlice = createSlice({
     empezarTurnoCaja: (state, action: PayloadAction<Turno_Caja>) => {
       if (state.usuario) {
         state.usuario.Turno_Caja = action.payload;
+        state.usuario.turno_caja_activo = action.payload;
       }
     },
     terminarTurnoCaja: (state) => {
       if (state.usuario) {
         state.usuario.Turno_Caja = null;
+        state.usuario.turno_caja_activo = null;
       }
     },
   },

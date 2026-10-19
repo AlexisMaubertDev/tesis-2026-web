@@ -147,6 +147,44 @@ export default function CobroPage() {
     return <Navigate to="/" replace />;
   }
 
+  // El servidor exige un turno de caja abierto para registrar el cobro: sin
+  // turno, la pantalla ni siquiera muestra el formulario.
+  if (!usuario.Turno_Caja) {
+    return (
+      <PageLayout>
+        <MainLayout>
+          <aside className="w-full p-4 text-sm">
+            <BreadcrumbsMenu
+              page="Registrar cobro"
+              links={[{ name: "Cajero", href: "/cajeros" }]}
+            />
+          </aside>
+
+          <main className="flex flex-col justify-start items-center py-4 px-4 w-full">
+            <section className="w-full max-w-2xl flex flex-col gap-4">
+              <h1 className="text-lg font-bold uppercase">Registrar cobro</h1>
+
+              <div className="bg-cerulean-200 rounded-lg p-4 flex flex-col gap-3">
+                <p className="text-xs text-cerulean-900">
+                  Para registrar un cobro necesitás tener un turno de caja
+                  abierto. Abrí tu turno desde el inicio y volvé a intentarlo.
+                </p>
+                <div>
+                  <CallToActionButton
+                    type="button"
+                    handleSubmit={() => navigate("/cajeros")}
+                  >
+                    Ir al inicio
+                  </CallToActionButton>
+                </div>
+              </div>
+            </section>
+          </main>
+        </MainLayout>
+      </PageLayout>
+    );
+  }
+
   const volver = () => navigate("/cajeros");
   const recalcular = () => setPreviewKey((n) => n + 1);
 

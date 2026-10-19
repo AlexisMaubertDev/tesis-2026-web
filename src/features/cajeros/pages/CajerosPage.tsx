@@ -13,6 +13,7 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import { getTurnoLabel } from "../../../app/constants/turnos";
 import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
+import CobrosTurno from "../components/CobrosTurno";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
@@ -93,6 +94,8 @@ export default function CajerosPage() {
                   Cerrar Turno
                 </CallToActionButton>
               </div>
+
+              <CobrosTurno />
             </section>
           )}
         </main>

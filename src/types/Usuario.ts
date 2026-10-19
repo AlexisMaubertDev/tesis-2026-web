@@ -22,24 +22,28 @@ export interface Usuario {
   turno_grua_chofer_activo?: Turno_Grua | null;
 }
 
-export interface Turno_Caja {
+/**
+ * Caja tal como viene anidada en un turno: `empezar_turno` devuelve la caja
+ * completa, y el login (`turno_caja_activo`) la devuelve sin sus propios turnos.
+ */
+export interface CajaDelTurno {
   id: string;
-  apertura: Date;
-  Caja: Caja;
-  Usuario: Usuario;
-  turno: string;
+  numero_caja: number;
+  referencia: string;
+  Sucursal?: { id: string; nombre: string } | null;
 }
 
-// Turno de caja abierto que devuelve `GET /usuarios` para el "Ver detalle":
-// viene con la caja y su sucursal, no con la caja completa.
-export interface Turno_Caja_Activo {
+export interface Turno_Caja {
   id: string;
-  apertura: string;
+  /** La API lo manda como ISO string (en `empezar_turno` está tipado `Date`). */
+  apertura: string | Date;
   turno: string;
-  Caja?: {
-    id: string;
-    numero_caja: number;
-    referencia: string;
-    Sucursal?: { id: string; nombre: string } | null;
-  } | null;
+  Caja: Caja | CajaDelTurno;
+  Usuario?: Usuario | null;
 }
+
+/**
+ * Turno de caja abierto que devuelven `GET /usuarios` y el login. Tiene la
+ * misma forma que un turno común, así que es un alias para no duplicar el tipo.
+ */
+export type Turno_Caja_Activo = Turno_Caja;

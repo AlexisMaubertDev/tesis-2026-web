@@ -25,7 +25,8 @@ function Row({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  * existe, se muestra una tarjeta con los datos del vehículo y las acciones
  * disponibles. Lo usan las pantallas de cajero y supervisor:
  *
- * - Cajero: si el vehículo está INGRESADO, "Cobrar" (abre el formulario de cobro).
+ * - Cajero: si el vehículo está INGRESADO y tiene un turno de caja abierto,
+ *   "Cobrar" (abre el formulario de cobro). Sin turno de caja no se cobra.
  * - Supervisor: si el vehículo está INGRESADO, "Sacar sin cargo" (modal con motivo).
  *
  * Ambos tienen siempre "Ver historial".
@@ -43,6 +44,8 @@ export default function BuscarVehiculoPatente() {
 
   const esCajero = usuario?.rol === "CAJERO";
   const esSupervisor = usuario?.rol === "SUPERVISOR";
+  /** Sin turno de caja abierto el cajero no puede cobrar (lo exige el servidor). */
+  const tieneTurnoCaja = !!usuario?.Turno_Caja;
   const puedeCobrar = vehiculo?.ultimo_acarreo_estado === "INGRESADO";
 
   const irAlHistorial = (p: string) =>
@@ -151,7 +154,7 @@ export default function BuscarVehiculoPatente() {
               Ver historial
             </CallToActionButton>
 
-            {puedeCobrar && esCajero && (
+            {puedeCobrar && esCajero && tieneTurnoCaja && (
               <CallToActionButton
                 type="button"
                 handleSubmit={() => irACobrar(vehiculo.patente)}
@@ -159,6 +162,13 @@ export default function BuscarVehiculoPatente() {
                 Cobrar
               </CallToActionButton>
             )}
+
+            {puedeCobrar && esCajero && !tieneTurnoCaja && (
+              <p className="self-center text-xs text-cerulean-900">
+                Para cobrar necesitás tener un turno de caja abierto.
+              </p>
+            )}
+
 
             {puedeCobrar && esSupervisor && (
               <CallToActionButton

@@ -93,7 +93,9 @@ export default function UsuarioDetalleModal({
               />
               <DetailItem
                 etiqueta="Apertura"
-                valor={formatDateFullWithHs(turnoCaja.apertura)}
+                valor={formatDateFullWithHs(
+                  turnoCaja.apertura ? String(turnoCaja.apertura) : null,
+                )}
               />
             </>
           )}
