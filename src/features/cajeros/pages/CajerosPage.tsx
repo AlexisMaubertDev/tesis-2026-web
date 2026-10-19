@@ -94,6 +94,17 @@ export default function CajerosPage() {
 
               <CobrosTurno />
 
+              <section className="w-full max-w-6xl mt-2 flex justify-end">
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={() => {
+                    window.location.href = "/cajeros/cierres";
+                  }}
+                >
+                  Ver cierres de caja
+                </CallToActionButton>
+              </section>
+
               <CerrarTurnoModal
                 open={cerrarTurnoAbierto}
                 onClose={() => setCerrarTurnoAbierto(false)}
