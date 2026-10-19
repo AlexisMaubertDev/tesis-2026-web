@@ -7,17 +7,18 @@ import type { Caja } from "../../../types/Caja";
 import PageLayout from "../../../components/layout/PageLayout";
 import MainLayout from "../../../components/layout/MainLayout";
 import SelectCajas from "../components/SelectCajas";
-import { cerrarTurno_Caja } from "../../usuarios/services/usuariosService";
 import { terminarTurnoCaja } from "../../../app/store/authSlice";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
-import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import { showSuccess } from "../../../app/store/snackbarSlice";
 import { getTurnoLabel } from "../../../app/constants/turnos";
 import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
 import CobrosTurno from "../components/CobrosTurno";
+import CerrarTurnoModal from "../components/CerrarTurnoModal";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
   const [cajas, setCajas] = useState<Caja[]>([]);
+  const [cerrarTurnoAbierto, setCerrarTurnoAbierto] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -45,18 +46,14 @@ export default function CajerosPage() {
     return <Navigate to="/" replace />;
   }
 
-  const handleCerrarTurno = async () => {
-    try {
-      await cerrarTurno_Caja(token!, usuario.Turno_Caja!.id!);
+  const handleCerrarTurno = () => {
+    setCerrarTurnoAbierto(true);
+  };
 
-      dispatch(terminarTurnoCaja());
-
-      dispatch(showSuccess("Turno cerrado correctamente"));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      console.error(error.response?.data);
-      dispatch(showError(error.response?.data?.message));
-    }
+  const handleCerrarTurnoExitoso = () => {
+    setCerrarTurnoAbierto(false);
+    dispatch(terminarTurnoCaja());
+    dispatch(showSuccess("Turno cerrado correctamente"));
   };
 
   return (
@@ -96,6 +93,14 @@ export default function CajerosPage() {
               </div>
 
               <CobrosTurno />
+
+              <CerrarTurnoModal
+                open={cerrarTurnoAbierto}
+                onClose={() => setCerrarTurnoAbierto(false)}
+                turnoCaja={usuario.Turno_Caja ?? null}
+                token={token}
+                onSuccess={handleCerrarTurnoExitoso}
+              />
             </section>
           )}
         </main>
