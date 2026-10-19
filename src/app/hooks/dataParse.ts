@@ -39,3 +39,17 @@ export function toFechaInput(dateString: string | null | undefined): string {
   const date = toZonedTime(new Date(dateString), DEFAULT_TIMEZONE);
   return format(date, "yyyy-MM-dd");
 }
+
+// Indica si una fecha cae dentro del rango [desde, hasta] (ambos inclusive),
+// con `desde`/`hasta` en formato `yyyy-MM-dd`. Sin filtros, siempre entra.
+export function enRangoDeFechas(
+  dateString: string | null | undefined,
+  desde: string,
+  hasta: string,
+): boolean {
+  const fecha = toFechaInput(dateString);
+  if (!fecha) return false;
+  if (desde && fecha < desde) return false;
+  if (hasta && fecha > hasta) return false;
+  return true;
+}

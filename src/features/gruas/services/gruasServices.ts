@@ -1,5 +1,5 @@
 import api from "../../../services/api";
-import type { Turno_Grua } from "../../../types/Grua";
+import type { Grua, Turno_Grua } from "../../../types/Grua";
 import type { GruaForm } from "../components/GruaModal";
 
 export const obtenerGruas = async (token: string) => {
@@ -65,6 +65,18 @@ export const agregarIncidencia = async (
       },
     },
   );
+  return res.data;
+};
+
+/** Cambia el estado de una grúa (sólo supervisor o sistemas). */
+export const cambiarEstadoGrua = async (
+  token: string,
+  id: string,
+  data: { estado: Grua["estado"]; observaciones?: string },
+) => {
+  const res = await api.put(`/gruas/${id}/estado`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return res.data;
 };
 

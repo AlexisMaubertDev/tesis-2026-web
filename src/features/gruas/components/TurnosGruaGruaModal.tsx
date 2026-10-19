@@ -2,8 +2,12 @@ import { Modal } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
-import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
+import {
+  enRangoDeFechas,
+  formatDateFullWithHs,
+} from "../../../app/hooks/dataParse";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
+import FiltroFechas from "../../../components/ui/FiltroFechas";
 import type { Grua } from "../../../types/Grua";
 import type { TurnoGruaDetalle, TurnoGruaListado } from "../../../types/TurnoGrua";
 import {
@@ -21,8 +25,9 @@ type Props = {
 
 /**
  * Historial de turnos (el actual y los anteriores) de una grúa, con el chofer
- * y el enganchador de cada turno y un botón para ver el detalle. Es el modal
- * que se abre desde la tabla de grúas.
+ * y el enganchador de cada turno y un botón para ver el detalle (ahí el
+ * supervisor puede agregar/mirar las incidencias). Se puede acotar por fecha
+ * (desde/hasta). Es el modal que se abre desde la tabla de grúas.
  */
 export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -32,6 +37,8 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoGruaDetalle | null>(null);
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
 
   useEffect(() => {
     if (!open || !token || !grua?.id) return;
@@ -65,6 +72,13 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
     };
   }, [open, token, grua?.id]);
 
+  // Al cerrar limpiamos los filtros.
+  const cerrar = () => {
+    setDesde("");
+    setHasta("");
+    onClose();
+  };
+
   const verDetalle = async (id: string) => {
     if (!token) return;
 
@@ -87,9 +101,13 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
   const nombre = (usuario: TurnoGruaListado["chofer"]) =>
     usuario ? `${usuario.nombre} ${usuario.apellido}` : "-";
 
+  const turnosFiltrados = turnos.filter((t) =>
+    enRangoDeFechas(t.fecha_inicio, desde, hasta),
+  );
+
   return (
     <>
-      <Modal open={open} onClose={onClose} sx={{ padding: 4 }}>
+      <Modal open={open} onClose={cerrar} sx={{ padding: 4 }}>
         <div className="absolute top-1/2 left-1/2 w-4/5 md:max-w-3xl max-h-[90vh] overflow-y-auto -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans flex flex-col gap-4">
           <h2 className="text-center text-xl font-bold">
             Turnos de la grúa {grua?.patente}
@@ -101,6 +119,13 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
             </p>
           )}
 
+          <FiltroFechas
+            desde={desde}
+            hasta={hasta}
+            setDesde={setDesde}
+            setHasta={setHasta}
+          />
+
           {error && (
             <p className="text-xs text-scarlet-rush-700 text-center">{error}</p>
           )}
@@ -111,13 +136,15 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
             </p>
           )}
 
-          {!cargando && turnos.length === 0 && (
+          {!cargando && turnosFiltrados.length === 0 && (
             <p className="text-xs text-cerulean-800 text-center">
-              Esta grúa no tiene turnos.
+              {turnos.length === 0
+                ? "Esta grúa no tiene turnos."
+                : "No hay turnos en el rango de fechas seleccionado."}
             </p>
           )}
 
-          {turnos.length > 0 && (
+          {turnosFiltrados.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full table border-collapse text-xs">
                 <thead className="bg-cerulean-600 text-white text-left">
@@ -147,7 +174,7 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
                   </tr>
                 </thead>
                 <tbody className="bg-cerulean-50">
-                  {turnos.map((t) => (
+                  {turnosFiltrados.map((t) => (
                     <tr key={t.id}>
                       <td className="border-r border-b border-cerulean-200 px-2 py-1">
                         {t.turno || "-"}
@@ -187,7 +214,7 @@ export default function TurnosGruaGruaModal({ open, onClose, grua }: Props) {
           )}
 
           <div className="flex justify-center mt-2">
-            <CallToActionButton type="button" handleSubmit={onClose}>
+            <CallToActionButton type="button" handleSubmit={cerrar}>
               Cerrar
             </CallToActionButton>
           </div>

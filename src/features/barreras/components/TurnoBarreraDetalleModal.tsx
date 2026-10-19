@@ -7,6 +7,7 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoBarreraDetalle } from "../../../types/TurnoBarrera";
 import AgregarIncidenciaAcarreoModal from "../../vehiculos/components/AgregarIncidenciaAcarreoModal";
+import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
 
 type Props = {
   open: boolean;
@@ -39,6 +40,9 @@ export default function TurnoBarreraDetalleModal({
     incidencias?: string | null;
     titulo: string;
   } | null>(null);
+
+  // Si se está agregando/mirando la incidencia del turno.
+  const [turnoIncidencia, setTurnoIncidencia] = useState(false);
 
   const turno = detalle?.turno ?? null;
   const movimientos = detalle?.movimientos ?? [];
@@ -103,6 +107,18 @@ export default function TurnoBarreraDetalleModal({
                 etiqueta="Incidencias"
                 valor={turno.incidencias ?? "-"}
               />
+              {puedeAgregarIncidencia && (
+                <div className="flex justify-end">
+                  <CallToActionButton
+                    type="button"
+                    handleSubmit={() => setTurnoIncidencia(true)}
+                  >
+                    {turno.incidencias
+                      ? "Ver incidencias del turno"
+                      : "Agregar incidencia al turno"}
+                  </CallToActionButton>
+                </div>
+              )}
             </div>
           )}
 
@@ -220,6 +236,19 @@ export default function TurnoBarreraDetalleModal({
         acarreo={acarreoIncidencia}
         titulo={acarreoIncidencia?.titulo ?? "Incidencia acarreo"}
         incidenciasExistentes={acarreoIncidencia?.incidencias}
+        onSuccess={onRefrescar}
+      />
+
+      <AgregarIncidenciaTurnoModal
+        open={turnoIncidencia}
+        onClose={() => setTurnoIncidencia(false)}
+        tipo="barrera"
+        turno={turno}
+        descripcion={
+          turno
+            ? `Barrera ${turno.Barrera?.ubicacion ?? "-"} · Turno ${turno.turno || "-"}`
+            : undefined
+        }
         onSuccess={onRefrescar}
       />
     </>

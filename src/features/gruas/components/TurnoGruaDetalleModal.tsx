@@ -7,6 +7,7 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoGruaDetalle } from "../../../types/TurnoGrua";
 import AgregarIncidenciaAcarreoModal from "../../vehiculos/components/AgregarIncidenciaAcarreoModal";
+import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
 
 type Props = {
   open: boolean;
@@ -42,6 +43,9 @@ export default function TurnoGruaDetalleModal({
     patente?: string | null;
     incidencias?: string | null;
   } | null>(null);
+
+  // Si se está agregando/mirando la incidencia del turno.
+  const [turnoIncidencia, setTurnoIncidencia] = useState(false);
 
   const turno = detalle?.turno ?? null;
   const acarreos = detalle?.acarreos ?? [];
@@ -116,6 +120,18 @@ export default function TurnoGruaDetalleModal({
                 etiqueta="Incidencias"
                 valor={turno.incidencias ?? "-"}
               />
+              {puedeAgregarIncidencia && (
+                <div className="flex justify-end">
+                  <CallToActionButton
+                    type="button"
+                    handleSubmit={() => setTurnoIncidencia(true)}
+                  >
+                    {turno.incidencias
+                      ? "Ver incidencias del turno"
+                      : "Agregar incidencia al turno"}
+                  </CallToActionButton>
+                </div>
+              )}
             </div>
           )}
 
@@ -228,6 +244,19 @@ export default function TurnoGruaDetalleModal({
         acarreo={acarreoIncidencia}
         titulo="Incidencia acarreo"
         incidenciasExistentes={acarreoIncidencia?.incidencias}
+        onSuccess={onRefrescar}
+      />
+
+      <AgregarIncidenciaTurnoModal
+        open={turnoIncidencia}
+        onClose={() => setTurnoIncidencia(false)}
+        tipo="grua"
+        turno={turno}
+        descripcion={
+          turno
+            ? `Grúa ${turno.Grua?.patente ?? "-"} · Turno ${turno.turno || "-"}`
+            : undefined
+        }
         onSuccess={onRefrescar}
       />
     </>

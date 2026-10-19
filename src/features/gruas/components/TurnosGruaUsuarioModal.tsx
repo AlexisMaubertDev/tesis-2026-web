@@ -2,8 +2,12 @@ import { Modal } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
-import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
+import {
+  enRangoDeFechas,
+  formatDateFullWithHs,
+} from "../../../app/hooks/dataParse";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
+import FiltroFechas from "../../../components/ui/FiltroFechas";
 import type { TurnoGruaDetalle, TurnoGruaListado } from "../../../types/TurnoGrua";
 import {
   obtenerDetalleTurnoGrua,
@@ -25,8 +29,9 @@ type Props = {
 
 /**
  * Turnos de grúa de un usuario (chofer o enganchador). Es el modal que se abre
- * desde la tabla de usuarios (Sistemas) y la de usuarios del Supervisor:
- * lista los turnos y permite ver el detalle de cada uno.
+ * desde la tabla de usuarios (Sistemas) y la de usuarios del Supervisor: lista
+ * los turnos, permite ver el detalle (ahí el supervisor puede agregar/mirar las
+ * incidencias) y acotar por fecha (desde/hasta).
  */
 export default function TurnosGruaUsuarioModal({
   open,
@@ -40,6 +45,8 @@ export default function TurnosGruaUsuarioModal({
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoGruaDetalle | null>(null);
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
 
   useEffect(() => {
     if (!open || !token || !usuario?.id) return;
@@ -73,6 +80,13 @@ export default function TurnosGruaUsuarioModal({
     };
   }, [open, token, usuario?.id]);
 
+  // Al cerrar limpiamos los filtros.
+  const cerrar = () => {
+    setDesde("");
+    setHasta("");
+    onClose();
+  };
+
   const verDetalle = async (id: string) => {
     if (!token) return;
 
@@ -92,9 +106,13 @@ export default function TurnosGruaUsuarioModal({
     }
   };
 
+  const turnosFiltrados = turnos.filter((t) =>
+    enRangoDeFechas(t.fecha_inicio, desde, hasta),
+  );
+
   return (
     <>
-      <Modal open={open} onClose={onClose} sx={{ padding: 4 }}>
+      <Modal open={open} onClose={cerrar} sx={{ padding: 4 }}>
         <div className="absolute top-1/2 left-1/2 w-4/5 md:max-w-3xl max-h-[90vh] overflow-y-auto -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans flex flex-col gap-4">
           <h2 className="text-center text-xl font-bold">Turnos de grúa</h2>
 
@@ -103,6 +121,13 @@ export default function TurnosGruaUsuarioModal({
               {usuario.nombre} {usuario.apellido}
             </p>
           )}
+
+          <FiltroFechas
+            desde={desde}
+            hasta={hasta}
+            setDesde={setDesde}
+            setHasta={setHasta}
+          />
 
           {error && (
             <p className="text-xs text-scarlet-rush-700 text-center">{error}</p>
@@ -114,13 +139,15 @@ export default function TurnosGruaUsuarioModal({
             </p>
           )}
 
-          {!cargando && turnos.length === 0 && (
+          {!cargando && turnosFiltrados.length === 0 && (
             <p className="text-xs text-cerulean-800 text-center">
-              Este usuario no tiene turnos de grúa.
+              {turnos.length === 0
+                ? "Este usuario no tiene turnos de grúa."
+                : "No hay turnos en el rango de fechas seleccionado."}
             </p>
           )}
 
-          {turnos.length > 0 && (
+          {turnosFiltrados.length > 0 && (
             <div className="overflow-x-auto">
               <table className="w-full table border-collapse text-xs">
                 <thead className="bg-cerulean-600 text-white text-left">
@@ -148,7 +175,7 @@ export default function TurnosGruaUsuarioModal({
                   </tr>
                 </thead>
                 <tbody className="bg-cerulean-50">
-                  {turnos.map((t) => (
+                  {turnosFiltrados.map((t) => (
                     <tr key={t.id}>
                       <td className="border-r border-b border-cerulean-200 px-2 py-1 font-bold">
                         {t.Grua?.patente ?? "-"}
@@ -188,7 +215,7 @@ export default function TurnosGruaUsuarioModal({
           )}
 
           <div className="flex justify-center mt-2">
-            <CallToActionButton type="button" handleSubmit={onClose}>
+            <CallToActionButton type="button" handleSubmit={cerrar}>
               Cerrar
             </CallToActionButton>
           </div>

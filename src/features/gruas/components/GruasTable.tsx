@@ -2,16 +2,28 @@ import { Tooltip } from "@mui/material";
 import type { Grua } from "../../../types/Grua";
 import EditIcon from "@mui/icons-material/Edit";
 import HistoryIcon from "@mui/icons-material/History";
+import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
 import { useState } from "react";
 import TurnosGruaGruaModal from "./TurnosGruaGruaModal";
+import CambiarEstadoGruaModal from "./CambiarEstadoGruaModal";
 
 interface Props {
   gruas: Grua[];
+  /** Muestra la acción para cambiar el estado (páginas del supervisor). */
+  puedeCambiarEstado?: boolean;
+  /** Se llama después de cambiar el estado, para recargar la lista. */
+  onRefrescar?: () => void;
 }
 
-export default function GruasTable({ gruas }: Props) {
+export default function GruasTable({
+  gruas,
+  puedeCambiarEstado = false,
+  onRefrescar,
+}: Props) {
   // Grúa cuyo historial de turnos se está mirando.
   const [gruaTurnos, setGruaTurnos] = useState<Grua | null>(null);
+  // Grúa a la que se le está cambiando el estado.
+  const [gruaEstado, setGruaEstado] = useState<Grua | null>(null);
 
   return (
     <>
@@ -66,6 +78,17 @@ export default function GruasTable({ gruas }: Props) {
                       <HistoryIcon />
                     </Tooltip>
                   </button>
+
+                  {puedeCambiarEstado && (
+                    <button
+                      className="text-amber-700 hover:text-amber-500 transition-colors duration-300 cursor-pointer"
+                      onClick={() => setGruaEstado(grua)}
+                    >
+                      <Tooltip title="Cambiar estado">
+                        <PublishedWithChangesIcon />
+                      </Tooltip>
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -77,6 +100,14 @@ export default function GruasTable({ gruas }: Props) {
         open={gruaTurnos !== null}
         onClose={() => setGruaTurnos(null)}
         grua={gruaTurnos}
+      />
+
+      <CambiarEstadoGruaModal
+        key={gruaEstado?.id ?? "sin-grua"}
+        open={gruaEstado !== null}
+        onClose={() => setGruaEstado(null)}
+        grua={gruaEstado}
+        onSuccess={onRefrescar}
       />
     </>
   );

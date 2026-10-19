@@ -12,6 +12,9 @@ import CajasPage from "../features/cajas/pages/CajasPage.tsx";
 import BarrerasPage from "../features/barreras/pages/BarrerasPage.tsx";
 import SupervisorPage from "../features/supervisor/pages/SupervisorPage.tsx";
 import UsuariosSupervisorPage from "../features/supervisor/pages/UsuariosSupervisorPage.tsx";
+import CajasSupervisorPage from "../features/supervisor/pages/CajasSupervisorPage.tsx";
+import GruasSupervisorPage from "../features/supervisor/pages/GruasSupervisorPage.tsx";
+import BarrerasSupervisorPage from "../features/supervisor/pages/BarrerasSupervisorPage.tsx";
 import CajerosPage from "../features/cajeros/pages/CajerosPage.tsx";
 import CierresCajaPage from "../features/cajeros/pages/CierresCajaPage.tsx";
 import CobroPage from "../features/cobros/pages/CobroPage.tsx";
@@ -80,6 +83,30 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <UsuariosSupervisorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/supervisor/cajas"
+          element={
+            <ProtectedRoute>
+              <CajasSupervisorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/supervisor/gruas"
+          element={
+            <ProtectedRoute>
+              <GruasSupervisorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/supervisor/barreras"
+          element={
+            <ProtectedRoute>
+              <BarrerasSupervisorPage />
             </ProtectedRoute>
           }
         />

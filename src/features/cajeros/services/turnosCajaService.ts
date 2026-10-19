@@ -30,3 +30,17 @@ export const obtenerDetalleTurnoCaja = async (token: string, id: string) => {
   });
   return res.data as { success: boolean; data: TurnoCajaDetalle; message: string };
 };
+
+/** Agrega una incidencia al turno de caja (sólo supervisor o sistemas). */
+export const agregarIncidenciaTurnoCaja = async (
+  token: string,
+  id: string,
+  incidencias: string,
+) => {
+  const res = await api.put(
+    `/turno_caja/${id}/incidencias`,
+    { incidencias },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};

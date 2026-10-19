@@ -117,6 +117,7 @@ export default function TurnosCerradosTable() {
         open={detalle !== null}
         onClose={() => setDetalle(null)}
         detalle={detalle}
+        onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
       />
     </section>
   );
