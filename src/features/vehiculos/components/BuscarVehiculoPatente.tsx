@@ -29,7 +29,9 @@ function Row({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  *   "Cobrar" (abre el formulario de cobro). Sin turno de caja no se cobra.
  * - Supervisor: si el vehículo está INGRESADO, "Sacar sin cargo" (modal con motivo).
  *
- * Ambos tienen siempre "Ver historial".
+ * Ambos tienen siempre "Ver historial". Al lado del buscador está "Ver playa",
+ * que abre la tabla de vehículos filtrada por la sucursal del usuario y en
+ * estado INGRESADO.
  */
 export default function BuscarVehiculoPatente() {
   const { token, usuario } = useSelector((state: RootState) => state.auth);
@@ -53,6 +55,14 @@ export default function BuscarVehiculoPatente() {
 
   const irACobrar = (p: string) =>
     navigate(`/cajeros/cobrar/${encodeURIComponent(p)}`);
+
+  // Tabla de vehículos filtrada por la sucursal del usuario y estado INGRESADO.
+  const irAlaPlaya = () => {
+    const sucursal = usuario?.Sucursal?.nombre;
+    const params = new URLSearchParams({ estado: "INGRESADO" });
+    if (sucursal) params.set("sucursal", sucursal);
+    navigate(`/vehiculos?${params.toString()}`);
+  };
 
   const buscar = async (consulta: string) => {
     setLoading(true);
@@ -110,6 +120,9 @@ export default function BuscarVehiculoPatente() {
             disabled={loading}
           >
             {loading ? "Buscando..." : "Buscar"}
+          </CallToActionButton>
+          <CallToActionButton type="button" handleSubmit={irAlaPlaya}>
+            Ver playa
           </CallToActionButton>
         </div>
 
