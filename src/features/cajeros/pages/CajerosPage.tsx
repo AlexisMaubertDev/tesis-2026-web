@@ -62,19 +62,6 @@ export default function CajerosPage() {
         <main className="flex flex-col justify-start items-center py-4 px-4">
           <section className="w-full max-w-6xl mt-4">
             <BuscarVehiculoPatente />
-            {usuario?.rol === "CAJERO" && (
-              <div className="flex justify-end mt-2">
-                <CallToActionButton
-                  type="button"
-                  className="whitespace-nowrap shrink-0"
-                  handleSubmit={() => {
-                    window.location.href = "/cajeros/cierres";
-                  }}
-                >
-                  Ver cierres de caja
-                </CallToActionButton>
-              </div>
-            )}
           </section>
 
           {!usuario.Turno_Caja ? (
