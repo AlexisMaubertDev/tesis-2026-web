@@ -55,3 +55,36 @@ export const obtenerCobrosDeMiTurno = async (token: string) => {
   });
   return res.data as { success: boolean; data: CobrosDelTurno; message: string };
 };
+
+/**
+ * Abre el comprobante PDF de un cobro en una pestaña nueva (para imprimir).
+ *
+ * El PDF lo genera el servidor y requiere el token, así que no se puede usar un
+ * `window.open` directo a la URL: se pide como blob y se abre el blob. El
+ * `window.open` se hace antes del `await` para no perder el "gesto del usuario"
+ * (si no, el navegador bloquea la pestaña emergente).
+ */
+export const abrirComprobanteCobro = async (token: string, id_cobro: string) => {
+  const pestania = window.open("", "_blank");
+
+  try {
+    const res = await api.get(`/cobros/${id_cobro}/comprobante.pdf`, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "blob",
+    });
+
+    const blobUrl = window.URL.createObjectURL(res.data as Blob);
+
+    if (pestania) {
+      pestania.location.href = blobUrl;
+    } else {
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    }
+
+    // Se libera el blob cuando el navegador ya lo cargó.
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60_000);
+  } catch (err) {
+    pestania?.close();
+    throw err;
+  }
+};

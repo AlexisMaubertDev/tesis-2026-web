@@ -5,7 +5,10 @@ import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 import { formatCurrency } from "../../../app/utils/money";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import type { CobroConAcarreo, TotalesTurno } from "../../../types/Cobro";
-import { obtenerCobrosDeMiTurno } from "../../cobros/services/cobrosService";
+import {
+  abrirComprobanteCobro,
+  obtenerCobrosDeMiTurno,
+} from "../../cobros/services/cobrosService";
 import CobroDetalleModal from "./CobroDetalleModal";
 
 const TOTALES_VACIOS: TotalesTurno = {
@@ -28,6 +31,8 @@ export default function CobrosTurno() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<CobroConAcarreo | null>(null);
+  // Cobro cuyo PDF se está generando (para deshabilitar sólo ese botón).
+  const [generando, setGenerando] = useState<string | null>(null);
   // Al incrementarlo se vuelve a pedir la lista.
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -69,6 +74,20 @@ export default function CobrosTurno() {
       activo = false;
     };
   }, [token, idTurno, refreshKey]);
+
+  const generarPdf = async (id_cobro: string) => {
+    if (!token) return;
+
+    setGenerando(id_cobro);
+
+    try {
+      await abrirComprobanteCobro(token, id_cobro);
+    } catch {
+      setError("No se pudo generar el comprobante PDF. Intentá nuevamente.");
+    } finally {
+      setGenerando(null);
+    }
+  };
 
   return (
     <section className="w-full max-w-6xl mt-4 bg-cerulean-100 rounded shadow p-4 flex flex-col gap-3">
@@ -153,12 +172,22 @@ export default function CobrosTurno() {
                     {cobro.numero_factura ?? "-"}
                   </td>
                   <td className="border-b border-cerulean-200 px-2 py-2">
-                    <CallToActionButton
-                      type="button"
-                      handleSubmit={() => setDetalle(cobro)}
-                    >
-                      Ver detalle
-                    </CallToActionButton>
+                    <div className="flex items-center gap-2">
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => setDetalle(cobro)}
+                      >
+                        Ver detalle
+                      </CallToActionButton>
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => generarPdf(cobro.id)}
+                        disabled={generando === cobro.id}
+                        className="whitespace-nowrap"
+                      >
+                        {generando === cobro.id ? "Generando..." : "Generar PDF"}
+                      </CallToActionButton>
+                    </div>
                   </td>
                 </tr>
               ))}

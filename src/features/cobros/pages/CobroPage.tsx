@@ -13,6 +13,7 @@ import { formatCurrency, redondearImporte } from "../../../app/utils/money";
 import type { Acarreo } from "../../../types/Acarreo";
 import { obtenerAcarreosPorPatente } from "../../vehiculos/services/vehiculosService";
 import {
+  abrirComprobanteCobro,
   crearCobro,
   obtenerPreviewCobro,
   type PreviewCobro,
@@ -210,7 +211,8 @@ export default function CobroPage() {
     setErrorForm(null);
 
     try {
-      await crearCobro(token!, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const respuesta: any = await crearCobro(token!, {
         id_acarreo: acarreo.id,
         efectivo: e,
         mp: m,
@@ -219,6 +221,14 @@ export default function CobroPage() {
       });
 
       dispatch(showSuccess("Cobro registrado con éxito"));
+      const cobroId = respuesta?.data?.cobro?.id;
+      if (cobroId && token) {
+        try {
+          await abrirComprobanteCobro(token, cobroId);
+        } catch (e) {
+          console.error(e);
+        }
+      }
       volver();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

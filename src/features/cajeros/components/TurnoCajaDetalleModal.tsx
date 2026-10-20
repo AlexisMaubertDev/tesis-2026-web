@@ -7,6 +7,7 @@ import { formatCurrency } from "../../../app/utils/money";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoCajaDetalle } from "../../../types/TurnoCaja";
+import { abrirComprobanteCobro } from "../../cobros/services/cobrosService";
 import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
 
 type Props = {
@@ -28,7 +29,7 @@ export default function TurnoCajaDetalleModal({
   detalle,
   onRefrescar,
 }: Props) {
-  const { usuario } = useSelector((state: RootState) => state.auth);
+  const { usuario, token } = useSelector((state: RootState) => state.auth);
 
   // La incidencia del turno sólo la puede agregar un supervisor.
   const puedeAgregarIncidencia =
@@ -36,10 +37,27 @@ export default function TurnoCajaDetalleModal({
 
   // Si se está agregando/mirando la incidencia del turno.
   const [turnoIncidencia, setTurnoIncidencia] = useState(false);
+  // Cobro cuyo comprobante se está generando.
+  const [generando, setGenerando] = useState<string | null>(null);
 
   const turno = detalle?.turno ?? null;
   const cobros = detalle?.cobros ?? [];
   const totales = detalle?.totales;
+
+  const generarPdf = async (id_cobro: string) => {
+    if (!token) return;
+
+    setGenerando(id_cobro);
+
+    try {
+      await abrirComprobanteCobro(token, id_cobro);
+    } catch {
+      // El modal no tiene su propio cartel de error: se avisa por consola.
+      console.error("No se pudo generar el comprobante PDF.");
+    } finally {
+      setGenerando(null);
+    }
+  };
 
   return (
     <>
@@ -114,7 +132,8 @@ export default function TurnoCajaDetalleModal({
                       <th className="border-r px-2 py-1 border-cerulean-400">Total</th>
                       <th className="border-r px-2 py-1 border-cerulean-400">Efectivo</th>
                       <th className="border-r px-2 py-1 border-cerulean-400">MP</th>
-                      <th className="px-2 py-1 border-cerulean-400">Factura</th>
+                      <th className="border-r px-2 py-1 border-cerulean-400">Factura</th>
+                      <th className="px-2 py-1 border-cerulean-400">Acciones</th>
                     </tr>
                   </thead>
                   <tbody className="bg-cerulean-50">
@@ -146,8 +165,18 @@ export default function TurnoCajaDetalleModal({
                           <td className="border-r border-b border-cerulean-200 px-2 py-1">
                             {formatCurrency(c.mp)}
                           </td>
-                          <td className="border-b border-cerulean-200 px-2 py-1">
+                          <td className="border-r border-b border-cerulean-200 px-2 py-1">
                             {c.numero_factura ?? "-"}
+                          </td>
+                          <td className="border-b border-cerulean-200 px-2 py-1">
+                            <CallToActionButton
+                              type="button"
+                              handleSubmit={() => generarPdf(c.id)}
+                              disabled={generando === c.id}
+                              className="whitespace-nowrap"
+                            >
+                              {generando === c.id ? "Generando..." : "Generar PDF"}
+                            </CallToActionButton>
                           </td>
                         </tr>
                       );
