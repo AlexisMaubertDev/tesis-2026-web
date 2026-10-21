@@ -5,7 +5,6 @@ import { useEffect, useMemo, useState } from "react";
 import SelectInput from "../../../components/ui/SelectInput";
 import TextInput from "../../../components/ui/TextInput";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
-import TextArea from "../../../components/ui/TextArea";
 import { obtenerGrueros } from "../../usuarios/services/usuariosService";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
@@ -33,7 +32,6 @@ export default function AsignarGruaModal({
     turno: "",
     nombre_agente: "",
     numero_agente: "",
-    observaciones: "",
   };
   const { token } = useSelector((state: RootState) => state.auth);
   const usuario = useSelector((state: RootState) => state.auth.usuario);
@@ -223,17 +221,6 @@ export default function AsignarGruaModal({
               placeholder="Número del agente"
               name="numero_agente"
               type="number"
-              disabled={fetching}
-            />
-          </div>
-          <div className="flex gap-1">
-            <TextArea
-              value={formData.observaciones}
-              onChange={(e) =>
-                setFormData({ ...formData, observaciones: e.target.value })
-              }
-              placeholder="Observaciones"
-              name="observaciones"
               disabled={fetching}
             />
           </div>

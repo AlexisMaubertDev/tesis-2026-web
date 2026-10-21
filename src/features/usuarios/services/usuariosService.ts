@@ -97,10 +97,14 @@ export const empezarTurno_Caja = async (
   return res.data;
 };
 
-export const cerrarTurno_Caja = async (token: string, id_caja: string) => {
+export const cerrarTurno_Caja = async (
+  token: string,
+  id_caja: string,
+  observaciones?: string,
+) => {
   const res = await api.put(
     `/turno_caja/cerrar_turno/${id_caja}`,
-    {},
+    { observaciones: observaciones?.trim() || undefined },
     {
       headers: {
         Authorization: `Bearer ${token}`,

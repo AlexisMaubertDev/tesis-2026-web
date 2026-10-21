@@ -72,7 +72,7 @@ export const agregarIncidencia = async (
 export const cambiarEstadoGrua = async (
   token: string,
   id: string,
-  data: { estado: Grua["estado"]; observaciones?: string },
+  data: { estado: Grua["estado"]; motivo?: string },
 ) => {
   const res = await api.put(`/gruas/${id}/estado`, data, {
     headers: { Authorization: `Bearer ${token}` },

@@ -8,7 +8,6 @@ export interface Grua {
   numero: number;
   modelo: string;
   estado: "DISPONIBLE" | "EN_SERVICIO" | "FUERA_DE_SERVICIO" | "MANTENIMIENTO";
-  observaciones: string | null;
   incidencias: string | null;
   Turno_Gruas: Turno_Grua[];
   turno_grua_activo: Turno_Grua | null;
@@ -27,7 +26,6 @@ export interface Turno_Grua {
   id_supervisor?: string | null;
   nombre_agente: string | null;
   numero_agente: string | null;
-  observaciones: string | null;
   incidencias?: string | null;
   turno: "1" | "2" | "3" | "";
 }

@@ -113,10 +113,6 @@ export default function TurnoGruaDetalleModal({
                 valor={turno.activo ? "Abierto" : "Cerrado"}
               />
               <DetailItem
-                etiqueta="Observaciones"
-                valor={turno.observaciones ?? "-"}
-              />
-              <DetailItem
                 etiqueta="Incidencias"
                 valor={turno.incidencias ?? "-"}
               />

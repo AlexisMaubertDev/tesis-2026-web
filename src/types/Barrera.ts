@@ -17,6 +17,5 @@ export interface Turno_Barrera {
   fecha_fin: string | null;
   turno: "1" | "2" | "3";
   activo: boolean;
-  observaciones: string | null;
   incidencias: string | null;
 }

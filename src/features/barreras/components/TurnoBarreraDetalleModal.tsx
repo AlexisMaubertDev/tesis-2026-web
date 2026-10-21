@@ -100,10 +100,6 @@ export default function TurnoBarreraDetalleModal({
                 }
               />
               <DetailItem
-                etiqueta="Observaciones"
-                valor={turno.observaciones ?? "-"}
-              />
-              <DetailItem
                 etiqueta="Incidencias"
                 valor={turno.incidencias ?? "-"}
               />

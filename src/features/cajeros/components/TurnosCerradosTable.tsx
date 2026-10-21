@@ -6,6 +6,7 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import type { TurnoCajaCerrado, TurnoCajaDetalle } from "../../../types/TurnoCaja";
 import { obtenerDetalleTurnoCaja, obtenerTurnosCerrados } from "../services/turnosCajaService";
 import TurnoCajaDetalleModal from "./TurnoCajaDetalleModal";
+import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 export default function TurnosCerradosTable() {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -14,6 +15,7 @@ export default function TurnosCerradosTable() {
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoCajaDetalle | null>(null);
   const [abriendo, setAbriendo] = useState(false);
+  const [observaciones, setObservaciones] = useState<TurnoCajaCerrado | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -98,13 +100,24 @@ export default function TurnosCerradosTable() {
                     {t.turno}
                   </td>
                   <td className="border-b border-cerulean-200 px-2 py-2">
-                    <CallToActionButton
-                      type="button"
-                      handleSubmit={() => verDetalle(t.id)}
-                      disabled={abriendo}
-                    >
-                      Ver detalle
-                    </CallToActionButton>
+                    <div className="flex gap-2">
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => verDetalle(t.id)}
+                        disabled={abriendo}
+                      >
+                        Ver detalle
+                      </CallToActionButton>
+                      {t.observaciones && (
+                        <CallToActionButton
+                          type="button"
+                          handleSubmit={() => setObservaciones(t)}
+                          className="whitespace-nowrap"
+                        >
+                          Ver observación
+                        </CallToActionButton>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -118,6 +131,17 @@ export default function TurnosCerradosTable() {
         onClose={() => setDetalle(null)}
         detalle={detalle}
         onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
+      />
+
+      <VerObservacionesModal
+        open={observaciones !== null}
+        onClose={() => setObservaciones(null)}
+        observaciones={observaciones?.observaciones}
+        descripcion={
+          observaciones
+            ? `Caja ${observaciones.Caja?.numero_caja ?? "-"} · Turno ${observaciones.turno}`
+            : undefined
+        }
       />
     </section>
   );

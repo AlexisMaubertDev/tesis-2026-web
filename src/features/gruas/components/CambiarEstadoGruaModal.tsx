@@ -49,7 +49,7 @@ export default function CambiarEstadoGruaModal({
   const [estado, setEstado] = useState<Grua["estado"]>(
     grua?.estado ?? "DISPONIBLE",
   );
-  const [observaciones, setObservaciones] = useState(grua?.observaciones ?? "");
+  const [motivo, setMotivo] = useState("");
   const [enviando, setEnviando] = useState(false);
 
   const tieneTurnoActivo = Boolean(grua?.turno_grua_activo);
@@ -70,7 +70,7 @@ export default function CambiarEstadoGruaModal({
     setEnviando(true);
 
     try {
-      await cambiarEstadoGrua(token, grua.id, { estado, observaciones });
+      await cambiarEstadoGrua(token, grua.id, { estado, motivo });
       dispatch(showSuccess("Estado de la grúa actualizado con éxito"));
       handleClose();
       onSuccess?.();
@@ -126,13 +126,13 @@ export default function CambiarEstadoGruaModal({
 
             <div className="flex flex-col gap-1">
               <h3 className="text-xs font-bold uppercase">
-                Observaciones (opcional)
+                Motivo (opcional)
               </h3>
               <TextArea
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
                 placeholder="Motivo del cambio de estado"
-                name="observaciones"
+                name="motivo"
                 rows={3}
               />
             </div>

@@ -14,6 +14,7 @@ import {
   obtenerTurnosDeUsuario,
 } from "../services/turnosCajaService";
 import TurnoCajaDetalleModal from "./TurnoCajaDetalleModal";
+import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 type Props = {
   open: boolean;
@@ -48,6 +49,7 @@ export default function TurnosCajaUsuarioModal({
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
+  const [observaciones, setObservaciones] = useState<TurnoCajaCerrado | null>(null);
 
   useEffect(() => {
     if (!open || !token || !usuario?.id) return;
@@ -190,13 +192,24 @@ export default function TurnosCajaUsuarioModal({
                         {t.activo ? "Abierto" : "Cerrado"}
                       </td>
                       <td className="border-b border-cerulean-200 px-2 py-1">
-                        <CallToActionButton
-                          type="button"
-                          handleSubmit={() => verDetalle(t.id)}
-                          disabled={abriendoDetalle}
-                        >
-                          Ver detalle
-                        </CallToActionButton>
+                        <div className="flex gap-2">
+                          <CallToActionButton
+                            type="button"
+                            handleSubmit={() => verDetalle(t.id)}
+                            disabled={abriendoDetalle}
+                          >
+                            Ver detalle
+                          </CallToActionButton>
+                          {t.observaciones && (
+                            <CallToActionButton
+                              type="button"
+                              handleSubmit={() => setObservaciones(t)}
+                              className="whitespace-nowrap"
+                            >
+                              Ver observación
+                            </CallToActionButton>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -218,6 +231,17 @@ export default function TurnosCajaUsuarioModal({
         onClose={() => setDetalle(null)}
         detalle={detalle}
         onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
+      />
+
+      <VerObservacionesModal
+        open={observaciones !== null}
+        onClose={() => setObservaciones(null)}
+        observaciones={observaciones?.observaciones}
+        descripcion={
+          observaciones
+            ? `Caja ${observaciones.Caja?.numero_caja ?? "-"} · Turno ${observaciones.turno}`
+            : undefined
+        }
       />
     </>
   );

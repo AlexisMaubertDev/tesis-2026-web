@@ -27,7 +27,6 @@ export type GruaForm = {
   modelo: string;
   numero: number;
   estado: Grua["estado"];
-  observaciones: string | null;
   incidencias: string | null;
 };
 
@@ -41,7 +40,6 @@ const initialFormData: GruaForm = {
   modelo: "",
   numero: 1,
   estado: "DISPONIBLE",
-  observaciones: null,
   incidencias: null,
 };
 

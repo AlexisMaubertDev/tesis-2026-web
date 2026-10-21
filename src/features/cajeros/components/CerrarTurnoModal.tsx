@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { formatCurrency } from "../../../app/utils/money";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import DetailItem from "../../../components/ui/DetailItem";
+import TextArea from "../../../components/ui/TextArea";
 import { obtenerCobrosDeMiTurno } from "../../cobros/services/cobrosService";
 import { cerrarTurno_Caja } from "../../usuarios/services/usuariosService";
 import { getTurnoLabel } from "../../../app/constants/turnos";
@@ -47,6 +48,7 @@ export default function CerrarTurnoModal({
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cerrando, setCerrando] = useState(false);
+  const [observaciones, setObservaciones] = useState("");
 
   useEffect(() => {
     if (!open || !token) return;
@@ -87,7 +89,7 @@ export default function CerrarTurnoModal({
     setError(null);
 
     try {
-      await cerrarTurno_Caja(token, turnoCaja.id);
+      await cerrarTurno_Caja(token, turnoCaja.id, observaciones);
       onSuccess();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -139,6 +141,19 @@ export default function CerrarTurnoModal({
         {error && (
           <p className="text-xs text-scarlet-rush-700 text-center">{error}</p>
         )}
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-bold uppercase">
+            Observaciones (opcional)
+          </label>
+          <TextArea
+            value={observaciones}
+            onChange={(e) => setObservaciones(e.target.value)}
+            placeholder="Observaciones del turno (ej: faltante de cambio, aclaración del arqueo)"
+            name="observaciones"
+            disabled={cerrando}
+          />
+        </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-3 mt-2">
           <CallToActionButton

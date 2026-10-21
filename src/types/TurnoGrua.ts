@@ -19,7 +19,6 @@ export interface TurnoGruaListado {
   turno: "1" | "2" | "3";
   nombre_agente: string;
   numero_agente: string;
-  observaciones: string | null;
   incidencias: string | null;
   activo: boolean;
   fecha_inicio: string;

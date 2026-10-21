@@ -11,7 +11,6 @@ import type { Usuario } from "../../../types/Usuario";
 import { useEffect, useMemo, useState } from "react";
 import SelectInput from "../../../components/ui/SelectInput";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
-import TextArea from "../../../components/ui/TextArea";
 import { obtenerPlayeros } from "../../usuarios/services/usuariosService";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
@@ -38,7 +37,6 @@ export default function AsignarBarreraModal({
   const [playeros, setPlayeros] = useState<Usuario[]>([]);
   const [turno, setTurno] = useState<"" | "1" | "2" | "3">("");
   const [seleccionados, setSeleccionados] = useState<string[]>([]);
-  const [observaciones, setObservaciones] = useState("");
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +44,6 @@ export default function AsignarBarreraModal({
     setOpen(false);
     setTurno("");
     setSeleccionados([]);
-    setObservaciones("");
     setError(null);
   };
 
@@ -121,7 +118,6 @@ export default function AsignarBarreraModal({
         id_barrera: barrera!.id,
         turno,
         id_usuarios: seleccionados,
-        observaciones: observaciones.trim() || undefined,
       });
       dispatch(showSuccess("Playeros asignados con éxito"));
       onSuccess?.();
@@ -239,15 +235,6 @@ export default function AsignarBarreraModal({
                 })}
               </Box>
             )}
-          </div>
-          <div className="flex gap-1">
-            <TextArea
-              value={observaciones}
-              onChange={(e) => setObservaciones(e.target.value)}
-              placeholder="Observaciones"
-              name="observaciones"
-              disabled={fetching}
-            />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <div className="flex w-full gap-2 justify-end mt-4">

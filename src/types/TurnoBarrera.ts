@@ -18,7 +18,6 @@ export interface TurnoBarreraListado {
   activo: boolean;
   fecha_inicio: string;
   fecha_fin: string | null;
-  observaciones: string | null;
   incidencias: string | null;
   Barrera?: {
     id: string;

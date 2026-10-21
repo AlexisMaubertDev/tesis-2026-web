@@ -18,8 +18,8 @@ type Props = {
 
 /**
  * Modal del supervisor para autorizar la salida sin cargo de un vehículo
- * ingresado en la playa. El motivo es obligatorio y queda guardado en el
- * acarreo (observaciones) y en la auditoría.
+ * ingresado en la playa. El motivo es obligatorio y queda guardado como
+ * incidencia del acarreo (además de la auditoría).
  */
 export default function SinCargoModal({
   open,

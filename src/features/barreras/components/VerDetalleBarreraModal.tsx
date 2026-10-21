@@ -108,14 +108,6 @@ export default function VerDetalleBarreraModal({
           </div>
           <div className="flex w-full justify-center gap-2 items-center">
             <span className="w-1/2 bg-cerulean-200 text-white px-2 py-1 font-bold rounded self-start">
-              Observaciones:
-            </span>
-            <span className="w-1/2 bg-cerulean-50 px-2 py-1 min-h-10 rounded">
-              {turno?.observaciones ? turno.observaciones : "Ninguna"}
-            </span>
-          </div>
-          <div className="flex w-full justify-center gap-2 items-center">
-            <span className="w-1/2 bg-cerulean-200 text-white px-2 py-1 font-bold rounded self-start">
               Incidencias:
             </span>
             {agregandoIncidencia ? (

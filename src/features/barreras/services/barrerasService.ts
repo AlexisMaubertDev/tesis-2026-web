@@ -33,7 +33,6 @@ export const asignarBarrera = async (
     id_barrera: string;
     turno: string;
     id_usuarios: string[];
-    observaciones?: string;
   },
 ) => {
   const res = await api.post("/barreras/asignar", data, {

@@ -9,6 +9,7 @@ import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoCajaDetalle } from "../../../types/TurnoCaja";
 import { abrirComprobanteCobro } from "../../cobros/services/cobrosService";
 import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
+import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 type Props = {
   open: boolean;
@@ -37,6 +38,8 @@ export default function TurnoCajaDetalleModal({
 
   // Si se está agregando/mirando la incidencia del turno.
   const [turnoIncidencia, setTurnoIncidencia] = useState(false);
+  // Si se están mirando las observaciones del turno (las carga el cajero al cerrar).
+  const [turnoObservaciones, setTurnoObservaciones] = useState(false);
   // Cobro cuyo comprobante se está generando.
   const [generando, setGenerando] = useState<string | null>(null);
 
@@ -85,8 +88,16 @@ export default function TurnoCajaDetalleModal({
                 valor={turno.cierre ? formatDateFullWithHs(turno.cierre) : "En curso"}
               />
               <DetailItem etiqueta="Estado" valor={turno.activo ? "Abierto" : "Cerrado"} />
-              {puedeAgregarIncidencia && (
-                <div className="flex justify-end">
+              <div className="flex flex-wrap justify-end gap-2">
+                {turno.observaciones && (
+                  <CallToActionButton
+                    type="button"
+                    handleSubmit={() => setTurnoObservaciones(true)}
+                  >
+                    Ver observaciones
+                  </CallToActionButton>
+                )}
+                {puedeAgregarIncidencia && (
                   <CallToActionButton
                     type="button"
                     handleSubmit={() => setTurnoIncidencia(true)}
@@ -95,8 +106,8 @@ export default function TurnoCajaDetalleModal({
                       ? "Ver incidencias del turno"
                       : "Agregar incidencia al turno"}
                   </CallToActionButton>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
@@ -206,6 +217,17 @@ export default function TurnoCajaDetalleModal({
             : undefined
         }
         onSuccess={onRefrescar}
+      />
+
+      <VerObservacionesModal
+        open={turnoObservaciones}
+        onClose={() => setTurnoObservaciones(false)}
+        observaciones={turno?.observaciones}
+        descripcion={
+          turno
+            ? `Caja ${turno.Caja?.numero_caja ?? "-"} · Turno ${turno.turno || "-"}`
+            : undefined
+        }
       />
     </>
   );
