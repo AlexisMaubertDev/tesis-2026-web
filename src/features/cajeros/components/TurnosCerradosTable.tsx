@@ -9,7 +9,7 @@ import { abrirInformeTurnoCaja } from "../../usuarios/services/usuariosService";
 import TurnoCajaDetalleModal from "./TurnoCajaDetalleModal";
 
 export default function TurnosCerradosTable() {
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, usuario } = useSelector((state: RootState) => state.auth);
   const [turnos, setTurnos] = useState<TurnoCajaCerrado[]>([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,13 @@ export default function TurnosCerradosTable() {
       setError(null);
       try {
         const res = await obtenerTurnosCerrados(token);
-        setTurnos(res.data);
+        // El backend ya filtra por cajero; se refuerza en la vista para no
+        // mostrar nunca un cierre ajeno si la respuesta viniera más amplia.
+        setTurnos(
+          usuario?.id
+            ? res.data.filter((turno) => turno.id_usuario === usuario.id)
+            : [],
+        );
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.response?.data?.message || "No se pudieron cargar los cierres de caja.");
@@ -35,7 +41,7 @@ export default function TurnosCerradosTable() {
     };
 
     cargar();
-  }, [token]);
+  }, [token, usuario?.id]);
 
   const verDetalle = async (id: string) => {
     if (!token) return;
@@ -67,14 +73,14 @@ export default function TurnosCerradosTable() {
   return (
     <section className="w-full max-w-6xl mt-4 bg-cerulean-100 rounded shadow p-4 flex flex-col gap-3">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-        <h2 className="font-bold uppercase">Cierres de caja (historial)</h2>
+        <h2 className="font-bold uppercase">Mis cierres de caja (historial)</h2>
       </div>
 
       {error && <p className="text-xs text-scarlet-rush-700">{error}</p>}
       {cargando && <p className="text-xs text-cerulean-800">Cargando cierres...</p>}
 
       {!cargando && turnos.length === 0 && (
-        <p className="text-xs text-cerulean-800">No hay turnos de caja cerrados para mostrar.</p>
+        <p className="text-xs text-cerulean-800">No tenés cierres de caja propios para mostrar.</p>
       )}
 
       {turnos.length > 0 && (
