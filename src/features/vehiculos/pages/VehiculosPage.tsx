@@ -20,7 +20,10 @@ import EditarVehiculoModal from "../components/EditarVehiculoModal";
 import VehiculoDetalleModal from "../components/VehiculoDetalleModal";
 import VehiculosFiltros from "../components/VehiculosFiltros";
 import PlayeroHome from "../components/PlayeroHome";
-import { obtenerVehiculos } from "../services/vehiculosService";
+import {
+  abrirInformeVehiculosPdf,
+  obtenerVehiculos,
+} from "../services/vehiculosService";
 
 export type FiltrosVehiculos = {
   sucursales: string[];
@@ -104,6 +107,7 @@ function VehiculosTabla() {
   const [vehiculoAEditar, setVehiculoAEditar] = useState<Vehiculo | null>(null);
   const [vehiculoDetalle, setVehiculoDetalle] = useState<Vehiculo | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [generandoPdf, setGenerandoPdf] = useState(false);
 
   const recargar = () => setRefreshKey((k) => k + 1);
 
@@ -159,6 +163,32 @@ function VehiculosTabla() {
   const buscarVehiculos = () =>
     setVehiculosFiltrados(aplicarFiltros(vehiculos, search, filtros));
 
+  const generarPdf = async () => {
+    if (!token || generandoPdf) return;
+
+    setGenerandoPdf(true);
+
+    try {
+      await abrirInformeVehiculosPdf(token, {
+        busqueda: search,
+        sucursales: filtros.sucursales,
+        estados: filtros.estados,
+        fechaDesde: filtros.fechaDesde,
+        fechaHasta: filtros.fechaHasta,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      dispatch(
+        showError(
+          error.response?.data?.message ||
+            "No se pudo generar el PDF del listado de vehículos.",
+        ),
+      );
+    } finally {
+      setGenerandoPdf(false);
+    }
+  };
+
   return (
     <PageLayout>
       <MainLayout>
@@ -170,7 +200,7 @@ function VehiculosTabla() {
             <h1 className=" sm:text-lg font-bold uppercase self-center">
               Vehiculos
             </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full md:w-auto">
               <div className="flex gap-2 w-full sm:col-span-2">
                 <Search
                   value={search}
@@ -187,18 +217,15 @@ function VehiculosTabla() {
               <CallToActionButton type="button" handleSubmit={recargar}>
                 Refrescar
               </CallToActionButton>
+              <CallToActionButton
+                type="button"
+                handleSubmit={generarPdf}
+                disabled={generandoPdf}
+                className="whitespace-nowrap"
+              >
+                {generandoPdf ? "Generando..." : "Generar PDF"}
+              </CallToActionButton>
             </div>
-          </section>
-
-          <section className="w-full flex justify-end mt-2 mx-4">
-            <CallToActionButton
-              type="button"
-              handleSubmit={() => {
-                window.location.href = "/informes";
-              }}
-            >
-              Ver informes
-            </CallToActionButton>
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-auto">
