@@ -67,7 +67,6 @@ export interface Acarreo {
   motivo: string;
   fue_denuncia: boolean;
   tuvo_siniestro: boolean;
-  observaciones: string | null;
   incidencias: string | null;
   Turno_Grua?: AcarreoGrua | null;
   /**

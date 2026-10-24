@@ -19,6 +19,7 @@ import CajerosPage from "../features/cajeros/pages/CajerosPage.tsx";
 import CierresCajaPage from "../features/cajeros/pages/CierresCajaPage.tsx";
 import CobroPage from "../features/cobros/pages/CobroPage.tsx";
 import TarifasPage from "../features/tarifas/pages/TarifasPage.tsx";
+import InformesPage from "../features/informes/pages/InformesPage.tsx";
 import AcercaDe from "../pages/AcercaDe.tsx";
 
 export default function AppRoutes() {
@@ -173,6 +174,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <HistorialVehiculoPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/informes"
+          element={
+            <ProtectedRoute>
+              <InformesPage />
             </ProtectedRoute>
           }
         />

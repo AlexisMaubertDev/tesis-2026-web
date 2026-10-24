@@ -14,8 +14,8 @@ import {
   obtenerDetalleTurnoCaja,
   obtenerTurnosDeCaja,
 } from "../../cajeros/services/turnosCajaService";
+import { abrirInformeTurnoCaja } from "../../usuarios/services/usuariosService";
 import TurnoCajaDetalleModal from "../../cajeros/components/TurnoCajaDetalleModal";
-import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 type Props = {
   open: boolean;
@@ -40,7 +40,7 @@ export default function TurnosCajaCajaModal({ open, onClose, caja }: Props) {
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
-  const [observaciones, setObservaciones] = useState<TurnoCajaCerrado | null>(null);
+  const [generando, setGenerando] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !token || !caja?.id) return;
@@ -97,6 +97,21 @@ export default function TurnosCajaCajaModal({ open, onClose, caja }: Props) {
       );
     } finally {
       setAbriendoDetalle(false);
+    }
+  };
+
+  // Informe consolidado del turno (RF15 / CU13): PDF en otra pestaña.
+  const verInforme = async (id: string) => {
+    if (!token) return;
+
+    setGenerando(id);
+
+    try {
+      await abrirInformeTurnoCaja(token, id);
+    } catch {
+      setError("No se pudo generar el informe del turno.");
+    } finally {
+      setGenerando(null);
     }
   };
 
@@ -201,15 +216,14 @@ export default function TurnosCajaCajaModal({ open, onClose, caja }: Props) {
                           >
                             Ver detalle
                           </CallToActionButton>
-                          {t.observaciones && (
-                            <CallToActionButton
-                              type="button"
-                              handleSubmit={() => setObservaciones(t)}
-                              className="whitespace-nowrap"
-                            >
-                              Ver observación
-                            </CallToActionButton>
-                          )}
+                          <CallToActionButton
+                            type="button"
+                            handleSubmit={() => verInforme(t.id)}
+                            disabled={generando === t.id}
+                            className="whitespace-nowrap"
+                          >
+                            {generando === t.id ? "Generando..." : "Ver informe"}
+                          </CallToActionButton>
                         </div>
                       </td>
                     </tr>
@@ -232,17 +246,6 @@ export default function TurnosCajaCajaModal({ open, onClose, caja }: Props) {
         onClose={() => setDetalle(null)}
         detalle={detalle}
         onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
-      />
-
-      <VerObservacionesModal
-        open={observaciones !== null}
-        onClose={() => setObservaciones(null)}
-        observaciones={observaciones?.observaciones}
-        descripcion={
-          observaciones
-            ? `Caja ${caja?.numero_caja ?? "-"} · Turno ${observaciones.turno}`
-            : undefined
-        }
       />
     </>
   );

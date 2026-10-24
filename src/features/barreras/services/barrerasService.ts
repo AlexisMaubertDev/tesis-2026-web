@@ -69,5 +69,19 @@ export const finalizarTodosTurnosBarrera = async (token: string, id: string) => 
     {},
     { headers: { Authorization: `Bearer ${token}` } },
   );
-  return res.data;
+  return res.data as {
+    success: boolean;
+    message: string;
+    /** Turnos de barrera que se cerraron (para emitir el informe de cada uno). */
+    data: {
+      turnos: {
+        id: string;
+        id_barrera: string;
+        turno: "1" | "2" | "3";
+        fecha_inicio: string;
+        fecha_fin: string;
+        barrera: { id: string; ubicacion: string } | null;
+      }[];
+    };
+  };
 };

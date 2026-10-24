@@ -225,6 +225,17 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
             </CallToActionButton>
           </section>
 
+          <section className="w-full max-w-6xl flex justify-end mt-2">
+            <CallToActionButton
+              type="button"
+              handleSubmit={() => {
+                window.location.href = "/informes";
+              }}
+            >
+              Ver informes
+            </CallToActionButton>
+          </section>
+
           <section className="flex flex-col w-full max-w-6xl gap-4 mt-4">
             <div className="bg-cerulean-100 rounded shadow p-4">
               <h2 className="sm:text-lg font-bold uppercase mb-2">

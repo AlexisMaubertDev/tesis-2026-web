@@ -25,6 +25,9 @@ import AsignarBarreraModal from "../../barreras/components/AsignarBarreraModal";
 import VerDetalleBarreraModal from "../../barreras/components/VerDetalleBarreraModal";
 import ChoiceModal from "../../../components/ui/ChoiceModal";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
+import { abrirPestanias, cerrarPestanias } from "../../../app/utils/pestanias";
+import { abrirInformeTurnoBarrera } from "../../barreras/services/turnosBarreraService";
+import { abrirInformeTurnoGrua } from "../../gruas/services/turnosGruaService";
 
 const ESTADOS = {
   EN_SERVICIO: "En servicio",
@@ -88,11 +91,37 @@ export default function SupervisorPage() {
   }
 
   const finalizarTurno = async () => {
+    // RF27: al cerrar los turnos de grúa se emite solo un informe por grúa. Las
+    // pestañas se abren antes del pedido para no perder el gesto del usuario.
+    const pestanias = abrirPestanias(
+      gruas.filter((grua) => grua.turno_grua_activo).length,
+    );
+
     try {
-      await finalizarTurnosSucursal(token!, usuario.Sucursal.id!);
+      const res = await finalizarTurnosSucursal(token!, usuario.Sucursal.id!);
       dispatch(showSuccess("Turnos finalizados con éxito"));
       await refrescarDatos(); // <--- RECARGA DATOS
+
+      const turnos = res?.data?.turnos ?? [];
+
+      const informes = await Promise.allSettled(
+        turnos.map((turno, indice) =>
+          abrirInformeTurnoGrua(
+            token!,
+            turno.id,
+            pestanias[indice] ?? null,
+            `informe-turno-grua-${turno.grua?.patente ?? turno.id}.pdf`,
+          ),
+        ),
+      );
+
+      if (informes.some((resultado) => resultado.status === "rejected")) {
+        dispatch(showError("Algunos informes no se pudieron generar"));
+      }
+
+      cerrarPestanias(pestanias.slice(turnos.length));
     } catch (error) {
+      cerrarPestanias(pestanias);
       console.error(error);
       dispatch(showError("Error al finalizar turnos"));
     } finally {
@@ -101,11 +130,37 @@ export default function SupervisorPage() {
   };
 
   const finalizarTurnosBarrera = async () => {
+    // RF15: al cerrar los turnos de barrera se emite solo un informe por
+    // barrera. Las pestañas se abren antes del pedido (gesto del usuario).
+    const pestanias = abrirPestanias(
+      barreras.filter((barrera) => barrera.turno_barrera_activo).length,
+    );
+
     try {
-      await finalizarTodosTurnosBarrera(token!, usuario.Sucursal.id!);
+      const res = await finalizarTodosTurnosBarrera(token!, usuario.Sucursal.id!);
       dispatch(showSuccess("Turnos de barrera finalizados con éxito"));
       await refrescarDatos();
+
+      const turnos = res?.data?.turnos ?? [];
+
+      const informes = await Promise.allSettled(
+        turnos.map((turno, indice) =>
+          abrirInformeTurnoBarrera(
+            token!,
+            turno.id,
+            pestanias[indice] ?? null,
+            `informe-turno-barrera-${turno.barrera?.ubicacion ?? turno.id}.pdf`,
+          ),
+        ),
+      );
+
+      if (informes.some((resultado) => resultado.status === "rejected")) {
+        dispatch(showError("Algunos informes no se pudieron generar"));
+      }
+
+      cerrarPestanias(pestanias.slice(turnos.length));
     } catch (error) {
+      cerrarPestanias(pestanias);
       console.error(error);
       dispatch(showError("Error al finalizar turnos de barrera"));
     } finally {
@@ -161,6 +216,11 @@ export default function SupervisorPage() {
                   >
                     Barreras
                   </Link>
+                </CallToActionButton>
+              </li>
+              <li>
+                <CallToActionButton type="button">
+                  <Link to="/informes">Informes</Link>
                 </CallToActionButton>
               </li>
             </ul>

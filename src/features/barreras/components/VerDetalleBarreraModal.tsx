@@ -7,9 +7,10 @@ import {
   agregarIncidenciaBarrera,
   finalizarTurnoBarrera,
 } from "../../barreras/services/barrerasService";
+import { abrirInformeTurnoBarrera } from "../../barreras/services/turnosBarreraService";
 import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
-import { showSuccess } from "../../../app/store/snackbarSlice";
+import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 
 type Props = {
@@ -58,13 +59,40 @@ export default function VerDetalleBarreraModal({
   };
 
   const handleTerminarTurno = async () => {
+    const idTurno = turno?.id;
+
+    // RF15: el informe del turno de barrera se emite solo al cerrarlo. La
+    // pestaña se abre antes del pedido para no perder el gesto del usuario.
+    const pestania = window.open("", "_blank");
+
     try {
-      await finalizarTurnoBarrera(token!, turno?.id || "");
-      onSuccess?.();
-      dispatch(showSuccess("Turno finalizado con éxito"));
+      await finalizarTurnoBarrera(token!, idTurno || "");
     } catch (error) {
+      pestania?.close();
       const msg = (error as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setErrorIncidencia(msg || "Error al terminar el turno");
+      return;
+    }
+
+    onSuccess?.();
+    dispatch(showSuccess("Turno finalizado con éxito"));
+
+    if (!idTurno) {
+      pestania?.close();
+      return;
+    }
+
+    try {
+      await abrirInformeTurnoBarrera(
+        token!,
+        idTurno,
+        pestania,
+        `informe-turno-barrera-${barrera?.ubicacion ?? idTurno}.pdf`,
+      );
+    } catch {
+      dispatch(
+        showError("El turno se cerró, pero no se pudo generar el informe"),
+      );
     }
   };
 

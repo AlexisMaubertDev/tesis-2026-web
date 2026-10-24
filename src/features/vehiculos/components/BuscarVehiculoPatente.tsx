@@ -139,6 +139,17 @@ export default function BuscarVehiculoPatente() {
               Ver cierres de caja
             </CallToActionButton>
           )}
+          {esCajero && (
+            <CallToActionButton
+              type="button"
+              className="whitespace-nowrap shrink-0"
+              handleSubmit={() => {
+                window.location.href = "/informes";
+              }}
+            >
+              Ver informes
+            </CallToActionButton>
+          )}
         </div>
 
         {error && <p className="text-xs text-red-900">{error}</p>}

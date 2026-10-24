@@ -98,10 +98,6 @@ export default function AcarreoDetalleCard({ acarreo }: { acarreo: Acarreo }) {
       </div>
 
       <DetailItem
-        etiqueta="Observaciones"
-        valor={acarreo.observaciones ?? "Ninguna"}
-      />
-      <DetailItem
         etiqueta="Incidencias"
         valor={acarreo.incidencias ?? "Ninguna"}
       />

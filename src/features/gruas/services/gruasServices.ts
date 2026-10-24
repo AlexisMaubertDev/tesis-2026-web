@@ -48,7 +48,21 @@ export const finalizarTurnosSucursal = async (token: string, id: string) => {
       },
     },
   );
-  return res.data;
+  return res.data as {
+    success: boolean;
+    message: string;
+    /** Turnos de grúa que se cerraron (para emitir el informe de cada grúa). */
+    data: {
+      turnos: {
+        id: string;
+        id_grua: string;
+        turno: "1" | "2" | "3";
+        fecha_inicio: string;
+        fecha_fin: string;
+        grua: { id: string; patente: string; numero: number } | null;
+      }[];
+    };
+  };
 };
 
 export const agregarIncidencia = async (

@@ -8,8 +8,8 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoCajaDetalle } from "../../../types/TurnoCaja";
 import { abrirComprobanteCobro } from "../../cobros/services/cobrosService";
+import { abrirInformeTurnoCaja } from "../../usuarios/services/usuariosService";
 import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
-import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 type Props = {
   open: boolean;
@@ -38,10 +38,10 @@ export default function TurnoCajaDetalleModal({
 
   // Si se está agregando/mirando la incidencia del turno.
   const [turnoIncidencia, setTurnoIncidencia] = useState(false);
-  // Si se están mirando las observaciones del turno (las carga el cajero al cerrar).
-  const [turnoObservaciones, setTurnoObservaciones] = useState(false);
   // Cobro cuyo comprobante se está generando.
   const [generando, setGenerando] = useState<string | null>(null);
+  // Si se está generando el informe del turno.
+  const [generandoInforme, setGenerandoInforme] = useState(false);
 
   const turno = detalle?.turno ?? null;
   const cobros = detalle?.cobros ?? [];
@@ -59,6 +59,21 @@ export default function TurnoCajaDetalleModal({
       console.error("No se pudo generar el comprobante PDF.");
     } finally {
       setGenerando(null);
+    }
+  };
+
+  // Informe consolidado del turno (RF15 / CU13): PDF en otra pestaña.
+  const generarInforme = async () => {
+    if (!token || !turno?.id) return;
+
+    setGenerandoInforme(true);
+
+    try {
+      await abrirInformeTurnoCaja(token, turno.id);
+    } catch {
+      console.error("No se pudo generar el informe del turno.");
+    } finally {
+      setGenerandoInforme(false);
     }
   };
 
@@ -89,14 +104,13 @@ export default function TurnoCajaDetalleModal({
               />
               <DetailItem etiqueta="Estado" valor={turno.activo ? "Abierto" : "Cerrado"} />
               <div className="flex flex-wrap justify-end gap-2">
-                {turno.observaciones && (
-                  <CallToActionButton
-                    type="button"
-                    handleSubmit={() => setTurnoObservaciones(true)}
-                  >
-                    Ver observaciones
-                  </CallToActionButton>
-                )}
+                <CallToActionButton
+                  type="button"
+                  handleSubmit={generarInforme}
+                  disabled={generandoInforme}
+                >
+                  {generandoInforme ? "Generando..." : "Ver informe"}
+                </CallToActionButton>
                 {puedeAgregarIncidencia && (
                   <CallToActionButton
                     type="button"
@@ -118,6 +132,40 @@ export default function TurnoCajaDetalleModal({
               <DetailItem etiqueta="Total" valor={formatCurrency(totales.total)} />
               <DetailItem etiqueta="Efectivo" valor={formatCurrency(totales.efectivo)} />
               <DetailItem etiqueta="Mercado Pago" valor={formatCurrency(totales.mp)} />
+            </div>
+          )}
+
+          {detalle?.arqueo && (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-bold uppercase">Arqueo de cierre</h3>
+              <DetailItem
+                etiqueta="N° de sobre"
+                valor={detalle.arqueo.numero_sobre ?? "-"}
+              />
+              <DetailItem
+                etiqueta="Efectivo esperado"
+                valor={formatCurrency(detalle.arqueo.efectivoEsperado)}
+              />
+              <DetailItem
+                etiqueta="Efectivo contado"
+                valor={
+                  detalle.arqueo.efectivoContado === null
+                    ? "No informado"
+                    : formatCurrency(detalle.arqueo.efectivoContado)
+                }
+              />
+              {detalle.arqueo.diferencia !== null && (
+                <DetailItem
+                  etiqueta="Diferencia"
+                  valor={`${formatCurrency(Math.abs(detalle.arqueo.diferencia))} (${
+                    detalle.arqueo.diferencia > 0
+                      ? "sobrante"
+                      : detalle.arqueo.diferencia < 0
+                        ? "faltante"
+                        : "sin diferencia"
+                  })`}
+                />
+              )}
             </div>
           )}
 
@@ -217,17 +265,6 @@ export default function TurnoCajaDetalleModal({
             : undefined
         }
         onSuccess={onRefrescar}
-      />
-
-      <VerObservacionesModal
-        open={turnoObservaciones}
-        onClose={() => setTurnoObservaciones(false)}
-        observaciones={turno?.observaciones}
-        descripcion={
-          turno
-            ? `Caja ${turno.Caja?.numero_caja ?? "-"} · Turno ${turno.turno || "-"}`
-            : undefined
-        }
       />
     </>
   );

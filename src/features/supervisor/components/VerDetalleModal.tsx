@@ -7,9 +7,10 @@ import {
   agregarIncidencia,
   terminarTurno,
 } from "../../gruas/services/gruasServices";
+import { abrirInformeTurnoGrua } from "../../gruas/services/turnosGruaService";
 import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
-import { showSuccess } from "../../../app/store/snackbarSlice";
+import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 
 type Props = {
@@ -66,14 +67,41 @@ export default function VerDetalleModal({
   };
 
   const handleTerminarTurno = async () => {
+    const idTurno = grua?.turno_grua_activo?.id;
+
+    // RF27: el informe por grúa se emite solo al cerrar el turno. La pestaña se
+    // abre antes del pedido para no perder el gesto del usuario.
+    const pestania = window.open("", "_blank");
+
     try {
-      await terminarTurno(token!, grua?.turno_grua_activo?.id || "");
-      onSuccess!();
-      dispatch(showSuccess("Turno finalizado con exito"));
+      await terminarTurno(token!, idTurno || "");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      pestania?.close();
       setErrorIncidencia(
         error?.response?.data?.error || "Error al terminar el turno",
+      );
+      return;
+    }
+
+    onSuccess!();
+    dispatch(showSuccess("Turno finalizado con exito"));
+
+    if (!idTurno) {
+      pestania?.close();
+      return;
+    }
+
+    try {
+      await abrirInformeTurnoGrua(
+        token!,
+        idTurno,
+        pestania,
+        `informe-turno-grua-${grua?.patente ?? idTurno}.pdf`,
+      );
+    } catch {
+      dispatch(
+        showError("El turno se cerró, pero no se pudo generar el informe"),
       );
     }
   };

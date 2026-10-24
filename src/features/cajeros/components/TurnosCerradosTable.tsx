@@ -5,8 +5,8 @@ import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import type { TurnoCajaCerrado, TurnoCajaDetalle } from "../../../types/TurnoCaja";
 import { obtenerDetalleTurnoCaja, obtenerTurnosCerrados } from "../services/turnosCajaService";
+import { abrirInformeTurnoCaja } from "../../usuarios/services/usuariosService";
 import TurnoCajaDetalleModal from "./TurnoCajaDetalleModal";
-import VerObservacionesModal from "../../turnos/components/VerObservacionesModal";
 
 export default function TurnosCerradosTable() {
   const { token } = useSelector((state: RootState) => state.auth);
@@ -15,7 +15,7 @@ export default function TurnosCerradosTable() {
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoCajaDetalle | null>(null);
   const [abriendo, setAbriendo] = useState(false);
-  const [observaciones, setObservaciones] = useState<TurnoCajaCerrado | null>(null);
+  const [generando, setGenerando] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -48,6 +48,19 @@ export default function TurnosCerradosTable() {
       setError(err.response?.data?.message || "No se pudo cargar el detalle.");
     } finally {
       setAbriendo(false);
+    }
+  };
+
+  // Informe consolidado del turno (RF15 / CU13): PDF en otra pestaña.
+  const verInforme = async (id: string) => {
+    if (!token) return;
+    setGenerando(id);
+    try {
+      await abrirInformeTurnoCaja(token, id);
+    } catch {
+      setError("No se pudo generar el informe del turno.");
+    } finally {
+      setGenerando(null);
     }
   };
 
@@ -108,15 +121,14 @@ export default function TurnosCerradosTable() {
                       >
                         Ver detalle
                       </CallToActionButton>
-                      {t.observaciones && (
-                        <CallToActionButton
-                          type="button"
-                          handleSubmit={() => setObservaciones(t)}
-                          className="whitespace-nowrap"
-                        >
-                          Ver observación
-                        </CallToActionButton>
-                      )}
+                      <CallToActionButton
+                        type="button"
+                        handleSubmit={() => verInforme(t.id)}
+                        disabled={generando === t.id}
+                        className="whitespace-nowrap"
+                      >
+                        {generando === t.id ? "Generando..." : "Ver informe"}
+                      </CallToActionButton>
                     </div>
                   </td>
                 </tr>
@@ -131,17 +143,6 @@ export default function TurnosCerradosTable() {
         onClose={() => setDetalle(null)}
         detalle={detalle}
         onRefrescar={() => detalle && verDetalle(detalle.turno.id)}
-      />
-
-      <VerObservacionesModal
-        open={observaciones !== null}
-        onClose={() => setObservaciones(null)}
-        observaciones={observaciones?.observaciones}
-        descripcion={
-          observaciones
-            ? `Caja ${observaciones.Caja?.numero_caja ?? "-"} · Turno ${observaciones.turno}`
-            : undefined
-        }
       />
     </section>
   );

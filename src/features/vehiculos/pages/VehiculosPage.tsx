@@ -190,6 +190,17 @@ function VehiculosTabla() {
             </div>
           </section>
 
+          <section className="w-full flex justify-end mt-2 mx-4">
+            <CallToActionButton
+              type="button"
+              handleSubmit={() => {
+                window.location.href = "/informes";
+              }}
+            >
+              Ver informes
+            </CallToActionButton>
+          </section>
+
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-auto">
             {vehiculosFiltrados.length === 0 ? (
               <p className="text-center text-cerulean-600 font-bold">

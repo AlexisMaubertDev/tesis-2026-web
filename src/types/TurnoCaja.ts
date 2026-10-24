@@ -16,7 +16,9 @@ export interface TurnoCajaCerrado {
   total_efectivo: number | null;
   total_mp: number | null;
   total: number | null;
-  observaciones: string | null;
+  /** Arqueo de cierre (RF14/CU08). */
+  numero_sobre: string | null;
+  efectivo_contado: number | null;
   incidencias: string | null;
   Caja?: CajaDelTurno | null;
   Usuario?: Pick<Usuario, "id" | "nombre" | "apellido" | "dni" | "rol"> | null;
@@ -32,5 +34,12 @@ export interface TurnoCajaDetalle {
     total: number;
     efectivo: number;
     mp: number;
+  };
+  /** Arqueo del cierre: efectivo esperado vs. contado (RF14/CU08). */
+  arqueo: {
+    numero_sobre: string | null;
+    efectivoEsperado: number;
+    efectivoContado: number | null;
+    diferencia: number | null;
   };
 }
