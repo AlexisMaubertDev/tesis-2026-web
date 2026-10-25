@@ -11,16 +11,32 @@ import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import type {
   Informe,
+  InformeAcarreos,
   InformeCobros,
   InformeMovimientos,
   MovimientoInforme,
   PlayeroInforme,
 } from "../../../types/Informe";
 import GenerarInformeModal from "../components/GenerarInformeModal";
+import InformeAcarreosTable from "../components/InformeAcarreosTable";
 import InformeCobrosTable from "../components/InformeCobrosTable";
 import InformeFinTurnoCard from "../components/InformeFinTurnoCard";
 import InformeTable from "../components/InformeTable";
 import { abrirInformePdf } from "../services/informesService";
+
+const dosDigitos = (valor: number) => String(valor).padStart(2, "0");
+
+/** Fecha local `AAAA-MM-DD` de un instante ISO devuelto por el servidor. */
+const fechaLocal = (iso: string) => {
+  const fecha = new Date(iso);
+  return `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(fecha.getDate())}`;
+};
+
+/** Hora local `HH:mm` de un instante ISO devuelto por el servidor. */
+const horaLocal = (iso: string) => {
+  const fecha = new Date(iso);
+  return `${dosDigitos(fecha.getHours())}:${dosDigitos(fecha.getMinutes())}`;
+};
 
 /**
  * Agrupa los playeros por turno de barrera (mismo turno/igual asignación)
@@ -65,6 +81,8 @@ export default function InformesPage() {
     ? (informe as InformeMovimientos)
     : null;
   const informeCobros = informe?.tipo === "COBRO" ? (informe as InformeCobros) : null;
+  const informeAcarreos =
+    informe?.tipo === "ACARREO" ? (informe as InformeAcarreos) : null;
 
   const turnosBarrera = useMemo(
     () => (informeMovimientos ? agruparTurnosBarrera(informeMovimientos) : []),
@@ -96,20 +114,23 @@ export default function InformesPage() {
         modo: informe.modo,
         desde:
           informe.modo === "RANGO"
-            ? informe.periodo.desde.slice(0, 10)
+            ? fechaLocal(informe.periodo.desde)
             : undefined,
         hasta:
           informe.modo === "RANGO"
-            ? informe.periodo.hasta.slice(0, 10)
+            ? fechaLocal(informe.periodo.hasta)
             : undefined,
         desdeHora:
           informe.modo === "RANGO"
-            ? informe.periodo.desde.slice(11, 16)
+            ? horaLocal(informe.periodo.desde)
             : undefined,
         hastaHora:
           informe.modo === "RANGO"
-            ? informe.periodo.hasta.slice(11, 16)
+            ? horaLocal(informe.periodo.hasta)
             : undefined,
+        // Conserva el filtro de sucursal elegido por Sistemas al generar el
+        // informe, para que el PDF muestre exactamente lo mismo que la tabla.
+        sucursal: informe.sucursal.id ? informe.sucursal.nombre : undefined,
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -306,6 +327,61 @@ export default function InformesPage() {
                 <InformeCobrosTable
                   cobros={informeCobros.movimientos}
                   etiquetaFecha={informeCobros.etiquetaFecha}
+                />
+              </section>
+            </>
+          )}
+
+          {informeAcarreos && (
+            <>
+              <section className="w-full mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="rounded-lg bg-cerulean-100 shadow p-3">
+                  <p className="text-[10px] font-bold uppercase text-cerulean-700">
+                    Tipo de informe
+                  </p>
+                  <p className="text-sm font-bold">{informeAcarreos.titulo}</p>
+                </div>
+                <div className="rounded-lg bg-cerulean-100 shadow p-3">
+                  <p className="text-[10px] font-bold uppercase text-cerulean-700">
+                    Período
+                  </p>
+                  <p className="text-sm font-bold">
+                    {informeAcarreos.periodo.descripcion}
+                  </p>
+                  <p className="text-[10px] text-cerulean-700">
+                    {formatDateFullWithHs(informeAcarreos.periodo.desde)} →{" "}
+                    {formatDateFullWithHs(informeAcarreos.periodo.hasta)}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-cerulean-100 shadow p-3">
+                  <p className="text-[10px] font-bold uppercase text-cerulean-700">
+                    Acarreos
+                  </p>
+                  <p className="text-sm font-bold">
+                    {informeAcarreos.totales.cantidad}
+                  </p>
+                  <p className="text-[10px] text-cerulean-700">
+                    Cobrados {informeAcarreos.totales.cobrados} · Sin cargo{" "}
+                    {informeAcarreos.totales.sinCargo}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-cerulean-100 shadow p-3">
+                  <p className="text-[10px] font-bold uppercase text-cerulean-700">
+                    En playa
+                  </p>
+                  <p className="text-sm font-bold">
+                    {informeAcarreos.totales.enPlaya}
+                  </p>
+                  <p className="text-[10px] text-cerulean-700">
+                    Egresados {informeAcarreos.totales.egresados}
+                  </p>
+                </div>
+              </section>
+
+              <section className="w-full mt-4">
+                <InformeAcarreosTable
+                  acarreos={informeAcarreos.movimientos}
+                  etiquetaFecha={informeAcarreos.etiquetaFecha}
                 />
               </section>
             </>

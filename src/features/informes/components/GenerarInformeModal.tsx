@@ -33,7 +33,8 @@ const OPCIONES_MODO = [
  * Movimientos de autos (RF19/RF20): el flujo es el de la documentación fuente
  * (CU10 / CU11): se elige el tipo (entrada/salida) y el período (turno actual o
  * rango). Cobros (RF21/CU12): el mismo flujo con el tipo "cobros realizados".
- * El "turno actual" lo resuelve el servidor según el rol del usuario.
+ * Acarreos: listado operativo de los acarreos del período. El "turno actual"
+ * lo resuelve el servidor según el rol del usuario.
  */
 export default function GenerarInformeModal({
   open,
@@ -46,6 +47,7 @@ export default function GenerarInformeModal({
   const opcionesTipo = [
     { value: "ENTRADA", label: "Entrada de vehículos (ingresos)" },
     { value: "SALIDA", label: "Salida de vehículos (egresos)" },
+    { value: "ACARREO", label: "Acarreos realizados" },
     ...(puedeVerCobros
       ? [{ value: "COBRO", label: "Cobros realizados" }]
       : []),

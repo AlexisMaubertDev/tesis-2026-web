@@ -26,8 +26,8 @@ const aQuery = (params: ParametrosInforme) => {
 };
 
 /**
- * Pide los datos del informe (movimientos de autos o cobros) al servidor.
- * El servidor resuelve el "turno actual" según el rol del usuario.
+ * Pide los datos del informe (movimientos de autos, cobros o acarreos) al
+ * servidor. El servidor resuelve el "turno actual" según el rol del usuario.
  */
 export const obtenerMovimientos = async (
   token: string,

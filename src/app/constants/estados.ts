@@ -11,3 +11,16 @@ export const ESTADOS_ACARREO: EstadoAcarreo[] = [
   "EGRESADO",
   "SIN_CARGO",
 ];
+
+/** Etiquetas legibles de los estados del acarreo, para tablas e informes. */
+export const ETIQUETAS_ESTADO_ACARREO: Record<EstadoAcarreo, string> = {
+  ACARREADO: "Acarreado",
+  INGRESADO: "En playa",
+  COBRADO: "Cobrado",
+  EGRESADO: "Egresado",
+  SIN_CARGO: "Sin cargo",
+};
+
+export const etiquetaEstadoAcarreo = (
+  estado: EstadoAcarreo | null | undefined,
+) => (estado ? ETIQUETAS_ESTADO_ACARREO[estado] : "-");

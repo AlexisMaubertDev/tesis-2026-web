@@ -6,10 +6,12 @@
  * eso es RF21 (los cobros).
  */
 
+import type { EstadoAcarreo } from "./Vehiculo";
+
 export type TipoMovimiento = "ENTRADA" | "SALIDA";
 
 /** Tipos de informe que ofrece el módulo. */
-export type TipoInforme = TipoMovimiento | "COBRO";
+export type TipoInforme = TipoMovimiento | "COBRO" | "ACARREO";
 
 export type ModoInforme = "TURNO" | "RANGO";
 
@@ -139,8 +141,65 @@ export interface InformeCobros {
   totales: TotalesCobros;
 }
 
+/** Un acarreo realizado en el período (informe de acarreos). */
+export interface AcarreoInforme {
+  id: string;
+  fecha: string;
+  patente: string;
+  marca: string | null;
+  modelo: string | null;
+  color: string | null;
+  estado: EstadoAcarreo | null;
+  motivo: string | null;
+  direccion: string | null;
+  numero_acta: number | null;
+  tuvo_siniestro: boolean | null;
+  fue_denuncia: boolean | null;
+  sucursal: string | null;
+  grua: {
+    id: string;
+    patente: string;
+    numero: number | null;
+  } | null;
+  chofer: string | null;
+  enganchador: string | null;
+  supervisor: string | null;
+  personal: string | null;
+  turno_grua: {
+    id: string;
+    turno: string;
+    fecha_inicio: string;
+    fecha_fin: string | null;
+  } | null;
+}
+
+export interface TotalesAcarreos {
+  cantidad: number;
+  enPlaya: number;
+  cobrados: number;
+  sinCargo: number;
+  egresados: number;
+}
+
+/** Informe operativo de acarreos realizados en el período. */
+export interface InformeAcarreos {
+  tipo: "ACARREO";
+  modo: ModoInforme;
+  titulo: string;
+  etiquetaFecha: string;
+  sucursales: { id: string; nombre: string }[];
+  sucursal: { id: string | null; nombre: string };
+  periodo: {
+    desde: string;
+    hasta: string;
+    descripcion: string;
+  };
+  movimientos: AcarreoInforme[];
+  totales: TotalesAcarreos;
+}
+
 /** Un informe cualquiera, discriminado por `tipo`. */
-export type Informe = InformeMovimientos | InformeCobros;
+export type Informe = InformeMovimientos | InformeCobros | InformeAcarreos;
 
 export type ParametrosInforme = {
   tipo: TipoInforme;
