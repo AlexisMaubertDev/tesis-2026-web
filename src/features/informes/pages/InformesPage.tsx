@@ -89,11 +89,11 @@ export default function InformesPage() {
     [informeMovimientos],
   );
 
-  // El informe de cobros (RF21) lo ven Cajero, Supervisor y Sistemas.
+  // El informe de cobros y el de acarreos los ven Supervisor y Sistemas.
   const puedeVerCobros =
-    usuario?.rol === "CAJERO" ||
-    usuario?.rol === "SUPERVISOR" ||
-    usuario?.rol === "SISTEMAS";
+    usuario?.rol === "SUPERVISOR" || usuario?.rol === "SISTEMAS";
+  const puedeVerAcarreos =
+    usuario?.rol === "SUPERVISOR" || usuario?.rol === "SISTEMAS";
 
   // El informe detallado de fin de turno es sólo para supervisor y sistemas.
   const puedeVerFinTurno =
@@ -402,6 +402,7 @@ export default function InformesPage() {
           token={token}
           esSistemas={usuario.rol === "SISTEMAS"}
           puedeVerCobros={puedeVerCobros}
+          puedeVerAcarreos={puedeVerAcarreos}
           onGenerado={setInforme}
         />
       </MainLayout>

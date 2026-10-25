@@ -17,8 +17,10 @@ type Props = {
   token: string | null;
   /** Sistemas administra todas las sucursales: puede filtrar por una. */
   esSistemas: boolean;
-  /** El informe de cobros (RF21) lo ven Cajero, Supervisor y Sistemas. */
+  /** El informe de cobros (RF21) lo ven Supervisor y Sistemas. */
   puedeVerCobros: boolean;
+  /** El informe de acarreos lo ven Supervisor y Sistemas. */
+  puedeVerAcarreos: boolean;
   onGenerado: (informe: Informe) => void;
 };
 
@@ -42,12 +44,15 @@ export default function GenerarInformeModal({
   token,
   esSistemas,
   puedeVerCobros,
+  puedeVerAcarreos,
   onGenerado,
 }: Props) {
   const opcionesTipo = [
     { value: "ENTRADA", label: "Entrada de vehículos (ingresos)" },
     { value: "SALIDA", label: "Salida de vehículos (egresos)" },
-    { value: "ACARREO", label: "Acarreos realizados" },
+    ...(puedeVerAcarreos
+      ? [{ value: "ACARREO", label: "Acarreos realizados" }]
+      : []),
     ...(puedeVerCobros
       ? [{ value: "COBRO", label: "Cobros realizados" }]
       : []),
