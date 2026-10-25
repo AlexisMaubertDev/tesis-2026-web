@@ -46,51 +46,75 @@ export default function AsignarGruaModal({
   // defecto el turno del supervisor si todavía no se eligió ninguno.
   const prioridadTurno = formData.turno || String(usuario?.numero_turno ?? "");
 
-  // Opciones de grueros agrupadas: primero los del turno prioritario (y dentro
-  // de ellos, los de la sucursal de la grúa), y después el resto. Se mantiene
-  // la agrupación por Sucursal dentro de cada bloque.
+  // Opciones de grueros ordenadas por prioridad:
+  // 1) Rol GRUERO, mismo turno Y misma sucursal que la grúa (prioritarios).
+  // 2) Misma sucursal que la grúa pero distinto turno (separados por turno).
+  // 3) Resto de sucursales, agrupadas por sucursal y dentro ordenadas por turno.
   const opcionesGrueros = useMemo(() => {
     const esDeLaSucursalDeLaGrua = (u: Usuario) =>
       !!grua?.Sucursal?.id && u.Sucursal?.id === grua.Sucursal.id;
 
-    const porSucursalYLegajo = (a: Usuario, b: Usuario) => {
-      const sa = a.Sucursal?.nombre ?? "Sin Sucursal";
-      const sb = b.Sucursal?.nombre ?? "Sin Sucursal";
-      if (sa !== sb) return sa.localeCompare(sb);
-      return String(a.legajo).localeCompare(String(b.legajo));
+    const sucursalNombre = (u: Usuario) => u.Sucursal?.nombre || "Sin Sucursal";
+
+    const etiquetaTurno = (t: string | number) =>
+      getTurnoLabel(String(t));
+
+    // Solo grueros disponibles.
+    const grueros = usuariosFiltrados.filter((u) => u.rol === "GRUERO");
+
+    // Asigna un "tier" de prioridad a cada usuario.
+    const tierDe = (u: Usuario): number => {
+      const mismoTurno = String(u.numero_turno) === prioridadTurno;
+      if (esDeLaSucursalDeLaGrua(u) && mismoTurno) return 0; // prioridad máxima
+      if (esDeLaSucursalDeLaGrua(u)) return 1; // misma sucursal, otro turno
+      return 2; // otras sucursales
     };
 
-    const prioritarios = usuariosFiltrados
-      .filter((u) => String(u.numero_turno) === prioridadTurno)
-      .sort((a, b) => {
-        // La sucursal de la grúa primero; después el resto por sucursal.
-        if (esDeLaSucursalDeLaGrua(a) !== esDeLaSucursalDeLaGrua(b)) {
-          return esDeLaSucursalDeLaGrua(a) ? -1 : 1;
-        }
-        return porSucursalYLegajo(a, b);
-      });
+    const ordenados = [...grueros].sort((a, b) => {
+      const ta = tierDe(a);
+      const tb = tierDe(b);
+      if (ta !== tb) return ta - tb;
 
-    const otros = usuariosFiltrados
-      .filter((u) => String(u.numero_turno) !== prioridadTurno)
-      .sort(porSucursalYLegajo);
+      // Tier 0 y 1: sucursal de la grúa (ya garantizada), ordenar por turno.
+      if (ta === 1) {
+        if (a.numero_turno !== b.numero_turno)
+          return a.numero_turno - b.numero_turno;
+      }
 
-    const etiquetaTurno = prioridadTurno
-      ? getTurnoLabel(prioridadTurno)
-      : "este turno";
+      // Tier 2: agrupar por sucursal, luego por turno.
+      if (ta === 2) {
+        const sa = sucursalNombre(a);
+        const sb = sucursalNombre(b);
+        if (sa !== sb) return sa.localeCompare(sb);
+        if (a.numero_turno !== b.numero_turno)
+          return a.numero_turno - b.numero_turno;
+      }
 
-    const aOpcion = (u: Usuario, bloque: "prioritario" | "otro") => ({
-      value: u.id,
-      label: `${u.nombre} ${u.apellido}`,
-      group:
-        bloque === "prioritario"
-          ? `${etiquetaTurno} — ${u.Sucursal?.nombre || "Sin Sucursal"}`
-          : `Otros turnos — ${u.Sucursal?.nombre || "Sin Sucursal"}`,
+      // Desempate final por legajo.
+      return String(a.legajo).localeCompare(String(b.legajo));
     });
 
-    return [
-      ...prioritarios.map((u) => aOpcion(u, "prioritario")),
-      ...otros.map((u) => aOpcion(u, "otro")),
-    ];
+    // Etiqueta de grupo para el SelectInput (optgroup).
+    const grupoDe = (u: Usuario): string => {
+      const t = tierDe(u);
+      const turnoLbl = etiquetaTurno(u.numero_turno);
+      const suc = sucursalNombre(u);
+
+      if (t === 0) {
+        return `${prioridadTurno ? getTurnoLabel(prioridadTurno) : "Este turno"} — ${suc}`;
+      }
+      if (t === 1) {
+        return `${turnoLbl} — ${suc}`;
+      }
+      // t === 2: agrupado por sucursal, turno como sub-etiqueta.
+      return `${suc} — ${turnoLbl}`;
+    };
+
+    return ordenados.map((u) => ({
+      value: u.id,
+      label: `${u.nombre} ${u.apellido}`,
+      group: grupoDe(u),
+    }));
   }, [usuariosFiltrados, prioridadTurno, grua]);
 
   const handleClose = () => {
