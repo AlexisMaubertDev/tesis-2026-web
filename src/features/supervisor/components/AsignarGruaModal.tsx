@@ -42,17 +42,23 @@ export default function AsignarGruaModal({
 
   const [error, setError] = useState<string | null>(null);
 
-  // Turno que define el grupo prioritario: el seleccionado en el modal, o por
-  // defecto el turno del supervisor si todavía no se eligió ninguno.
-  const prioridadTurno = formData.turno || String(usuario?.numero_turno ?? "");
+  // El grupo prioritario siempre usa el turno del supervisor activo.
+  const prioridadTurno = String(usuario?.numero_turno ?? "");
 
   // Opciones de grueros ordenadas:
-  // 1) Misma sucursal que la grúa Y mismo turno que prioridadTurno.
-  // 2) Misma sucursal que la grúa, pero distinto turno.
-  // 3) El resto, ordenados por sucursal y luego por turno.
+  // 1) Misma sucursal que la grúa Y mismo turno que el supervisor activo.
+  // 2) Misma sucursal que la grúa, pero distinto turno (separados por turno).
+  // 3) Resto de sucursales, agrupadas por sucursal y ordenadas por turno.
   const opcionesGrueros = useMemo(() => {
-    const esDeLaSucursalDeLaGrua = (u: Usuario) =>
-      !!grua?.Sucursal?.id && u.Sucursal?.id === grua.Sucursal.id;
+    const esDeLaSucursalDeLaGrua = (u: Usuario) => {
+      if (!grua?.Sucursal) return false;
+      // El endpoint puede devolver la Sucursal sin id; en ese caso comparamos
+      // por nombre para no perder la prioridad.
+      if (u.Sucursal?.id && grua.Sucursal.id) {
+        return u.Sucursal.id === grua.Sucursal.id;
+      }
+      return u.Sucursal?.nombre === grua.Sucursal.nombre;
+    };
 
     const sucursalNombre = (u: Usuario) => u.Sucursal?.nombre || "Sin Sucursal";
 
