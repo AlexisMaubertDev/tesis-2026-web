@@ -164,7 +164,9 @@ function VehiculosTabla() {
     setVehiculosFiltrados(aplicarFiltros(vehiculos, search, filtros));
 
   const generarPdf = async () => {
-    if (!token || generandoPdf) return;
+    // Sin resultados no hay nada que imprimir: el botón también queda
+    // deshabilitado, pero se protege el handler por si se dispara por otra vía.
+    if (!token || generandoPdf || vehiculosFiltrados.length === 0) return;
 
     setGenerandoPdf(true);
 
@@ -220,7 +222,7 @@ function VehiculosTabla() {
               <CallToActionButton
                 type="button"
                 handleSubmit={generarPdf}
-                disabled={generandoPdf}
+                disabled={generandoPdf || vehiculosFiltrados.length === 0}
                 className="whitespace-nowrap"
               >
                 {generandoPdf ? "Generando..." : "Generar PDF"}
