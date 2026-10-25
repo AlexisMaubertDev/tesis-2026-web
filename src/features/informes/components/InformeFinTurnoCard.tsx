@@ -20,7 +20,7 @@ const OPCIONES_PERIODO = [
 ];
 
 const CLASE_INPUT =
-  "rounded-lg border border-cerulean-700 bg-cerulean-50 px-2 py-1 text-xs focus-visible:outline-2 focus-visible:outline-cerulean-500";
+  "w-full rounded-lg border border-cerulean-700 bg-cerulean-50 p-2 text-xs focus-visible:outline-2 focus-visible:outline-cerulean-500";
 
 /** Fecha de hoy en formato `yyyy-MM-dd` (hora local del navegador). */
 const fechaDeHoy = () => {
