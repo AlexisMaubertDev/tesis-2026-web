@@ -238,7 +238,7 @@ export default function SupervisorPage() {
                 Cajas
               </h1>
             </div>
-            <ul className="flex justify-start items-start lg:items-center w-full gap-4">
+            <ul className="flex justify-start items-start w-full gap-4 flex-wrap">
               {cajas.map((caja) => (
                 <li
                   key={caja.id}
@@ -293,7 +293,7 @@ export default function SupervisorPage() {
                 </CallToActionButton>
               )}
             </div>
-            <ul className="flex justify-start items-start lg:items-center w-full gap-4">
+            <ul className="flex justify-start items-start w-full gap-4 flex-wrap">
               {gruas.map((grua) => (
                 <li
                   key={grua.id}
