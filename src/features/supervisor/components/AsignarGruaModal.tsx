@@ -46,10 +46,10 @@ export default function AsignarGruaModal({
   // defecto el turno del supervisor si todavía no se eligió ninguno.
   const prioridadTurno = formData.turno || String(usuario?.numero_turno ?? "");
 
-  // Opciones de grueros:
-  // - Si no hay turno seleccionado en el form, prioridadTurno = turno del supervisor.
-  // - Prioritarios: grueros de la sucursal de LA GRUA con el turno prioritario.
-  // - El resto se agrupa por sucursal y, dentro, por turno.
+  // Opciones de grueros ordenadas:
+  // 1) Misma sucursal que la grúa Y mismo turno que prioridadTurno.
+  // 2) Misma sucursal que la grúa, pero distinto turno.
+  // 3) El resto, ordenados por sucursal y luego por turno.
   const opcionesGrueros = useMemo(() => {
     const esDeLaSucursalDeLaGrua = (u: Usuario) =>
       !!grua?.Sucursal?.id && u.Sucursal?.id === grua.Sucursal.id;
@@ -58,53 +58,57 @@ export default function AsignarGruaModal({
 
     const grueros = usuariosFiltrados.filter((u) => u.rol === "GRUERO");
 
-    const prioritarios = grueros
-      .filter(
-        (u) =>
-          esDeLaSucursalDeLaGrua(u) &&
-          String(u.numero_turno) === prioridadTurno,
-      )
-      .sort((a, b) =>
-        String(a.legajo).localeCompare(String(b.legajo)),
-      );
+    const tierDe = (u: Usuario): number => {
+      const mismoTurno = String(u.numero_turno) === prioridadTurno;
+      if (esDeLaSucursalDeLaGrua(u) && mismoTurno) return 0;
+      if (esDeLaSucursalDeLaGrua(u)) return 1;
+      return 2;
+    };
 
-    const otros = grueros
-      .filter(
-        (u) =>
-          !(
-            esDeLaSucursalDeLaGrua(u) &&
-            String(u.numero_turno) === prioridadTurno
-          ),
-      )
-      .sort((a, b) => {
+    const ordenados = [...grueros].sort((a, b) => {
+      const ta = tierDe(a);
+      const tb = tierDe(b);
+      if (ta !== tb) return ta - tb;
+
+      // Tier 1: ordenar por turno.
+      if (ta === 1) {
+        if (a.numero_turno !== b.numero_turno)
+          return a.numero_turno - b.numero_turno;
+      }
+
+      // Tier 2: ordenar por sucursal, luego por turno.
+      if (ta === 2) {
         const sa = sucursalNombre(a);
         const sb = sucursalNombre(b);
         if (sa !== sb) return sa.localeCompare(sb);
         if (a.numero_turno !== b.numero_turno)
           return a.numero_turno - b.numero_turno;
-        return String(a.legajo).localeCompare(String(b.legajo));
-      });
+      }
 
-    const etiquetaPrioritaria = prioridadTurno
-      ? getTurnoLabel(prioridadTurno)
-      : "Este turno";
+      return String(a.legajo).localeCompare(String(b.legajo));
+    });
 
-    const grupoPrioritario = `${etiquetaPrioritaria} — ${
-      grua?.Sucursal?.nombre || "Sucursal de la grúa"
-    }`;
+    const grupoDe = (u: Usuario): string => {
+      const t = tierDe(u);
+      const turnoLbl = getTurnoLabel(String(u.numero_turno));
+      const suc = sucursalNombre(u);
 
-    return [
-      ...prioritarios.map((u) => ({
-        value: u.id,
-        label: `${u.nombre} ${u.apellido}`,
-        group: grupoPrioritario,
-      })),
-      ...otros.map((u) => ({
-        value: u.id,
-        label: `${u.nombre} ${u.apellido}`,
-        group: `${sucursalNombre(u)} — ${getTurnoLabel(String(u.numero_turno))}`,
-      })),
-    ];
+      if (t === 0) {
+        return `${prioridadTurno ? getTurnoLabel(prioridadTurno) : "Este turno"} — ${
+          grua?.Sucursal?.nombre || "Sucursal de la grúa"
+        }`;
+      }
+      if (t === 1) {
+        return `${turnoLbl} — ${grua?.Sucursal?.nombre || "Sucursal de la grúa"}`;
+      }
+      return `${suc} — ${turnoLbl}`;
+    };
+
+    return ordenados.map((u) => ({
+      value: u.id,
+      label: `${u.nombre} ${u.apellido}`,
+      group: grupoDe(u),
+    }));
   }, [usuariosFiltrados, prioridadTurno, grua]);
 
   const handleClose = () => {
