@@ -56,7 +56,7 @@ export default function AsignarGruaModal({
 
     const sucursalNombre = (u: Usuario) => u.Sucursal?.nombre || "Sin Sucursal";
 
-    const grueros = usuariosFiltrados.filter((u) => u.rol === "GRUERO");
+    const grueros = usuariosFiltrados;
 
     const tierDe = (u: Usuario): number => {
       const mismoTurno = String(u.numero_turno) === prioridadTurno;
@@ -72,8 +72,8 @@ export default function AsignarGruaModal({
 
       // Tier 1: ordenar por turno.
       if (ta === 1) {
-        if (a.numero_turno !== b.numero_turno)
-          return a.numero_turno - b.numero_turno;
+        if (Number(a.numero_turno) !== Number(b.numero_turno))
+          return Number(a.numero_turno) - Number(b.numero_turno);
       }
 
       // Tier 2: ordenar por sucursal, luego por turno.
@@ -81,8 +81,8 @@ export default function AsignarGruaModal({
         const sa = sucursalNombre(a);
         const sb = sucursalNombre(b);
         if (sa !== sb) return sa.localeCompare(sb);
-        if (a.numero_turno !== b.numero_turno)
-          return a.numero_turno - b.numero_turno;
+        if (Number(a.numero_turno) !== Number(b.numero_turno))
+          return Number(a.numero_turno) - Number(b.numero_turno);
       }
 
       return String(a.legajo).localeCompare(String(b.legajo));
