@@ -20,6 +20,7 @@ import CierresCajaPage from "../features/cajeros/pages/CierresCajaPage.tsx";
 import CobroPage from "../features/cobros/pages/CobroPage.tsx";
 import TarifasPage from "../features/tarifas/pages/TarifasPage.tsx";
 import InformesPage from "../features/informes/pages/InformesPage.tsx";
+import OfflinePage from "../pages/OfflinePage.tsx";
 import AcercaDe from "../pages/AcercaDe.tsx";
 
 export default function AppRoutes() {
@@ -182,6 +183,14 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <InformesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/offline"
+          element={
+            <ProtectedRoute>
+              <OfflinePage />
             </ProtectedRoute>
           }
         />

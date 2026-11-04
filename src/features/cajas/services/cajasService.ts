@@ -1,22 +1,33 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 import type { CajaForm } from "../components/CajaModal";
 
 export const obtenerCajas = async (token: string) => {
-  const res = await api.get("/cajas", {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: "cajas",
+    fetcher: async () => {
+      const res = await api.get("/cajas", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 
 export const obtenerCajasSucursal = async (token: string, id: string) => {
-  const res = await api.get(`/cajas/sucursal/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: `cajas:sucursal:${id}`,
+    fetcher: async () => {
+      const res = await api.get(`/cajas/sucursal/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 
 export const crearCaja = async (token: string, data: CajaForm) => {

@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 
 export type NuevaTarifa = {
   acarreo: number;
@@ -7,18 +8,28 @@ export type NuevaTarifa = {
 
 /** Historial completo de tarifas (la vigente primero). */
 export const obtenerTarifas = async (token: string) => {
-  const res = await api.get("/tarifas", {
-    headers: { Authorization: `Bearer ${token}` },
+  return obtenerConCache({
+    key: "tarifas",
+    fetcher: async () => {
+      const res = await api.get("/tarifas", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
   });
-  return res.data;
 };
 
 /** Tarifa vigente (o `data: null` si todavía no se configuró ninguna). */
 export const obtenerTarifaVigente = async (token: string) => {
-  const res = await api.get("/tarifas/vigente", {
-    headers: { Authorization: `Bearer ${token}` },
+  return obtenerConCache({
+    key: "tarifas:vigente",
+    fetcher: async () => {
+      const res = await api.get("/tarifas/vigente", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
   });
-  return res.data;
 };
 
 /**

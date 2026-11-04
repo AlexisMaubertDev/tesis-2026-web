@@ -1,6 +1,11 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import authReducer, { logout } from "./authSlice.ts";
+import authReducer, {
+  logout,
+  marcarSesionValida,
+  marcarSesionVencida,
+} from "./authSlice.ts";
 import snackbarReducer from "./snackbarSlice.ts";
+import offlineReducer from "./offlineSlice.ts";
 import { isTokenExpired } from "../utils/token.ts";
 import {
   persistStore,
@@ -24,12 +29,15 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  blacklist: ["snackbar"],
+  // `offline` es estado de ejecución (conectividad, contadores): se recalcula
+  // al abrir la app y no tiene sentido persistirlo.
+  blacklist: ["snackbar", "offline"],
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
   snackbar: snackbarReducer,
+  offline: offlineReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -46,12 +54,25 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store, null, () => {
-  // Una vez rehidratada la sesión: si el token guardado ya venció, se cierra en
-  // el cliente. Si no, el usuario queda "logueado" con un token muerto y toda
-  // acción (incluso cerrar sesión) falla con 401.
-  const { token } = store.getState().auth;
+  // Una vez rehidratada la sesión: si el token guardado ya venció, no se cierra
+  // la sesión. Se marca `sessionExpired` para entrar en modo lectura con la
+  // caché local y pedir un re-login al operar. Así no se pierde la outbox ni
+  // los datos guardados en el dispositivo.
+  const { token, usuario, sessionExpired } = store.getState().auth;
+
   if (token && isTokenExpired(token)) {
-    store.dispatch(logout());
+    if (usuario) {
+      store.dispatch(marcarSesionVencida());
+    } else {
+      store.dispatch(logout());
+    }
+    return;
+  }
+
+  // Si el token sigue vigente, un vencimiento marcado antes (por un 401
+  // transitorio) no debe dejar la app en modo lectura para siempre.
+  if (token && usuario && sessionExpired) {
+    store.dispatch(marcarSesionValida());
   }
 });
 

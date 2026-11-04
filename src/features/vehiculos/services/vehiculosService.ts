@@ -1,13 +1,19 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 import type { Vehiculo } from "../../../types/Vehiculo";
 
 export const obtenerVehiculos = async (token: string) => {
-  const res = await api.get("/vehiculos", {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: "vehiculos",
+    fetcher: async () => {
+      const res = await api.get("/vehiculos", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 
 export type FiltrosInformeVehiculos = {
@@ -97,12 +103,22 @@ export const obtenerAcarreosPorPatente = async (
   token: string,
   patente: string,
 ) => {
-  const res = await api.get(`/acarreos/patente/${encodeURIComponent(patente)}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const patenteNormalizada = patente.trim().toUpperCase();
+
+  return obtenerConCache({
+    key: `acarreos:patente:${patenteNormalizada}`,
+    fetcher: async () => {
+      const res = await api.get(
+        `/acarreos/patente/${encodeURIComponent(patenteNormalizada)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      return res.data;
     },
   });
-  return res.data;
 };
 
 /**

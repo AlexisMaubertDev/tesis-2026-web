@@ -10,17 +10,22 @@ import TextInput from "../../../components/ui/TextInput";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSnackbar, showError } from "../../../app/store/snackbarSlice";
 import type { RootState } from "../../../app/store";
+import { clasificarError } from "../../../app/offline/errors";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ dni: null, password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const { usuario } = useSelector((state: RootState) => state.auth);
+  const { usuario, sessionExpired } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const { login } = useAuth();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  if (usuario) {
+  // Con la sesión vencida se deja ver el login aunque haya un usuario
+  // guardado: es la forma de reconectar sin perder la caché ni la outbox.
+  if (usuario && !sessionExpired) {
     return <Navigate to="/" />;
   }
 
@@ -45,10 +50,13 @@ export default function LoginPage() {
       navigate("/");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      const sinRed = clasificarError(err) === "network";
       dispatch(
         showError(
           err.response?.data?.message ||
-            "Error en el servidor. Intenta nuevamente más tarde.",
+            (sinRed
+              ? "No hay conexión con el servidor. Para iniciar sesión necesitás reconectarte."
+              : "Error en el servidor. Intenta nuevamente más tarde."),
         ),
       );
     } finally {
@@ -73,6 +81,12 @@ export default function LoginPage() {
           <p className="text-center text-xs">
             Por favor, ingresa tu DNI y contraseña
           </p>
+          {sessionExpired && (
+            <p className="text-center text-xs text-scarlet-rush-700 bg-scarlet-rush-100 rounded p-2">
+              Tu sesión venció. Ingresá de nuevo para sincronizar los cambios
+              pendientes; los datos guardados siguen disponibles.
+            </p>
+          )}
           <div className="flex flex-col gap-2">
             <TextInput
               type="number"

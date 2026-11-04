@@ -1,19 +1,30 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 
 export const obtenerBarreras = async (token: string) => {
-  const res = await api.get("/barreras", {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: "barreras",
+    fetcher: async () => {
+      const res = await api.get("/barreras", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 
 export const obtenerBarrerasSucursal = async (token: string, id: string) => {
-  const res = await api.get(`/barreras/sucursal/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return obtenerConCache({
+    key: `barreras:sucursal:${id}`,
+    fetcher: async () => {
+      const res = await api.get(`/barreras/sucursal/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
   });
-  return res.data;
 };
 
 /**
@@ -21,10 +32,15 @@ export const obtenerBarrerasSucursal = async (token: string, id: string) => {
  * Devuelve `null` en `data` si el playero no tiene una barrera asignada.
  */
 export const obtenerMiTurnoBarrera = async (token: string) => {
-  const res = await api.get("/barreras/mi-turno", {
-    headers: { Authorization: `Bearer ${token}` },
+  return obtenerConCache({
+    key: "barreras:mi-turno",
+    fetcher: async () => {
+      const res = await api.get("/barreras/mi-turno", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data;
+    },
   });
-  return res.data;
 };
 
 export const asignarBarrera = async (

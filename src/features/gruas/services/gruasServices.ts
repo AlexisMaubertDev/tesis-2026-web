@@ -1,14 +1,20 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 import type { Grua, Turno_Grua } from "../../../types/Grua";
 import type { GruaForm } from "../components/GruaModal";
 
 export const obtenerGruas = async (token: string) => {
-  const res = await api.get("/gruas", {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: "gruas",
+    fetcher: async () => {
+      const res = await api.get("/gruas", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 export const crearGrua = async (token: string, data: GruaForm) => {
   const response = await api.post("/gruas", data, {
@@ -21,12 +27,17 @@ export const crearGrua = async (token: string, data: GruaForm) => {
 };
 
 export const obtenerGruasSucursal = async (token: string, id: string) => {
-  const res = await api.get(`/gruas/sucursal/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  return obtenerConCache({
+    key: `gruas:sucursal:${id}`,
+    fetcher: async () => {
+      const res = await api.get(`/gruas/sucursal/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return res.data;
     },
   });
-  return res.data;
 };
 
 export const asignarGrua = async (token: string, data: Turno_Grua) => {

@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { obtenerConCache } from "../../../app/offline/cache";
 import type { Tarifa } from "../../../types/Tarifa";
 import type { CobrosDelTurno } from "../../../types/Cobro";
 
@@ -50,10 +51,19 @@ export const crearCobro = async (token: string, cobro: NuevoCobro) => {
  * los totales del turno). Si no hay turno abierto devuelve la lista vacía.
  */
 export const obtenerCobrosDeMiTurno = async (token: string) => {
-  const res = await api.get("/cobros/mi-turno", {
-    headers: { Authorization: `Bearer ${token}` },
+  return obtenerConCache({
+    key: "cobros:mi-turno",
+    fetcher: async () => {
+      const res = await api.get("/cobros/mi-turno", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.data as {
+        success: boolean;
+        data: CobrosDelTurno;
+        message: string;
+      };
+    },
   });
-  return res.data as { success: boolean; data: CobrosDelTurno; message: string };
 };
 
 /**

@@ -5,6 +5,7 @@ import type { Turno_Caja } from "../../types/Usuario";
 const initialState: AuthState = {
   usuario: null,
   token: null,
+  sessionExpired: false,
 };
 
 const authSlice = createSlice({
@@ -23,10 +24,19 @@ const authSlice = createSlice({
 
       state.usuario = usuario;
       state.token = token;
+      state.sessionExpired = false;
     },
     logout: (state) => {
       state.usuario = null;
       state.token = null;
+      state.sessionExpired = false;
+    },
+    /** El servidor rechazó el token: se conserva la sesión en modo lectura. */
+    marcarSesionVencida: (state) => {
+      if (state.usuario) state.sessionExpired = true;
+    },
+    marcarSesionValida: (state) => {
+      state.sessionExpired = false;
     },
     empezarTurnoCaja: (state, action: PayloadAction<Turno_Caja>) => {
       if (state.usuario) {
@@ -43,6 +53,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, logout, empezarTurnoCaja, terminarTurnoCaja } =
-  authSlice.actions;
+export const {
+  loginSuccess,
+  logout,
+  marcarSesionVencida,
+  marcarSesionValida,
+  empezarTurnoCaja,
+  terminarTurnoCaja,
+} = authSlice.actions;
 export default authSlice.reducer;
