@@ -181,10 +181,14 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
 
     try {
       if (accion.tipo === "ingresar") {
-        await ingresarAcarreoAPlaya(token!, acarreoId);
+        await ingresarAcarreoAPlaya(token!, acarreoId, {
+          patente: accion.vehiculo?.patente ?? null,
+        });
         dispatch(showSuccess("Vehículo ingresado a la playa con éxito"));
       } else {
-        await egresarAcarreo(token!, acarreoId);
+        await egresarAcarreo(token!, acarreoId, {
+          patente: accion.vehiculo?.patente ?? null,
+        });
         dispatch(showSuccess("Vehículo egresado de la playa con éxito"));
       }
       recargar();

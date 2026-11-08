@@ -212,13 +212,19 @@ export default function CobroPage() {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const respuesta: any = await crearCobro(token!, {
-        id_acarreo: acarreo.id,
-        efectivo: e,
-        mp: m,
-        numero_factura:
-          numeroFactura.trim() === "" ? null : numeroFactura.trim(),
-      });
+      const respuesta: any = await crearCobro(
+        token!,
+        {
+          id_acarreo: acarreo.id,
+          efectivo: e,
+          mp: m,
+          numero_factura:
+            numeroFactura.trim() === "" ? null : numeroFactura.trim(),
+        },
+        // Patente del vehículo: la usa la outbox para resolver el acarreo si
+        // el alta del gruero todavía no llegó al servidor.
+        { patente: acarreo?.Vehiculo?.patente ?? null },
+      );
 
       dispatch(showSuccess("Cobro registrado con éxito"));
       const cobroId = respuesta?.data?.cobro?.id;

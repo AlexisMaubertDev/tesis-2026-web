@@ -1,5 +1,6 @@
 import api from "../../../services/api";
 import { obtenerConCache } from "../../../app/offline/cache";
+import { escribir } from "../../../app/offline/writes";
 import type { Tarifa } from "../../../types/Tarifa";
 import type { CobrosDelTurno } from "../../../types/Cobro";
 
@@ -38,12 +39,34 @@ export const obtenerPreviewCobro = async (
  * caja abierto del cajero, que el vehículo esté en la playa (INGRESADO),
  * calcula el total con la tarifa vigente y las estadías por reloj, y exige que
  * los medios de pago sumen ese total.
+ *
+ * Modo offline (Fase 4): el cobro va a la outbox (el turno de caja abierto lo
+ * busca el servidor por usuario al sincronizar). Si los importes no coinciden
+ * con el recálculo del server, queda en CONFLICTO para revisión.
  */
-export const crearCobro = async (token: string, cobro: NuevoCobro) => {
-  const res = await api.post("/cobros", cobro, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+export const crearCobro = async (
+  token: string,
+  cobro: NuevoCobro,
+  opciones?: { patente?: string | null },
+) => {
+  return escribir(
+    {
+      tipo: "COBRO",
+      metodo: "POST",
+      ruta: "/cobros",
+      body: cobro,
+      recurso: {
+        tipo: "ACARREO",
+        patente: opciones?.patente ?? "",
+        estadoRequerido: "INGRESADO",
+        id: cobro.id_acarreo ?? null,
+      },
+    },
+    () =>
+      api.post("/cobros", cobro, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+  );
 };
 
 /**

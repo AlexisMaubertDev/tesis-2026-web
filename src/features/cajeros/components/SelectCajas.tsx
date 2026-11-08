@@ -31,6 +31,8 @@ export default function SelectCajas({ cajas }: Props) {
       const res = await empezarTurno_Caja(token!, {
         id_caja: cajaSeleccionada.id!,
         turno,
+        // Caja de referencia para el turno local si la API está caída (Fase 4).
+        caja: cajaSeleccionada,
       });
 
       dispatch(empezarTurnoCaja(res.data));

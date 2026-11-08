@@ -1,5 +1,6 @@
 import api from "../../../services/api";
 import { obtenerConCache } from "../../../app/offline/cache";
+import { escribir } from "../../../app/offline/writes";
 import type { Vehiculo } from "../../../types/Vehiculo";
 
 export const obtenerVehiculos = async (token: string) => {
@@ -124,27 +125,63 @@ export const obtenerAcarreosPorPatente = async (
 /**
  * Ingreso a playa desde la barrera: el acarreo ACARREADO pasa a INGRESADO.
  * La usa el home del playero.
+ *
+ * Modo offline (Fase 4): la operación va a la outbox con el recurso por
+ * patente (estado esperado ACARREADO); el `:acarreoId` se resuelve al
+ * sincronizar (el id puede ser null si el acarreo aún no existe en el server).
  */
-export const ingresarAcarreoAPlaya = async (token: string, acarreoId: string) => {
-  const res = await api.put(
-    `/acarreos/${acarreoId}/ingresar`,
-    {},
-    { headers: { Authorization: `Bearer ${token}` } },
+export const ingresarAcarreoAPlaya = async (
+  token: string,
+  acarreoId: string,
+  opciones?: { patente?: string | null },
+) => {
+  return escribir(
+    {
+      tipo: "INGRESO",
+      metodo: "PUT",
+      ruta: "/acarreos/:acarreoId/ingresar",
+      body: {},
+      recurso: {
+        tipo: "ACARREO",
+        patente: opciones?.patente ?? "",
+        estadoRequerido: "ACARREADO",
+        id: acarreoId ?? null,
+      },
+    },
+    () =>
+      api.put(`/acarreos/${acarreoId}/ingresar`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
   );
-  return res.data;
 };
 
 /**
  * Salida de playa desde la barrera: el acarreo COBRADO (abonado) pasa a
  * EGRESADO. La usa el home del playero.
  */
-export const egresarAcarreo = async (token: string, acarreoId: string) => {
-  const res = await api.put(
-    `/acarreos/${acarreoId}/egresar`,
-    {},
-    { headers: { Authorization: `Bearer ${token}` } },
+export const egresarAcarreo = async (
+  token: string,
+  acarreoId: string,
+  opciones?: { patente?: string | null },
+) => {
+  return escribir(
+    {
+      tipo: "EGRESO",
+      metodo: "PUT",
+      ruta: "/acarreos/:acarreoId/egresar",
+      body: {},
+      recurso: {
+        tipo: "ACARREO",
+        patente: opciones?.patente ?? "",
+        estadoRequerido: "COBRADO",
+        id: acarreoId ?? null,
+      },
+    },
+    () =>
+      api.put(`/acarreos/${acarreoId}/egresar`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
   );
-  return res.data;
 };
 
 /**
@@ -155,13 +192,26 @@ export const sacarSinCargo = async (
   token: string,
   acarreoId: string,
   motivo: string,
+  opciones?: { patente?: string | null },
 ) => {
-  const res = await api.put(
-    `/acarreos/${acarreoId}/sin-cargo`,
-    { motivo },
-    { headers: { Authorization: `Bearer ${token}` } },
+  return escribir(
+    {
+      tipo: "SIN_CARGO",
+      metodo: "PUT",
+      ruta: "/acarreos/:acarreoId/sin-cargo",
+      body: { motivo },
+      recurso: {
+        tipo: "ACARREO",
+        patente: opciones?.patente ?? "",
+        estadoRequerido: "INGRESADO",
+        id: acarreoId ?? null,
+      },
+    },
+    () =>
+      api.put(`/acarreos/${acarreoId}/sin-cargo`, { motivo }, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
   );
-  return res.data;
 };
 
 /**

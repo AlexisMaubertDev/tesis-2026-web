@@ -79,6 +79,8 @@ export type NuevaOperacion = {
   body?: unknown;
   /** Fecha/hora local de la operación (ISO con offset). */
   creadoEn?: string;
+  /** Id local opcional pregenerado (sirve para recursos que dependen de él). */
+  id?: string;
   recurso?: RecursoOutbox;
   dependeDe?: string | null;
 };
@@ -107,7 +109,7 @@ export const encolarOperacion = async (
   const creadoEn = operacion.creadoEn ?? ahora;
 
   const item: OutboxItem = {
-    id: crearId(),
+    id: operacion.id ?? crearId(),
     usuarioId: operacion.usuarioId,
     tipo: operacion.tipo,
     metodo: operacion.metodo,

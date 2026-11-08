@@ -64,7 +64,9 @@ export default function SinCargoModal({
     setError(null);
 
     try {
-      await sacarSinCargo(token!, acarreoId, motivo.trim());
+      await sacarSinCargo(token!, acarreoId, motivo.trim(), {
+        patente: vehiculo?.patente ?? null,
+      });
       dispatch(showSuccess("Vehículo egresado sin cargo con éxito"));
       onSuccess?.();
       cerrar();
