@@ -76,6 +76,7 @@ export default function CobroPage() {
         if (!activo) return;
         setErrorCarga(
           err.response?.data?.message ||
+            err.message ||
             "No se pudo cargar el vehículo. Intentá nuevamente más tarde.",
         );
       } finally {
@@ -104,7 +105,10 @@ export default function CobroPage() {
       setCargandoPreview(true);
 
       try {
-        const res = await obtenerPreviewCobro(token, idAcarreo);
+        const res = await obtenerPreviewCobro(token, idAcarreo, {
+          // Fecha del acarreo para el cálculo local sin conexión (Fase 5).
+          fecha_acarreo: acarreo?.fecha_acarreo ?? null,
+        });
         if (!activo) return;
         setPreview(res.data as PreviewCobro);
         setErrorPreview(null);
@@ -113,6 +117,7 @@ export default function CobroPage() {
         if (!activo) return;
         setErrorPreview(
           err.response?.data?.message ||
+            err.message ||
             "No se pudo calcular el total. Intentá nuevamente.",
         );
       } finally {
