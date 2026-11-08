@@ -23,6 +23,29 @@ const api = axios.create({
 // consultar la caché en modo lectura y no se pierde la outbox.
 const RUTAS_SIN_SESION = ["/auth/login"];
 
+// Fase 3 (RF32): toda escritura hecha EN LÍNEA también informa `fecha` con el
+// reloj local del equipo, igual que la outbox lo hace al encolar. Así el
+// servidor registra la hora de la operación con el mismo contrato en los dos
+// modos (el server la lee con `resolverFechaOperacion`, Fase 2). No se toca el
+// body si ya trae `fecha` (reintentos de la outbox) ni lo que no es un objeto
+// plano (FormData, arrays, cadenas).
+api.interceptors.request.use((config) => {
+  const metodo = (config.method ?? "").toLowerCase();
+  if (metodo === "get" || metodo === "head") return config;
+
+  const datos: unknown = config.data;
+  if (
+    datos &&
+    typeof datos === "object" &&
+    !Array.isArray(datos) &&
+    !(datos instanceof FormData) &&
+    !("fecha" in datos)
+  ) {
+    config.data = { ...datos, fecha: new Date().toISOString() };
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => {
     marcarApiOnline();
