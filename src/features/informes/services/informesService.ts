@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { mostrarPdf } from "../../../app/utils/informesPdf";
 import type {
   Informe,
@@ -56,6 +57,9 @@ export const abrirInformePdf = async (
   token: string,
   params: ParametrosInforme,
 ) => {
+
+  // Los informes/PDF son online-only (Fase 7): los genera el servidor.
+  exigirConexion("el informe en PDF");
   const pestania = window.open("", "_blank");
 
   try {
@@ -92,6 +96,9 @@ export const abrirInformeTurnoSucursal = async (
   token: string,
   params: { fecha?: string; turno?: string; sucursal?: string },
 ) => {
+
+  // Los informes/PDF son online-only (Fase 7): los genera el servidor.
+  exigirConexion("el informe consolidado de la sucursal");
   const query = new URLSearchParams();
 
   if (params.fecha) query.set("fecha", params.fecha);
@@ -135,6 +142,9 @@ export const abrirInformeFinTurno = async (
   token: string,
   params: ParametrosFinTurno,
 ) => {
+
+  // Los informes/PDF son online-only (Fase 7): los genera el servidor.
+  exigirConexion("el informe de fin de turno");
   const query = new URLSearchParams();
 
   query.set("periodo", params.periodo);

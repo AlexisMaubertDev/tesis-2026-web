@@ -136,7 +136,7 @@ export default function InformesPage() {
     } catch (error: any) {
       dispatch(
         showError(
-          error.response?.data?.message ||
+          error.response?.data?.message || error.message ||
             "No se pudo generar el PDF del informe. Intentá nuevamente.",
         ),
       );

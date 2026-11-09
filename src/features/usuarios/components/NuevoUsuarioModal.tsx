@@ -118,7 +118,7 @@ export default function NuevoUsuarioModal({
     } catch (err: any) {
       console.error(err);
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.message || err?.message ||
           (esEdicion
             ? "Error al editar usuario. Intenta nuevamente más tarde."
             : "Error al crear usuario. Intenta nuevamente más tarde."),

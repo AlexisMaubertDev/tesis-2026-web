@@ -126,7 +126,7 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.message || err?.message ||
           "Error al crear la grúa. Intenta nuevamente más tarde.",
       );
     } finally {

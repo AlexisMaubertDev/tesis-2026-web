@@ -124,6 +124,7 @@ export default function InformeFinTurnoCard({ token, esSistemas }: Props) {
     } catch (err: any) {
       setError(
         err.response?.data?.message ||
+          err.message ||
           "No se pudo generar el informe de fin de turno. Intentá nuevamente.",
       );
     } finally {

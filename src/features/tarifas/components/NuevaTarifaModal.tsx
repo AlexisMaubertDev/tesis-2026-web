@@ -89,7 +89,7 @@ export default function NuevaTarifaModal({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.message || err?.message ||
           "No se pudo configurar la tarifa. Intentá nuevamente más tarde.",
       );
     } finally {

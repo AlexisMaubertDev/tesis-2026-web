@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { store } from "../../../app/store";
 import type { Usuario, CajaDelTurno } from "../../../types/Usuario";
 import type { Caja } from "../../../types/Caja";
@@ -33,6 +34,7 @@ export const obtenerPlayeros = async (token: string) => {
 };
 
 export const crearUsuario = async (token: string, usuarioData: Usuario) => {
+  exigirConexion("el alta del usuario");
   const res = await api.post("/usuarios", usuarioData, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -42,6 +44,7 @@ export const crearUsuario = async (token: string, usuarioData: Usuario) => {
 };
 
 export const eliminarUsuario = async (token: string, legajo: string) => {
+  exigirConexion("la baja del usuario");
   const res = await api.delete(`/usuarios/${legajo}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -55,6 +58,7 @@ export const editarUsuario = async (
   legajo: string,
   usuario: Partial<Omit<Usuario, "id">> & { password?: string },
 ) => {
+  exigirConexion("la edición del usuario");
   const res = await api.put(`/usuarios/${legajo}`, usuario, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -68,6 +72,7 @@ export const bloquearUsuario = async (
   legajo: string,
   bloqueado: boolean,
 ) => {
+  exigirConexion("el bloqueo del usuario");
   const res = await api.put(
     `/usuarios/${legajo}/bloquear`,
     { bloqueado },
@@ -219,6 +224,7 @@ export const abrirInformeTurnoCaja = async (
   id_turno_caja: string,
   pestaniaAbierta?: Window | null,
 ) => {
+  exigirConexion("el informe del turno de caja");
   const pestania = pestaniaAbierta ?? window.open("", "_blank");
 
   try {

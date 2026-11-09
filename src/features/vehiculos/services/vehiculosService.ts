@@ -1,6 +1,6 @@
 import api from "../../../services/api";
 import { obtenerConCache } from "../../../app/offline/cache";
-import { escribir } from "../../../app/offline/writes";
+import { escribir, exigirConexion } from "../../../app/offline/writes";
 import type { Vehiculo } from "../../../types/Vehiculo";
 
 export const obtenerVehiculos = async (token: string) => {
@@ -37,6 +37,8 @@ export const abrirInformeVehiculosPdf = async (
   token: string,
   filtros: FiltrosInformeVehiculos,
 ) => {
+  // Online-only (Fase 7).
+  exigirConexion("el informe en PDF de vehículos");
   const params = new URLSearchParams();
   const busqueda = filtros.busqueda?.trim();
 
@@ -83,6 +85,8 @@ export const editarVehiculo = async (
   id: string,
   vehiculo: Partial<Omit<Vehiculo, "id">>,
 ) => {
+  // Online-only (Fase 7).
+  exigirConexion("la edición del vehículo");
   const res = await api.put(`/vehiculos/${id}`, vehiculo, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -92,6 +96,8 @@ export const editarVehiculo = async (
 };
 
 export const eliminarVehiculo = async (token: string, id: string) => {
+  // Online-only (Fase 7).
+  exigirConexion("la baja del vehículo");
   const res = await api.delete(`/vehiculos/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -223,6 +229,8 @@ export const agregarIncidenciaAcarreo = async (
   acarreoId: string,
   incidencias: string,
 ) => {
+  // Online-only (Fase 7).
+  exigirConexion("la carga de la incidencia del acarreo");
   const res = await api.put(
     `/acarreos/${acarreoId}/incidencias`,
     { incidencias },

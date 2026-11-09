@@ -23,6 +23,46 @@ export type EscrituraEncolada = {
 
 export type RespuestaEscritura<T> = T | EscrituraEncolada;
 
+/** Error explícito de una operación que exige la API en línea (no se encola). */
+export class OperacionOnlineError extends Error {
+  readonly code = "OPERACION_ONLINE";
+
+  constructor(message: string) {
+    super(message);
+    this.name = "OperacionOnlineError";
+  }
+}
+
+/**
+ * Guarda para las operaciones **online-only** (Fase 7): los ABM de Sistemas,
+ * los informes/PDF y las tareas administrativas no se encolan en la outbox.
+ * Si no hay conexión (o la API está caída, o la sesión venció) se rechazan con
+ * un mensaje claro en vez de fallar con un error de red genérico.
+ *
+ * `label` describe la operación para el mensaje (ej. `el informe en PDF`).
+ */
+export const exigirConexion = (label: string) => {
+  const { auth, offline } = store.getState();
+
+  if (!auth.usuario || !auth.token) {
+    throw new OperacionOnlineError(
+      `Necesitás una sesión iniciada para ${label}.`,
+    );
+  }
+
+  if (auth.sessionExpired) {
+    throw new OperacionOnlineError(
+      `Tu sesión venció (modo lectura): ${label} necesita conexión. Volvé a iniciar sesión para continuar.`,
+    );
+  }
+
+  if (!offline.browserOnline || offline.apiStatus === "down") {
+    throw new OperacionOnlineError(
+      `Sin conexión con el servidor: ${label} necesita estar en línea (no se puede hacer sin conexión). Probá de nuevo cuando vuelva la API.`,
+    );
+  }
+};
+
 // Guarda de tipos: viene de la cola (respuesta parcial, sin datos del
 // servidor) cuando `pendiente === true`.
 export const estaEncolada = <T>(

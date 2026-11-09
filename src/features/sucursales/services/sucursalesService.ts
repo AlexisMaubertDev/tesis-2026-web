@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { obtenerConCache } from "../../../app/offline/cache";
 import type { NuevaSucursalForm } from "../types/sucursalForm";
 
@@ -34,6 +35,7 @@ export const crearSucursal = async (
   token: string,
   sucursalData: NuevaSucursalForm,
 ) => {
+  exigirConexion("el alta de la sucursal");
   const res = await api.post("/sucursales", sucursalData, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -46,6 +48,7 @@ export const editarSucursal = async (
   token: string,
   sucursalData: NuevaSucursalForm,
 ) => {
+  exigirConexion("la edición de la sucursal");
   const res = await api.put(`/sucursales/${sucursalData.id}`, sucursalData, {
     headers: {
       Authorization: `Bearer ${token}`,

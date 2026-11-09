@@ -115,7 +115,7 @@ export default function CajaModal({ open, onClose, caja, onSuccess }: Props) {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.message || err?.message ||
           "Error al crear la caja. Intenta nuevamente más tarde.",
       );
     } finally {

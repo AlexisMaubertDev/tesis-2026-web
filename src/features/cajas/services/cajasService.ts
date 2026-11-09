@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { obtenerConCache } from "../../../app/offline/cache";
 import type { CajaForm } from "../components/CajaModal";
 
@@ -31,6 +32,7 @@ export const obtenerCajasSucursal = async (token: string, id: string) => {
 };
 
 export const crearCaja = async (token: string, data: CajaForm) => {
+  exigirConexion("el alta de la caja");
   const res = await api.post("/cajas", data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -43,6 +45,7 @@ export const editarCaja = async (
   token: string,
   data: CajaForm & { id: string },
 ) => {
+  exigirConexion("la edición de la caja");
   const res = await api.put(`/cajas/${data.id}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,

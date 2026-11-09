@@ -183,6 +183,7 @@ function VehiculosTabla() {
       dispatch(
         showError(
           error.response?.data?.message ||
+          error.message ||
             "No se pudo generar el PDF del listado de vehículos.",
         ),
       );

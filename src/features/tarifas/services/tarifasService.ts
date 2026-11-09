@@ -1,4 +1,5 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { obtenerConCache } from "../../../app/offline/cache";
 
 export type NuevaTarifa = {
@@ -37,6 +38,7 @@ export const obtenerTarifaVigente = async (token: string) => {
  * tarifa vigente y deja la nueva como vigente.
  */
 export const crearTarifa = async (token: string, tarifa: NuevaTarifa) => {
+  exigirConexion("el alta de la tarifa");
   const res = await api.post("/tarifas", tarifa, {
     headers: { Authorization: `Bearer ${token}` },
   });

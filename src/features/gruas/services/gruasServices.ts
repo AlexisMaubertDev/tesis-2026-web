@@ -2,6 +2,7 @@ import api from "../../../services/api";
 import { obtenerConCache } from "../../../app/offline/cache";
 import type { Grua, Turno_Grua } from "../../../types/Grua";
 import type { GruaForm } from "../components/GruaModal";
+import { exigirConexion } from "../../../app/offline/writes";
 
 export const obtenerGruas = async (token: string) => {
   return obtenerConCache({
@@ -17,6 +18,7 @@ export const obtenerGruas = async (token: string) => {
   });
 };
 export const crearGrua = async (token: string, data: GruaForm) => {
+  exigirConexion("el alta de la grúa");
   const response = await api.post("/gruas", data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -41,6 +43,7 @@ export const obtenerGruasSucursal = async (token: string, id: string) => {
 };
 
 export const asignarGrua = async (token: string, data: Turno_Grua) => {
+  exigirConexion("la asignación del turno de grúa");
   const res = await api.post("/gruas/asignar", data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -50,6 +53,7 @@ export const asignarGrua = async (token: string, data: Turno_Grua) => {
 };
 
 export const finalizarTurnosSucursal = async (token: string, id: string) => {
+  exigirConexion("el cierre de los turnos de grúa de la sucursal");
   const res = await api.put(
     `/turno_grua/finalizar/${id}`,
     {},
@@ -81,6 +85,7 @@ export const agregarIncidencia = async (
   incidencias: string,
   id: string,
 ) => {
+  exigirConexion("la carga de la incidencia del turno");
   const res = await api.put(
     `/turno_grua/${id}/incidencias`,
     { incidencias },
@@ -99,6 +104,7 @@ export const cambiarEstadoGrua = async (
   id: string,
   data: { estado: Grua["estado"]; motivo?: string },
 ) => {
+  exigirConexion("el cambio de estado de la grúa");
   const res = await api.put(`/gruas/${id}/estado`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -107,6 +113,7 @@ export const cambiarEstadoGrua = async (
 
 
 export const terminarTurno = async (token: string, id: string) => {
+  exigirConexion("el cierre del turno de grúa");
   const res = await api.put(
     `/turno_grua/${id}/finalizar`,
     {},
