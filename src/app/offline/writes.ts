@@ -110,8 +110,18 @@ export const escribir = async <T>(
   const apiCaida = !offline.browserOnline || offline.apiStatus === "down";
 
   if (apiCaida) {
+    // La operación se carga sin sistema: viaja con ese flag en el body (parte
+    // de la huella, así el reintento idéntico sigue idéntico) y el servidor
+    // deja constancia en las incidencias del acarreo al sincronizar.
+    const cuerpo = op.body ?? {};
+    const bodyConMarca =
+      cuerpo && typeof cuerpo === "object" && !Array.isArray(cuerpo)
+        ? { ...(cuerpo as Record<string, unknown>), cargado_sin_sistema: true }
+        : { valor: cuerpo ?? null, cargado_sin_sistema: true };
+
     const item = await encolarOperacion({
       ...op,
+      body: bodyConMarca,
       usuarioId: auth.usuario.id,
     });
 

@@ -8,7 +8,8 @@ import type { Tarifa } from "../../../types/Tarifa";
 import type { CobrosDelTurno } from "../../../types/Cobro";
 
 export type NuevoCobro = {
-  id_acarreo: string;
+  /** Sin sistema puede no haber id aún: la cola lo resuelve por patente. */
+  id_acarreo: string | null;
   efectivo: number;
   mp: number;
   numero_factura: string | null;

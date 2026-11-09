@@ -46,6 +46,13 @@ export default function CobroPage() {
   const [mp, setMp] = useState("");
   const [numeroFactura, setNumeroFactura] = useState("");
 
+  const { browserOnline, apiStatus } = useSelector(
+    (state: RootState) => state.offline,
+  );
+  // Sin sistema: el cajero cobra a ojo (los importes los tipea él); el server
+  // recalcula al sincronizar y deja la incidencia si hay diferencia.
+  const apiCaida = !browserOnline || apiStatus === "down";
+
   const [enviando, setEnviando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
@@ -195,7 +202,9 @@ export default function CobroPage() {
   const recalcular = () => setPreviewKey((n) => n + 1);
 
   const handleSubmit = async () => {
-    if (!acarreo || !tarifa) return;
+    // Sin sistema se puede cobrar aunque el acarreo no esté en el cache.
+    if (!tarifa && !apiCaida) return;
+    if (!apiCaida && !acarreo) return;
 
     const e = Number(efectivo || 0);
     const m = Number(mp || 0);
@@ -205,7 +214,10 @@ export default function CobroPage() {
       return;
     }
 
-    if (diferencia !== 0) {
+    // Con sistema, el total del servidor es ley; sin sistema el cajero declara
+    // los importes: el server los guarda tal cual y deja la incidencia si
+    // recalcando encuentra un faltante.
+    if (!apiCaida && diferencia !== 0) {
       setErrorForm(
         `El total a abonar es ${formatCurrency(total)}: el efectivo y Mercado Pago deben sumar exactamente ese importe.`,
       );
@@ -220,7 +232,9 @@ export default function CobroPage() {
       const respuesta: any = await crearCobro(
         token!,
         {
-          id_acarreo: acarreo.id,
+          // Sin sistema el acarreo puede no estar en el cache: el id va nulo y
+          // la cola lo resuelve por patente al sincronizar.
+          id_acarreo: acarreo?.id ?? null,
           efectivo: e,
           mp: m,
           numero_factura:
@@ -228,10 +242,16 @@ export default function CobroPage() {
         },
         // Patente del vehículo: la usa la outbox para resolver el acarreo si
         // el alta del gruero todavía no llegó al servidor.
-        { patente: acarreo?.Vehiculo?.patente ?? null },
+        { patente: acarreo?.Vehiculo?.patente ?? patente ?? null },
       );
 
-      dispatch(showSuccess("Cobro registrado con éxito"));
+      dispatch(
+        showSuccess(
+          apiCaida
+            ? "Cobro guardado sin conexión: se enviará cuando vuelva el sistema"
+            : "Cobro registrado con éxito",
+        ),
+      );
       const cobroId = respuesta?.data?.cobro?.id;
       if (cobroId && token) {
         try {
@@ -281,6 +301,97 @@ export default function CobroPage() {
             )}
 
             {!cargando && !errorCarga && !acarreo && (
+              apiCaida ? (
+                // Sin sistema y sin cache: el cajero carga la patente que
+                // presintió a mano; el server la resuelve al sincronizar.
+                <div className="bg-cerulean-100 rounded shadow p-4 flex flex-col gap-4">
+                  <div>
+                    <h2 className="text-lg font-bold text-cerulean-900">
+                      {patente}
+                    </h2>
+                    <p className="text-xs text-cerulean-800 flex flex-col gap-1 text-left items-start">
+                      <span className="text-scarlet-rush-700 font-semibold">
+                        Sin conexión: este vehículo no está en la memoria del
+                        dispositivo. Registrá lo que cobró y al volver la
+                        conexión el sistema lo va a asociar a su acarreo.
+                      </span>
+                      <span>
+                        <span className="font-semibold">Fecha y hora del cobro:</span>{" "}
+                        {formatDateFullWithHs(new Date().toISOString())} (la hora local se
+                        guarda sola)
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                      Efectivo
+                      <TextInput
+                        value={efectivo}
+                        onChange={(e) => setEfectivo(e.target.value)}
+                        placeholder="Monto en efectivo"
+                        name="efectivo"
+                        type="number"
+                        disabled={enviando}
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1 text-xs font-bold uppercase">
+                      Mercado Pago
+                      <TextInput
+                        value={mp}
+                        onChange={(e) => setMp(e.target.value)}
+                        placeholder="Monto por Mercado Pago"
+                        name="mp"
+                        type="number"
+                        disabled={enviando}
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1 text-xs font-bold uppercase sm:col-span-2">
+                      N° de factura (opcional)
+                      <TextInput
+                        value={numeroFactura}
+                        onChange={(e) => setNumeroFactura(e.target.value)}
+                        placeholder="Número de factura"
+                        name="numero_factura"
+                        type="text"
+                        disabled={enviando}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs bg-cerulean-200 rounded-lg p-3">
+                    <span className="text-cerulean-800">
+                      Total cobrado (efectivo + Mercado Pago)
+                    </span>
+                    <span className="font-bold text-cerulean-900">
+                      {formatCurrency(sumaPagos)}
+                    </span>
+                  </div>
+
+                  {errorForm && (
+                    <p className="text-xs text-red-900">{errorForm}</p>
+                  )}
+
+                  <div className="flex justify-end gap-3">
+                    <CallToActionButton
+                      type="button"
+                      handleSubmit={volver}
+                      disabled={enviando}
+                    >
+                      Volver
+                    </CallToActionButton>
+                    <CallToActionButton
+                      type="button"
+                      handleSubmit={handleSubmit}
+                      disabled={enviando}
+                    >
+                      {enviando ? "Registrando..." : "Cobrar sin sistema"}
+                    </CallToActionButton>
+                  </div>
+                </div>
+              ) : (
               <div className="bg-cerulean-200 rounded-lg p-4 flex flex-col gap-3">
                 <p className="text-xs text-cerulean-900">
                   El vehículo {patente} no está ingresado en la playa, por lo
@@ -292,6 +403,7 @@ export default function CobroPage() {
                   </CallToActionButton>
                 </div>
               </div>
+              )
             )}
 
             {!cargando && acarreo && (
@@ -322,6 +434,12 @@ export default function CobroPage() {
                 )}
 
                 {!cargandoPreview && errorPreview && (
+                  apiCaida ? (
+                    <p className="text-xs text-cerulean-800">
+                      No se pudo calcular el total sugerido (sin conexión):
+                      cargá el importe que cobró el cliente a mano.
+                    </p>
+                  ) : (
                   <div className="flex flex-col gap-2">
                     <p className="text-xs text-scarlet-rush-700">
                       {errorPreview}
@@ -332,6 +450,7 @@ export default function CobroPage() {
                       </CallToActionButton>
                     </div>
                   </div>
+                  )
                 )}
 
                 {!cargandoPreview && !errorPreview && !tarifa && (
@@ -341,10 +460,14 @@ export default function CobroPage() {
                   </p>
                 )}
 
-                {!cargandoPreview && !errorPreview && tarifa && preview && (
+                {!cargandoPreview && ((tarifa && preview) || apiCaida) && (
                   <>
+                    {tarifa && preview && (
+                    <>
                     <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900 flex flex-col gap-1">
-                      <p className="font-bold uppercase">Tarifa vigente</p>
+                      <p className="font-bold uppercase">
+                        {apiCaida ? "Tarifa sugerida (última conocida)" : "Tarifa vigente"}
+                      </p>
                       <p>
                         Acarreo {formatCurrency(tarifa.acarreo)} + estadía{" "}
                         {formatCurrency(tarifa.estadia)} cada{" "}
@@ -370,13 +493,15 @@ export default function CobroPage() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-bold uppercase">
-                          Total
+                          {apiCaida ? "Total sugerido" : "Total"}
                         </span>
                         <span className="text-sm font-bold uppercase">
                           {formatCurrency(total)}
                         </span>
                       </div>
                     </div>
+                    </>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <label className="flex flex-col gap-1 text-xs font-bold uppercase">
@@ -422,20 +547,31 @@ export default function CobroPage() {
                       </span>
                       <span
                         className={
-                          diferencia === 0
+                          !apiCaida && diferencia === 0
                             ? "text-emerald-700 font-bold"
-                            : "text-scarlet-rush-700 font-bold"
+                            : !apiCaida
+                              ? "text-scarlet-rush-700 font-bold"
+                              : "text-cerulean-900 font-bold"
                         }
                       >
                         {formatCurrency(sumaPagos)}
                       </span>
                     </div>
 
-                    {diferencia !== 0 && (
+                    {!apiCaida && diferencia !== 0 && (
                       <p className="text-xs text-scarlet-rush-700">
                         {diferencia > 0
                           ? `Faltan ${formatCurrency(diferencia)}`
                           : `Sobran ${formatCurrency(Math.abs(diferencia))}`}
+                      </p>
+                    )}
+
+                    {apiCaida && (
+                      <p className="text-xs text-cerulean-800">
+                        Sin conexión: el cobro queda en este dispositivo y al
+                        volver el sistema se sincroniza con su fecha local. Si
+                        el recálculo del servidor da distinto, queda registrado
+                        con la constancia correspondiente.
                       </p>
                     )}
 
@@ -454,7 +590,9 @@ export default function CobroPage() {
                       <CallToActionButton
                         type="button"
                         handleSubmit={handleSubmit}
-                        disabled={enviando || diferencia !== 0}
+                        disabled={
+                          enviando || (!apiCaida && (diferencia !== 0 || !acarreo))
+                        }
                       >
                         {enviando ? "Registrando..." : "Registrar cobro"}
                       </CallToActionButton>

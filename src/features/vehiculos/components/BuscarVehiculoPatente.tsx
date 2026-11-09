@@ -35,6 +35,13 @@ function Row({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  */
 export default function BuscarVehiculoPatente() {
   const { token, usuario } = useSelector((state: RootState) => state.auth);
+  const { browserOnline, apiStatus } = useSelector(
+    (state: RootState) => state.offline,
+  );
+  // Sin sistema: si la patente no está en la memoria del dispositivo, el
+  // cajero puede igualmente iniciar un cobro manual (la cola lo resuelve por
+  // patente cuando vuelve la conexión).
+  const apiCaida = !browserOnline || apiStatus === "down";
   const navigate = useNavigate();
 
   const [patente, setPatente] = useState("");
@@ -83,6 +90,9 @@ export default function BuscarVehiculoPatente() {
         err.response?.data?.message ||
           "No se pudo buscar el vehículo. Intenta nuevamente.",
       );
+      // Sin conexión el buscador no bloquea: la tarjeta "no encontrado"
+      // ofrece el cobro manual al cajero.
+      if (apiCaida) setBuscado(true);
     } finally {
       setLoading(false);
     }
@@ -156,9 +166,23 @@ export default function BuscarVehiculoPatente() {
       </div>
 
       {buscado && !vehiculo && (
-        <div className="w-full max-w-xl bg-cerulean-200 rounded-lg p-4 text-xs text-cerulean-900">
-          No existe un vehículo con la patente{" "}
-          <span className="font-bold">{patente.trim().toUpperCase()}</span>.
+        <div className="w-full max-w-xl bg-cerulean-200 rounded-lg p-4 text-xs text-cerulean-900 flex flex-col gap-3">
+          <span>
+            No existe un vehículo con la patente{" "}
+            <span className="font-bold">{patente.trim().toUpperCase()}</span>
+            {apiCaida
+              ? " en la memoria del dispositivo (sin conexión)."
+              : "."}
+          </span>
+
+          {esCajero && apiCaida && (
+            <CallToActionButton
+              type="button"
+              handleSubmit={() => irACobrar(patente.trim().toUpperCase())}
+            >
+              Cobrar sin sistema
+            </CallToActionButton>
+          )}
         </div>
       )}
 
