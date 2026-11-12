@@ -57,6 +57,16 @@ export default function BuscarVehiculoPatente() {
   const tieneTurnoCaja = !!usuario?.Turno_Caja;
   const puedeCobrar = vehiculo?.ultimo_acarreo_estado === "INGRESADO";
 
+  // El cajero sólo cobra acarreos de la sucursal de la caja de su turno
+  // (la misma regla que valida el servidor al registrar el cobro).
+  const sucursalDelCajero =
+    usuario?.Turno_Caja?.Caja?.Sucursal?.id ?? usuario?.Sucursal?.id;
+  const sucursalDelVehiculo = vehiculo?.Sucursal?.id;
+  const enMiSucursal =
+    !sucursalDelCajero ||
+    !sucursalDelVehiculo ||
+    sucursalDelCajero === sucursalDelVehiculo;
+
   const irAlHistorial = (p: string) =>
     navigate(`/vehiculos/${encodeURIComponent(p)}/historial`);
 
@@ -217,7 +227,7 @@ export default function BuscarVehiculoPatente() {
               Ver historial
             </CallToActionButton>
 
-            {puedeCobrar && esCajero && tieneTurnoCaja && (
+            {puedeCobrar && esCajero && tieneTurnoCaja && enMiSucursal && (
               <CallToActionButton
                 type="button"
                 handleSubmit={() => irACobrar(vehiculo.patente)}
@@ -226,7 +236,14 @@ export default function BuscarVehiculoPatente() {
               </CallToActionButton>
             )}
 
-            {puedeCobrar && esCajero && !tieneTurnoCaja && (
+            {puedeCobrar && esCajero && !enMiSucursal && (
+              <p className="self-center text-xs text-cerulean-900">
+                El acarreo es de la sucursal{" "}
+                {vehiculo.Sucursal?.nombre ?? "-"}: tu caja no puede cobrarlo.
+              </p>
+            )}
+
+            {puedeCobrar && esCajero && !tieneTurnoCaja && enMiSucursal && (
               <p className="self-center text-xs text-cerulean-900">
                 Para cobrar necesitás tener un turno de caja abierto.
               </p>

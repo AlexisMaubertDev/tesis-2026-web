@@ -79,9 +79,7 @@ export default function CajerosPage() {
                 <h1 className=" sm:text-lg  font-bold uppercase self-center">
                   Caja N°: {usuario.Turno_Caja.Caja.numero_caja}
                 </h1>
-                <h2>
-                  Turno: {getTurnoLabel(usuario.Turno_Caja.turno)}
-                </h2>
+                <h2>Turno: {getTurnoLabel(usuario.Turno_Caja.turno)}</h2>
                 <h2>Referencia: {usuario.Turno_Caja.Caja.referencia}</h2>
 
                 <CallToActionButton

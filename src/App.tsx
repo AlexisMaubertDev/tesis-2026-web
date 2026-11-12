@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import AppRoutes from "./routes";
 import PwaUpdatePrompt from "./components/ui/PwaUpdatePrompt";
+import TopSnackbar from "./components/ui/TopSnackbar";
+import BarraModoOffline from "./components/ui/BarraModoOffline";
 import { iniciarSync } from "./app/offline/sync";
 
 function App() {
@@ -13,6 +15,8 @@ function App() {
   return (
     <>
       <AppRoutes />
+      <TopSnackbar />
+      <BarraModoOffline />
       <PwaUpdatePrompt />
     </>
   );

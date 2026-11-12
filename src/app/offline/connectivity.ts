@@ -1,4 +1,5 @@
 import { store } from "../store";
+import { volverDelModoSistema } from "../store/sesion";
 import {
   setApiStatus,
   setBrowserOnline,
@@ -95,6 +96,8 @@ const ejecutarVerificacion = async (
     );
     programarProximoChequeo();
 
+    if (disponible) procesarRetornoSistema();
+
     return disponible;
   } catch {
     store.dispatch(setApiStatus({ status: "down", latenciaMs: null }));
@@ -134,14 +137,25 @@ export const marcarApiCaida = () => {
   programarProximoChequeo();
 };
 
+/**
+ * C1: si la API vuelve y el usuario está operando como invitado (sin
+ * sistema), se lo manda al login para que ingrese sus credenciales: la cola
+ * que cargó a nombre de `invitado` se re-atribuye a su usuario al loguearse
+ * y ahí sí se sincroniza.
+ */
+export const procesarRetornoSistema = () => {
+  const { usuario } = store.getState().auth;
+  if (usuario?.id === "invitado") volverDelModoSistema();
+};
+
 /** La llama `api.ts` cuando una petición se completa bien. */
 export const marcarApiOnline = () => {
   if (store.getState().offline.apiStatus === "online") return;
 
   store.dispatch(setApiStatus({ status: "online", latenciaMs: null }));
+  procesarRetornoSistema();
   programarProximoChequeo();
 };
-
 const alConectarse = () => {
   store.dispatch(setBrowserOnline(true));
   void verificarApi({ forzar: true });

@@ -11,6 +11,12 @@ export default function Snackbar() {
   const { error, info, success } = useSelector(
     (state: RootState) => state.snackbar,
   );
+  // La barra de modo sin conexión vive abajo de todo: si está visible, este
+  // cartel sube para no quedar tapado.
+  const barraOfflineVisible = useSelector((state: RootState) => {
+    const { browserOnline, apiStatus } = state.offline;
+    return !browserOnline || apiStatus === "down";
+  });
   const [open, setOpen] = useState<boolean>(false);
   const dispatch = useDispatch();
 
@@ -30,7 +36,7 @@ export default function Snackbar() {
 
   return (
     <aside
-      className={`fixed bottom-0 left-0 min-w-1/3 rounded-tr-lg bg-cerulean-50 p-4 transition-transform duration-300
+      className={`fixed ${barraOfflineVisible ? "bottom-10" : "bottom-0"} left-0 min-w-1/3 rounded-tr-lg bg-cerulean-50 p-4 transition-transform duration-300
         ${!open ? "translate-y-full" : "translate-y-0"}
         shadow-lg flex justify-between items-center gap-4 text-xs`}
     >

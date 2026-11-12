@@ -1,7 +1,6 @@
 import axios from "axios";
 import { store } from "../app/store";
-import { marcarSesionVencida } from "../app/store/authSlice";
-import { showInfo } from "../app/store/snackbarSlice";
+import { cerrarSesionPorToken } from "../app/store/sesion";
 import {
   marcarApiCaida,
   marcarApiOnline,
@@ -70,14 +69,21 @@ api.interceptors.response.use(
     }
 
     if (status === 401 && !esLogin) {
-      const yaVencida = store.getState().auth.sessionExpired;
-      store.dispatch(marcarSesionVencida());
+      const { usuario } = store.getState().auth;
 
-      if (!yaVencida) {
-        store.dispatch(
-          showInfo(
-            "Tu sesión venció. Podés consultar los datos guardados; volvé a iniciar sesión para operar.",
-          ),
+      // El invitado "sin sistema" no tiene token: un 401 de una consulta
+      // residual no debe patearlo de la app (el modo invitado ya no hace
+      // llamadas online; esto defiende cualquier intento residual).
+      if (usuario?.id === "invitado") {
+        return Promise.reject(error);
+      }
+
+      const teniaSesion = Boolean(usuario);
+
+      // Token vencido/inválido: cierre de sesión directo + aviso desde arriba.
+      if (teniaSesion) {
+        cerrarSesionPorToken(
+          "Tu sesión venció: los datos guardados siguen en el dispositivo. Iniciá sesión para continuar.",
         );
       }
     }

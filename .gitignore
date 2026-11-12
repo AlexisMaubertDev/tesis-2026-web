@@ -21,6 +21,9 @@ dist-ssr
 .env.*.local
 !.env.example
 
+# Configuración local de OpenCode (MCPs y ajustes propios de la máquina)
+opencode.jsonc
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

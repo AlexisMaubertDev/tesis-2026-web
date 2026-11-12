@@ -2,6 +2,7 @@ import { useDispatch } from "react-redux";
 import { loginSuccess, logout } from "../../../app/store/authSlice";
 import type { ServerResponse } from "../../../types/ServerResponse";
 import type { AuthState } from "../../../types/AuthState";
+import { migrarOutboxInvitado } from "../../../app/offline/outbox";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,11 @@ export const useAuth = () => {
     if (usuario) delete usuario.password;
 
     dispatch(loginSuccess({ ...response.data, usuario }));
+
+    // La cola cargada como invitado ("sin sistema") pasa a nombre del
+    // usuario que recién inició sesión, así aparece en la pantalla de la
+    // cola aunque todavía no haya conexión para sincronizar.
+    void migrarOutboxInvitado(response.data.usuario?.id ?? "");
   };
 
   const signOut = () => {

@@ -12,6 +12,7 @@ export default function SistemasRoute({ children }: Props) {
   const rolesPermitidos = ["SISTEMAS"];
 
   if (usuario?.rol && !rolesPermitidos.includes(usuario.rol)) {
+    console.log("SistemasRoute: usuario.rol", usuario.rol);
     return <Navigate to="/" replace />;
   }
 

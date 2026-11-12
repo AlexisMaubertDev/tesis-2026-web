@@ -51,9 +51,29 @@ export default function FilterMenu({ sucursales, filtros, setFiltros }: Props) {
         : [...prev.turnos, turno],
     }));
   };
+
+  const toggleRol = (rol: string) => {
+    setFiltros((prev: FiltrosUsuarios) => ({
+      ...prev,
+      roles: prev.roles.includes(rol)
+        ? prev.roles.filter((r: string) => r !== rol)
+        : [...prev.roles, rol],
+    }));
+  };
+
+  const ROL_LABEL: Record<string, string> = {
+    PLAYERO: "Playero",
+    CAJERO: "Cajero",
+    SUPERVISOR: "Supervisor",
+    GRUERO: "Gruero",
+    SISTEMAS: "Sistemas",
+  };
+  const ROLES = ["PLAYERO", "CAJERO", "SUPERVISOR", "GRUERO", "SISTEMAS"];
+
   const filtrosActivos =
     filtros.sucursales.length +
     filtros.turnos.length +
+    filtros.roles.length +
     (filtros.trabajaDomingos !== null ? 1 : 0) +
     (filtros.bloqueados ? 1 : 0);
 
@@ -166,6 +186,25 @@ export default function FilterMenu({ sucursales, filtros, setFiltros }: Props) {
           </ListItemIcon>
           <p className="text-xs">3</p>
         </MenuItem>
+        <Divider />
+        <ListSubheader className="bg-cerulean-300! text-cerulean-50!">
+          Rol
+        </ListSubheader>
+        {ROLES.map((rol) => (
+          <MenuItem
+            dense
+            key={rol}
+            onClick={() => {
+              handleClose();
+              toggleRol(rol);
+            }}
+          >
+            <ListItemIcon>
+              <Checkbox size="small" checked={filtros.roles.includes(rol)} />
+            </ListItemIcon>
+            <p className="text-xs">{ROL_LABEL[rol]}</p>
+          </MenuItem>
+        ))}
         <Divider />
         <ListSubheader className="bg-cerulean-300! text-cerulean-50!">
           Trabaja domingos

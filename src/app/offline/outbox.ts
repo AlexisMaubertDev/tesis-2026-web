@@ -3,9 +3,9 @@ import api from "../../services/api";
 import { store } from "../store";
 import {
   empezarTurnoCaja,
-  marcarSesionVencida,
   terminarTurnoCaja,
 } from "../store/authSlice";
+import { cerrarSesionPorToken } from "../store/sesion";
 import type { Turno_Caja } from "../../types/Usuario";
 import {
   borrarCachePorPrefijo,
@@ -135,7 +135,6 @@ export const encolarOperacion = async (
 
 const BACKOFF_BASE_MS = 15_000;
 const BACKOFF_MAX_MS = 10 * 60_000;
-
 const backoffMs = (intentos: number): number => {
   const exponencial = Math.min(
     BACKOFF_MAX_MS,
@@ -377,6 +376,23 @@ const contarRestantes = async (
   return { pendientes: items.length - conflictos, conflictos };
 };
 
+/**
+ * Re-atribuye la cola del invitado ("sin sistema") al usuario real: misma
+ * Idempotency-Key, mismo body (la huella de idempotencia no cambia). La
+ * llamamos al iniciar sesión y, por las dudas, al entrar al flush.
+ */
+export const migrarOutboxInvitado = async (usuarioId: string): Promise<void> => {
+  if (!usuarioId || usuarioId === "invitado") return;
+
+  const deInvitado = await listarOutbox("invitado");
+  for (const item of deInvitado) {
+    if (item.usuarioId !== "invitado") continue;
+    await guardarOutbox({ ...item, usuarioId });
+  }
+
+  if (deInvitado.length > 0) notificarOutbox();
+};
+
 const ejecutarProcesamiento = async (): Promise<ResultadoSync> => {
   const { usuario, token, sessionExpired } = store.getState().auth;
   const { browserOnline, apiStatus } = store.getState().offline;
@@ -397,6 +413,11 @@ const ejecutarProcesamiento = async (): Promise<ResultadoSync> => {
     };
   }
 
+  // La cola cargada como invitado ("sin sistema") pasa a nombre del usuario
+  // real recién logueado: se re-atribuyen los ítems (misma Idempotency-Key,
+  // mismo body — la huella no cambia) y de ahí en adelante se procesan con
+  // el token de su sesión.
+  await migrarOutboxInvitado(usuario.id);
   const items = (await listarOutbox(usuario.id)).sort(
     (a, b) =>
       a.creadoEn.localeCompare(b.creadoEn) || a.id.localeCompare(b.id),
@@ -442,7 +463,9 @@ const ejecutarProcesamiento = async (): Promise<ResultadoSync> => {
       const clasificacion = clasificarError(resolucion.error);
 
       if (clasificacion === "auth") {
-        marcarSesionVencida();
+        cerrarSesionPorToken(
+          "Tu sesión venció: los datos guardados siguen en el dispositivo. Iniciá sesión para continuar.",
+        );
         detenidoPorSesion = true;
         break;
       }
@@ -494,7 +517,9 @@ const ejecutarProcesamiento = async (): Promise<ResultadoSync> => {
         : undefined;
 
       if (clasificacion === "auth") {
-        marcarSesionVencida();
+        cerrarSesionPorToken(
+          "Tu sesión venció: los datos guardados siguen en el dispositivo. Iniciá sesión para continuar.",
+        );
         await devolverAPendiente(item, error, null);
         detenidoPorSesion = true;
         huboCambios = true;

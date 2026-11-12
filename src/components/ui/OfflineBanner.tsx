@@ -61,7 +61,7 @@ export default function OfflineBanner() {
     clase = "bg-amber-600 text-white";
     mensaje = sinRed
       ? "Sin conexión. La app funciona con los datos guardados y enviará los cambios al reconectar."
-      : "La API no responde. La app sigue en modo lectura con los datos guardados.";
+      : "El servidor no responde. La app sigue en modo lectura con los datos guardados.";
     detalle =
       pendientes > 0
         ? `${pendientes} cambio(s) pendientes de sincronizar.`

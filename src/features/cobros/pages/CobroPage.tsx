@@ -161,8 +161,10 @@ export default function CobroPage() {
   }
 
   // El servidor exige un turno de caja abierto para registrar el cobro: sin
-  // turno, la pantalla ni siquiera muestra el formulario.
-  if (!usuario.Turno_Caja) {
+  // turno, la pantalla ni siquiera muestra el formulario. En modo invitado
+  // ("sin sistema") no hay turno: el cobro va a la cola y el servidor deja el
+  // detalle en las incidencias del acarreo al sincronizar.
+  if (!usuario.Turno_Caja && usuario.id !== "invitado") {
     return (
       <PageLayout>
         <MainLayout>
@@ -198,7 +200,9 @@ export default function CobroPage() {
     );
   }
 
-  const volver = () => navigate("/cajeros");
+  // El invitado vuelve a su sección "sin conexión"; los demás a su home.
+  const volver = () =>
+    navigate(usuario.id === "invitado" ? "/sin-conexion" : "/cajeros");
   const recalcular = () => setPreviewKey((n) => n + 1);
 
   const handleSubmit = async () => {
@@ -300,8 +304,10 @@ export default function CobroPage() {
               <p className="text-sm text-scarlet-rush-700">{errorCarga}</p>
             )}
 
-            {!cargando && !errorCarga && !acarreo && (
-              apiCaida ? (
+            {!cargando &&
+              !errorCarga &&
+              !acarreo &&
+              (apiCaida ? (
                 // Sin sistema y sin cache: el cajero carga la patente que
                 // presintió a mano; el server la resuelve al sincronizar.
                 <div className="bg-cerulean-100 rounded shadow p-4 flex flex-col gap-4">
@@ -316,9 +322,11 @@ export default function CobroPage() {
                         conexión el sistema lo va a asociar a su acarreo.
                       </span>
                       <span>
-                        <span className="font-semibold">Fecha y hora del cobro:</span>{" "}
-                        {formatDateFullWithHs(new Date().toISOString())} (la hora local se
-                        guarda sola)
+                        <span className="font-semibold">
+                          Fecha y hora del cobro:
+                        </span>{" "}
+                        {formatDateFullWithHs(new Date().toISOString())} (la
+                        hora local se guarda sola)
                       </span>
                     </p>
                   </div>
@@ -392,19 +400,18 @@ export default function CobroPage() {
                   </div>
                 </div>
               ) : (
-              <div className="bg-cerulean-200 rounded-lg p-4 flex flex-col gap-3">
-                <p className="text-xs text-cerulean-900">
-                  El vehículo {patente} no está ingresado en la playa, por lo
-                  que no se puede cobrar.
-                </p>
-                <div>
-                  <CallToActionButton type="button" handleSubmit={volver}>
-                    Volver
-                  </CallToActionButton>
+                <div className="bg-cerulean-200 rounded-lg p-4 flex flex-col gap-3">
+                  <p className="text-xs text-cerulean-900">
+                    El vehículo {patente} no está ingresado en la playa, por lo
+                    que no se puede cobrar.
+                  </p>
+                  <div>
+                    <CallToActionButton type="button" handleSubmit={volver}>
+                      Volver
+                    </CallToActionButton>
+                  </div>
                 </div>
-              </div>
-              )
-            )}
+              ))}
 
             {!cargando && acarreo && (
               <div className="bg-cerulean-100 rounded shadow p-4 flex flex-col gap-4">
@@ -433,25 +440,28 @@ export default function CobroPage() {
                   </p>
                 )}
 
-                {!cargandoPreview && errorPreview && (
-                  apiCaida ? (
+                {!cargandoPreview &&
+                  errorPreview &&
+                  (apiCaida ? (
                     <p className="text-xs text-cerulean-800">
                       No se pudo calcular el total sugerido (sin conexión):
                       cargá el importe que cobró el cliente a mano.
                     </p>
                   ) : (
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs text-scarlet-rush-700">
-                      {errorPreview}
-                    </p>
-                    <div>
-                      <CallToActionButton type="button" handleSubmit={recalcular}>
-                        Recalcular
-                      </CallToActionButton>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-scarlet-rush-700">
+                        {errorPreview}
+                      </p>
+                      <div>
+                        <CallToActionButton
+                          type="button"
+                          handleSubmit={recalcular}
+                        >
+                          Recalcular
+                        </CallToActionButton>
+                      </div>
                     </div>
-                  </div>
-                  )
-                )}
+                  ))}
 
                 {!cargandoPreview && !errorPreview && !tarifa && (
                   <p className="text-xs text-scarlet-rush-700">
@@ -463,44 +473,46 @@ export default function CobroPage() {
                 {!cargandoPreview && ((tarifa && preview) || apiCaida) && (
                   <>
                     {tarifa && preview && (
-                    <>
-                    <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900 flex flex-col gap-1">
-                      <p className="font-bold uppercase">
-                        {apiCaida ? "Tarifa sugerida (última conocida)" : "Tarifa vigente"}
-                      </p>
-                      <p>
-                        Acarreo {formatCurrency(tarifa.acarreo)} + estadía{" "}
-                        {formatCurrency(tarifa.estadia)} cada{" "}
-                        {preview.horas_por_estadia} horas
-                      </p>
-                      <p className="text-cerulean-700">
-                        Las estadías se calculan solas: se cobra una cada{" "}
-                        {preview.horas_por_estadia} horas desde el acarreo (hasta{" "}
-                        {preview.max_estadias}).
-                      </p>
-                    </div>
+                      <>
+                        <div className="rounded-lg bg-cerulean-200 p-3 text-xs text-cerulean-900 flex flex-col gap-1">
+                          <p className="font-bold uppercase">
+                            {apiCaida
+                              ? "Tarifa sugerida (última conocida)"
+                              : "Tarifa vigente"}
+                          </p>
+                          <p>
+                            Acarreo {formatCurrency(tarifa.acarreo)} + estadía{" "}
+                            {formatCurrency(tarifa.estadia)} cada{" "}
+                            {preview.horas_por_estadia} horas
+                          </p>
+                          <p className="text-cerulean-700">
+                            Las estadías se calculan solas: se cobra una cada{" "}
+                            {preview.horas_por_estadia} horas desde el acarreo
+                            (hasta {preview.max_estadias}).
+                          </p>
+                        </div>
 
-                    <div className="flex flex-col gap-1 bg-cerulean-200 rounded-lg p-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-cerulean-800">
-                          Acarreo {formatCurrency(tarifa.acarreo)} +{" "}
-                          {formatCurrency(tarifa.estadia)} × {estadias}
-                        </span>
-                        <span className="font-semibold text-cerulean-900">
-                          Estadías: {estadias}
-                          {preview.tope_estadias ? " (máximo)" : ""}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-bold uppercase">
-                          {apiCaida ? "Total sugerido" : "Total"}
-                        </span>
-                        <span className="text-sm font-bold uppercase">
-                          {formatCurrency(total)}
-                        </span>
-                      </div>
-                    </div>
-                    </>
+                        <div className="flex flex-col gap-1 bg-cerulean-200 rounded-lg p-3">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-cerulean-800">
+                              Acarreo {formatCurrency(tarifa.acarreo)} +{" "}
+                              {formatCurrency(tarifa.estadia)} × {estadias}
+                            </span>
+                            <span className="font-semibold text-cerulean-900">
+                              Estadías: {estadias}
+                              {preview.tope_estadias ? " (máximo)" : ""}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-bold uppercase">
+                              {apiCaida ? "Total sugerido" : "Total"}
+                            </span>
+                            <span className="text-sm font-bold uppercase">
+                              {formatCurrency(total)}
+                            </span>
+                          </div>
+                        </div>
+                      </>
                     )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -591,7 +603,8 @@ export default function CobroPage() {
                         type="button"
                         handleSubmit={handleSubmit}
                         disabled={
-                          enviando || (!apiCaida && (diferencia !== 0 || !acarreo))
+                          enviando ||
+                          (!apiCaida && (diferencia !== 0 || !acarreo))
                         }
                       >
                         {enviando ? "Registrando..." : "Registrar cobro"}

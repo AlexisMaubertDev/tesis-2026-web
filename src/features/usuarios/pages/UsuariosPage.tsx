@@ -20,6 +20,7 @@ import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu.tsx";
 export type FiltrosUsuarios = {
   sucursales: string[];
   turnos: number[];
+  roles: string[];
   trabajaDomingos: boolean | null;
   bloqueados: boolean;
 };
@@ -51,12 +52,15 @@ const coincideFiltros = (
   const cumpleTurno =
     filtros.turnos.length === 0 || filtros.turnos.includes(usuario.numero_turno);
 
+  const cumpleRol =
+    filtros.roles.length === 0 || filtros.roles.includes(usuario.rol);
+
   const cumpleDomingos =
     !filtros.trabajaDomingos || usuario.trabaja_domingo === true;
 
   const cumpleBloqueados = !filtros.bloqueados || usuario.bloqueado === true;
 
-  return cumpleSucursal && cumpleTurno && cumpleDomingos && cumpleBloqueados;
+  return cumpleSucursal && cumpleTurno && cumpleRol && cumpleDomingos && cumpleBloqueados;
 };
 
 /** Aplica el texto del buscador y el menú de filtros sobre los usuarios. */
@@ -80,6 +84,7 @@ export default function UsuariosPage() {
   const [filtros, setFiltros] = useState<FiltrosUsuarios>({
     sucursales: [],
     turnos: [],
+    roles: [],
     trabajaDomingos: null,
     bloqueados: false,
   });
@@ -144,6 +149,7 @@ export default function UsuariosPage() {
     const nuevosFiltros: FiltrosUsuarios = {
       sucursales: [],
       turnos: [],
+      roles: [],
       trabajaDomingos: null,
       bloqueados: false,
     };

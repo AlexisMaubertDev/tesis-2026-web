@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "../features/auth/pages/LoginPage.tsx";
+import SinConexionPage from "../features/auth/pages/SinConexionPage.tsx";
 import ProtectedRoute from "./ProtectedRoute.tsx";
 import Home from "../pages/Home.tsx";
 import SistemasRoute from "./SistemasRoute.tsx";
@@ -28,6 +29,14 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/sin-conexion"
+          element={
+            <ProtectedRoute>
+              <SinConexionPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/"

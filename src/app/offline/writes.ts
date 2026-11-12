@@ -96,9 +96,13 @@ export const escribir = async <T>(
 ): Promise<RespuestaEscritura<T>> => {
   const { auth, offline } = store.getState();
 
-  if (!auth.usuario || !auth.token) {
+  if (!auth.usuario) {
     throw new Error("No hay una sesión iniciada.");
   }
+
+  // Modo invitado ("sin sistema"): nunca hay llamada online, todo va directo
+  // a la cola y viaja con el flag `cargado_sin_sistema` (huella de idempotencia).
+  const esInvitado = auth.usuario.id === "invitado";
 
   // Modo lectura (sesión vencida): no se encola ni se envía.
   if (auth.sessionExpired) {
@@ -107,7 +111,8 @@ export const escribir = async <T>(
     );
   }
 
-  const apiCaida = !offline.browserOnline || offline.apiStatus === "down";
+  const apiCaida =
+    esInvitado || !offline.browserOnline || offline.apiStatus === "down";
 
   if (apiCaida) {
     // La operación se carga sin sistema: viaja con ese flag en el body (parte

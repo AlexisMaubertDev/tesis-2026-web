@@ -9,4 +9,10 @@ export interface AuthState {
    * no perder la outbox; se pide volver a iniciar sesión para operar.
    */
   sessionExpired: boolean;
+  /**
+   * El usuario entró "sin sistema" como invitado (sin credenciales ni token):
+   * sólo puede operar cobrar / ingresar / dar salida y todo queda encolado en
+   * el dispositivo bajo el usuario pseudo `invitado`.
+   */
+  invitadoOffline: boolean;
 }
