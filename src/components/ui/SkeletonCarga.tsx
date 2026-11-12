@@ -14,7 +14,7 @@ type Props = {
  */
 export default function SkeletonCarga({ filas = 6, alto = 36 }: Props) {
   return (
-    <Box className="w-full flex flex-col gap-2 py-2">
+    <Box className="w-full flex flex-col gap-2 py-2 min-h-[80vh]">
       {Array.from({ length: filas }).map((_, i) => (
         <Skeleton
           key={i}

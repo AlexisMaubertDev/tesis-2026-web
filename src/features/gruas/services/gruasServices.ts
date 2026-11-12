@@ -28,6 +28,21 @@ export const crearGrua = async (token: string, data: GruaForm) => {
   return response.data;
 };
 
+export const editarGrua = async (
+  token: string,
+  id: string,
+  data: GruaForm,
+) => {
+  exigirConexion("la edición de la grúa");
+  const response = await api.put(`/gruas/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+};
+
 export const obtenerGruasSucursal = async (token: string, id: string) => {
   return obtenerConCache({
     key: `gruas:sucursal:${id}`,

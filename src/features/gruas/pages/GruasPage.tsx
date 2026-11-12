@@ -17,6 +17,7 @@ export default function GruasPage() {
   const [gruas, setGruas] = useState<Grua[]>([]);
   const [cargando, setCargando] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [gruaAEditar, setGruaAEditar] = useState<Grua | null>(null);
 
   useEffect(() => {
     const cargarGruas = async () => {
@@ -66,12 +67,16 @@ export default function GruasPage() {
             {cargando ? (
               <SkeletonCarga filas={6} alto={40} />
             ) : (
-              <GruasTable gruas={gruas} />
+              <GruasTable gruas={gruas} onEditar={setGruaAEditar} />
             )}
           </section>
           <NuevaGruaModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
+            open={modalOpen || gruaAEditar !== null}
+            grua={gruaAEditar ?? undefined}
+            onClose={() => {
+              setModalOpen(false);
+              setGruaAEditar(null);
+            }}
             onSuccess={() => setRefreshKey((n) => n + 1)}
           />
         </main>

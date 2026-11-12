@@ -9,6 +9,8 @@ import CambiarEstadoGruaModal from "./CambiarEstadoGruaModal";
 
 interface Props {
   gruas: Grua[];
+  /** Abre el modal de edición con la grúa elegida. */
+  onEditar?: (grua: Grua) => void;
   /** Muestra la acción para cambiar el estado (páginas del supervisor). */
   puedeCambiarEstado?: boolean;
   /** Se llama después de cambiar el estado, para recargar la lista. */
@@ -17,6 +19,7 @@ interface Props {
 
 export default function GruasTable({
   gruas,
+  onEditar,
   puedeCambiarEstado = false,
   onRefrescar,
 }: Props) {
@@ -63,7 +66,7 @@ export default function GruasTable({
                 <div className="flex items-center gap-2">
                   <button
                     className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
-                    //onClick={() => handleEdit(caja)}
+                    onClick={() => onEditar?.(grua)}
                   >
                     <Tooltip title="Editar">
                       <EditIcon />

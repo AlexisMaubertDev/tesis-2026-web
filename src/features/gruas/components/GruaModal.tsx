@@ -11,7 +11,7 @@ import { showSuccess } from "../../../app/store/snackbarSlice";
 import { obtenerSucursales } from "../../sucursales/services/sucursalesService";
 import type { Sucursal } from "../../../types/Sucursal";
 import type { Grua } from "../../../types/Grua";
-import { crearGrua } from "../services/gruasServices";
+import { crearGrua, editarGrua } from "../services/gruasServices";
 // import { crearGrua } from "../services/gruasService";
 
 type Props = {
@@ -57,9 +57,15 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
   ) => {
     const { name, value } = e.target;
 
+    // Patente y modelo se guardan en mayúsculas (igual que el server).
+    const valorNormalizado =
+      name === "patente" || name === "modelo"
+        ? value.toUpperCase()
+        : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "numero" ? Number(value) : value,
+      [name]: name === "numero" ? Number(valorNormalizado) : valorNormalizado,
     }));
   };
 
@@ -113,11 +119,18 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
     setLoading(true);
 
     try {
-      await crearGrua(token!, formData);
+      if (grua) {
+        await editarGrua(token!, grua.id!, formData);
 
-      dispatch(showSuccess("Grúa creada con éxito"));
+        dispatch(showSuccess("Grúa editada con éxito"));
+      } else {
+        await crearGrua(token!, formData);
 
-      setFormData(initialFormData);
+        dispatch(showSuccess("Grúa creada con éxito"));
+
+        setFormData(initialFormData);
+      }
+
       onSuccess?.();
       onClose();
 
@@ -127,7 +140,7 @@ export default function GruaModal({ open, onClose, grua, onSuccess }: Props) {
 
       setError(
         err.response?.data?.message || err?.message ||
-          "Error al crear la grúa. Intenta nuevamente más tarde.",
+          `Error al ${grua ? "editar" : "crear"} la grúa. Intenta nuevamente más tarde.`,
       );
     } finally {
       setLoading(false);
