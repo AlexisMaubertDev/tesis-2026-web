@@ -4,6 +4,7 @@ import PageLayout from "../../../components/layout/PageLayout";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import CajasTable from "../components/CajasTable";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import type { RootState } from "../../../app/store";
 import { useSelector } from "react-redux";
 import { obtenerCajas } from "../services/cajasService";
@@ -14,16 +15,20 @@ export default function CajasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [cajas, setCajas] = useState<Caja[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const cargarCajas = async () => {
+      setCargando(true);
       try {
         const res = await obtenerCajas(token!);
         setCajas(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.response?.message);
+      } finally {
+        setCargando(false);
       }
     };
 
@@ -58,7 +63,11 @@ export default function CajasPage() {
             </div>
           </section>
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <CajasTable cajas={cajas} />
+            {cargando ? (
+              <SkeletonCarga filas={6} alto={40} />
+            ) : (
+              <CajasTable cajas={cajas} />
+            )}
           </section>
           <NuevaCajaModal
             open={modalOpen}

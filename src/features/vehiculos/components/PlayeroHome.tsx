@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../../components/layout/MainLayout";
 import PageLayout from "../../../components/layout/PageLayout";
@@ -115,6 +116,7 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
   const navigate = useNavigate();
 
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const [accion, setAccion] = useState<Accion | null>(null);
   const [procesando, setProcesando] = useState(false);
@@ -124,22 +126,32 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
   useEffect(() => {
     if (!token) return;
 
+    let activo = true;
+
     const cargarVehiculos = async () => {
       try {
         const res = await obtenerVehiculos(token);
-        setVehiculos(res.data);
+        if (activo) setVehiculos(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        dispatch(
-          showError(
-            error.response?.data?.message ||
-              "Error al cargar vehículos. Intenta nuevamente más tarde.",
-          ),
-        );
+        if (activo) {
+          dispatch(
+            showError(
+              error.response?.data?.message ||
+                "Error al cargar vehículos. Intenta nuevamente más tarde.",
+            ),
+          );
+        }
+      } finally {
+        if (activo) setCargando(false);
       }
     };
 
     cargarVehiculos();
+
+    return () => {
+      activo = false;
+    };
   }, [token, dispatch, refreshKey]);
 
   // Sólo se muestran los vehículos de la sucursal del playero (la sucursal
@@ -152,7 +164,12 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
     (v) => deMiSucursal(v) && v.ultimo_acarreo_estado === "ACARREADO",
   );
   const abonados = vehiculos.filter(
-    (v) => deMiSucursal(v) && v.ultimo_acarreo_estado === "COBRADO",
+    (v) =>
+      deMiSucursal(v) &&
+      // Pueden salir los abonados y también los salidos sin cargo: los dos
+      // están en la playa esperando que la barrera les dé salida.
+      (v.ultimo_acarreo_estado === "COBRADO" ||
+        v.ultimo_acarreo_estado === "SIN_CARGO"),
   );
 
   const ubicacion = turno.Barrera?.ubicacion ?? "-";
@@ -230,30 +247,40 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
           </section>
 
           <section className="flex flex-col w-full max-w-6xl gap-4 mt-4">
-            <div className="bg-cerulean-100 rounded shadow p-4">
-              <h2 className="sm:text-lg font-bold uppercase mb-2">
-                Vehículos acarreados
-              </h2>
-              <TablaAcciones
-                vehiculos={acarreados}
-                mostrarFecha
-                accionLabel="Ingresar a la playa"
-                onAccion={(vehiculo) => setAccion({ tipo: "ingresar", vehiculo })}
-                vacio="No hay vehículos pendientes de ingreso a la playa"
-              />
-            </div>
+            {cargando ? (
+              <SkeletonCarga filas={6} alto={40} />
+            ) : (
+              <>
+                <div className="bg-cerulean-100 rounded shadow p-4">
+                  <h2 className="sm:text-lg font-bold uppercase mb-2">
+                    Vehículos acarreados
+                  </h2>
+                  <TablaAcciones
+                    vehiculos={acarreados}
+                    mostrarFecha
+                    accionLabel="Ingresar a la playa"
+                    onAccion={(vehiculo) =>
+                      setAccion({ tipo: "ingresar", vehiculo })
+                    }
+                    vacio="No hay vehículos pendientes de ingreso a la playa"
+                  />
+                </div>
 
-            <div className="bg-cerulean-100 rounded shadow p-4">
-              <h2 className="sm:text-lg font-bold uppercase mb-2">
-                Vehículos abonados
-              </h2>
-              <TablaAcciones
-                vehiculos={abonados}
-                accionLabel="Dar salida"
-                onAccion={(vehiculo) => setAccion({ tipo: "egresar", vehiculo })}
-                vacio="No hay vehículos abonados para dar salida"
-              />
-            </div>
+                <div className="bg-cerulean-100 rounded shadow p-4">
+                  <h2 className="sm:text-lg font-bold uppercase mb-2">
+                    Vehículos abonados (y sin cargo)
+                  </h2>
+                  <TablaAcciones
+                    vehiculos={abonados}
+                    accionLabel="Dar salida"
+                    onAccion={(vehiculo) =>
+                      setAccion({ tipo: "egresar", vehiculo })
+                    }
+                    vacio="No hay vehículos esperando salida (abonados o sin cargo)"
+                  />
+                </div>
+              </>
+            )}
           </section>
         </main>
 

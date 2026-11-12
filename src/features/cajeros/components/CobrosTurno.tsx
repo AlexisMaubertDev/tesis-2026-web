@@ -4,6 +4,7 @@ import type { RootState } from "../../../app/store";
 import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 import { formatCurrency } from "../../../app/utils/money";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import type { CobroConAcarreo, TotalesTurno } from "../../../types/Cobro";
 import {
   abrirComprobanteCobro,
@@ -111,11 +112,13 @@ export default function CobrosTurno() {
 
       {error && <p className="text-xs text-scarlet-rush-700">{error}</p>}
 
-      {!error && cobros.length === 0 && (
+      {!error && cargando && cobros.length === 0 && (
+        <SkeletonCarga filas={4} alto={32} />
+      )}
+
+      {!error && !cargando && cobros.length === 0 && (
         <p className="text-xs text-cerulean-800">
-          {cargando
-            ? "Cargando cobros..."
-            : "Todavía no registraste cobros en este turno."}
+          Todavía no registraste cobros en este turno.
         </p>
       )}
 

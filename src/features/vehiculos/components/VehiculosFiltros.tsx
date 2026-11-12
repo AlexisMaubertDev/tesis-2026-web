@@ -9,6 +9,10 @@ import Tooltip from "@mui/material/Tooltip";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import React from "react";
 import { ESTADOS_ACARREO } from "../../../app/constants/estados";
+
+// Los egresados no se listan (solo aparecen buscando por la barra de
+// búsqueda), así que tampoco van como opción del filtro.
+const ESTADOS_FILTRO = ESTADOS_ACARREO.filter((e) => e !== "EGRESADO");
 import type { Sucursal } from "../../../types/Sucursal";
 import type { EstadoAcarreo } from "../../../types/Vehiculo";
 import type { FiltrosVehiculos } from "../pages/VehiculosPage";
@@ -140,7 +144,7 @@ export default function VehiculosFiltros({
         <ListSubheader className="bg-cerulean-300! text-cerulean-50!">
           Estado
         </ListSubheader>
-        {ESTADOS_ACARREO.map((estado) => (
+        {ESTADOS_FILTRO.map((estado) => (
           <MenuItem
             dense
             key={estado}

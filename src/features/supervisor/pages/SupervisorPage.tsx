@@ -15,6 +15,7 @@ import {
 } from "../../gruas/services/gruasServices";
 import { obtenerBarrerasSucursal, finalizarTodosTurnosBarrera } from "../../barreras/services/barrerasService";
 import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 
 import CircleIcon from "@mui/icons-material/Circle";
 import { Tooltip } from "@mui/material";
@@ -48,6 +49,7 @@ export default function SupervisorPage() {
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [gruas, setGruas] = useState<Grua[]>([]);
   const [barreras, setBarreras] = useState<Barrera[]>([]);
+  const [cargando, setCargando] = useState(true);
 
   const [asignarModal, setAsignarModal] = useState<Grua | null>(null);
   const [verDetalleModal, setVerDetalleModal] = useState<Grua | null>(null);
@@ -74,6 +76,8 @@ export default function SupervisorPage() {
       setBarreras(resBarreras.data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setCargando(false);
     }
   }, [token, usuario]);
 
@@ -238,6 +242,9 @@ export default function SupervisorPage() {
                 Cajas
               </h1>
             </div>
+            {cargando ? (
+              <SkeletonCarga filas={4} alto={56} />
+            ) : (
             <ul className="flex justify-start items-start w-full gap-4 flex-wrap">
               {cajas.map((caja) => (
                 <li
@@ -276,6 +283,7 @@ export default function SupervisorPage() {
                 </li>
               ))}
             </ul>
+            )}
           </section>
 
           {/* GRÚAS */}
@@ -293,6 +301,9 @@ export default function SupervisorPage() {
                 </CallToActionButton>
               )}
             </div>
+            {cargando ? (
+              <SkeletonCarga filas={4} alto={56} />
+            ) : (
             <ul className="flex justify-start items-start w-full gap-4 flex-wrap">
               {gruas.map((grua) => (
                 <li
@@ -334,6 +345,7 @@ export default function SupervisorPage() {
                 </li>
               ))}
             </ul>
+            )}
           </section>
 
           {/* BARRERAS */}
@@ -351,6 +363,9 @@ export default function SupervisorPage() {
                 </CallToActionButton>
               )}
             </div>
+            {cargando ? (
+              <SkeletonCarga filas={4} alto={56} />
+            ) : (
             <ul className="flex justify-start items-start lg:items-center w-full gap-4 flex-wrap">
               {barreras.map((barrera) => (
                 <li
@@ -396,6 +411,7 @@ export default function SupervisorPage() {
                 </li>
               ))}
             </ul>
+            )}
           </section>
         </main>
 

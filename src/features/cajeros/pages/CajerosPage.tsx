@@ -14,10 +14,12 @@ import { getTurnoLabel } from "../../../app/constants/turnos";
 import BuscarVehiculoPatente from "../../vehiculos/components/BuscarVehiculoPatente";
 import CobrosTurno from "../components/CobrosTurno";
 import CerrarTurnoModal from "../components/CerrarTurnoModal";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 
 export default function CajerosPage() {
   const { usuario, token } = useSelector((state: RootState) => state.auth);
   const [cajas, setCajas] = useState<Caja[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [cerrarTurnoAbierto, setCerrarTurnoAbierto] = useState(false);
 
   const dispatch = useDispatch();
@@ -26,12 +28,15 @@ export default function CajerosPage() {
     if (!token || !usuario) return;
 
     const cargarCajas = async () => {
+      setCargando(true);
       try {
         const res = await obtenerCajasSucursal(token, usuario.Sucursal.id!);
         setCajas(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.response?.data);
+      } finally {
+        setCargando(false);
       }
     };
 
@@ -71,7 +76,11 @@ export default function CajerosPage() {
                   Cajas - {usuario.Sucursal.nombre}
                 </h1>
               </div>
-              <SelectCajas cajas={cajas} />
+              {cargando ? (
+                <SkeletonCarga filas={5} alto={44} />
+              ) : (
+                <SelectCajas cajas={cajas} />
+              )}
             </section>
           ) : (
             <section className="flex flex-col  max-w-6xl justify-between items-start lg:items-center w-full mt-4  gap-4">

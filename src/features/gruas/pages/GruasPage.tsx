@@ -4,6 +4,7 @@ import PageLayout from "../../../components/layout/PageLayout";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import GruasTable from "../components/GruasTable";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import type { Grua } from "../../../types/Grua";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../app/store";
@@ -14,16 +15,20 @@ export default function GruasPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [gruas, setGruas] = useState<Grua[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const cargarGruas = async () => {
+      setCargando(true);
       try {
         const res = await obtenerGruas(token!);
         setGruas(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.message);
+      } finally {
+        setCargando(false);
       }
     };
 
@@ -58,7 +63,11 @@ export default function GruasPage() {
             </div>
           </section>
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <GruasTable gruas={gruas} />
+            {cargando ? (
+              <SkeletonCarga filas={6} alto={40} />
+            ) : (
+              <GruasTable gruas={gruas} />
+            )}
           </section>
           <NuevaGruaModal
             open={modalOpen}

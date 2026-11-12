@@ -16,6 +16,7 @@ import type { Turno_Barrera } from "../../../types/Barrera";
 import { obtenerSucursales } from "../../sucursales/services/sucursalesService";
 import { obtenerMiTurnoBarrera } from "../../barreras/services/barrerasService";
 import VehiculosTable from "../components/VehiculosTable";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import EditarVehiculoModal from "../components/EditarVehiculoModal";
 import VehiculoDetalleModal from "../components/VehiculoDetalleModal";
 import VehiculosFiltros from "../components/VehiculosFiltros";
@@ -98,6 +99,7 @@ function VehiculosTabla() {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [vehiculosFiltrados, setVehiculosFiltrados] = useState<Vehiculo[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [filtros, setFiltros] = useState<FiltrosVehiculos>(() =>
@@ -121,23 +123,41 @@ function VehiculosTabla() {
   useEffect(() => {
     if (!token) return;
 
+    let activo = true;
+
     const cargarVehiculos = async () => {
+      setCargando(true);
+
       try {
-        const res = await obtenerVehiculos(token);
+        // Con texto en la barra de búsqueda la lista incluye los egresados
+        // (y su historial); sin búsqueda, el server ya no los trae.
+        const res = await obtenerVehiculos(token, search.trim() || undefined);
+        if (!activo) return;
         setVehiculos(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
+        if (!activo) return;
         dispatch(
           showError(
             error.response?.data?.message ||
               "Error al cargar vehículos. Intenta nuevamente más tarde.",
           ),
         );
+      } finally {
+        if (activo) setCargando(false);
       }
     };
 
-    cargarVehiculos();
-  }, [token, dispatch, refreshKey]);
+    // Se re-consulta con un pequeño debounce mientras se escribe la búsqueda.
+    const temporizador = setTimeout(() => {
+      void cargarVehiculos();
+    }, 350);
+
+    return () => {
+      activo = false;
+      clearTimeout(temporizador);
+    };
+  }, [token, dispatch, refreshKey, search]);
 
   useEffect(() => {
     if (!token) return;
@@ -232,7 +252,9 @@ function VehiculosTabla() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-auto">
-            {vehiculosFiltrados.length === 0 ? (
+            {cargando ? (
+              <SkeletonCarga filas={8} alto={44} />
+            ) : vehiculosFiltrados.length === 0 ? (
               <p className="text-center text-cerulean-600 font-bold">
                 No se encontraron vehículos
               </p>
@@ -328,8 +350,8 @@ export default function VehiculosPage() {
       return (
         <PageLayout>
           <MainLayout>
-            <main className="flex flex-col justify-start items-center py-4 px-4 w-full">
-              <p className="text-sm text-cerulean-700 mt-4">Cargando...</p>
+            <main className="flex flex-col justify-start items-center py-4 px-4 w-full mt-6">
+              <SkeletonCarga filas={5} alto={48} />
             </main>
           </MainLayout>
         </PageLayout>

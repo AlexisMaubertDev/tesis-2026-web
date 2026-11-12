@@ -6,6 +6,7 @@ import { obtenerUsuarios } from "../services/usuariosService.ts";
 import type { RootState } from "../../../app/store/index.ts";
 import { useDispatch, useSelector } from "react-redux";
 import UsuariosTable from "../components/UsuariosTable.tsx";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import CallToActionButton from "../../../components/ui/CallToActionButton.tsx";
 import NuevoUsuarioModal from "../components/NuevoUsuarioModal.tsx";
 import CambiarRolModal from "../components/CambiarRolModal.tsx";
@@ -95,6 +96,7 @@ export default function UsuariosPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [search, setSearch] = useState("");
   const [usuariosFiltrados, setUsuariosFiltrados] = useState<Usuario[]>([]);
+  const [cargando, setCargando] = useState(true);
   const dispatch = useDispatch();
 
   const recargar = () => setRefreshKey((k) => k + 1);
@@ -103,6 +105,7 @@ export default function UsuariosPage() {
     if (!token) return;
 
     const cargarUsuarios = async () => {
+      setCargando(true);
       try {
         const res = await obtenerUsuarios(token);
         setUsuarios(res.data);
@@ -115,6 +118,8 @@ export default function UsuariosPage() {
               "Error al cargar usuarios. Intenta nuevamente más tarde.",
           ),
         );
+      } finally {
+        setCargando(false);
       }
     };
 
@@ -211,14 +216,18 @@ export default function UsuariosPage() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <UsuariosTable
-              usuarios={usuariosFiltrados}
-              onEditar={setUsuarioAEditar}
-              onCambiarRol={setUsuarioCambioRol}
-              onVerDetalle={setUsuarioDetalle}
-              onDeleted={recargar}
-              onRefrescar={recargar}
-            />
+            {cargando ? (
+              <SkeletonCarga filas={8} alto={40} />
+            ) : (
+              <UsuariosTable
+                usuarios={usuariosFiltrados}
+                onEditar={setUsuarioAEditar}
+                onCambiarRol={setUsuarioCambioRol}
+                onVerDetalle={setUsuarioDetalle}
+                onDeleted={recargar}
+                onRefrescar={recargar}
+              />
+            )}
           </section>
 
           {nuevoUsuarioModalOpen && (

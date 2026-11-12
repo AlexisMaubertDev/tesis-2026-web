@@ -3,11 +3,21 @@ import { obtenerConCache } from "../../../app/offline/cache";
 import { escribir, exigirConexion } from "../../../app/offline/writes";
 import type { Vehiculo } from "../../../types/Vehiculo";
 
-export const obtenerVehiculos = async (token: string) => {
+export const obtenerVehiculos = async (token: string, busqueda?: string) => {
+  const busquedaNormalizada = busqueda?.trim() ?? "";
+
   return obtenerConCache({
-    key: "vehiculos",
+    // Sin búsqueda la lista es "todos los vehículos (sin egresados)"; con
+    // búsqueda incluidos los egresados. La cache guarda cada variante aparte.
+    key: busquedaNormalizada
+      ? `vehiculos:busqueda:${busquedaNormalizada.toLowerCase()}`
+      : "vehiculos",
     fetcher: async () => {
-      const res = await api.get("/vehiculos", {
+      const query = busquedaNormalizada
+        ? `?busqueda=${encodeURIComponent(busquedaNormalizada)}`
+        : "";
+
+      const res = await api.get(`/vehiculos${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

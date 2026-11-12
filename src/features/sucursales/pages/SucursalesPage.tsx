@@ -9,10 +9,12 @@ import CallToActionButton from "../../../components/ui/CallToActionButton";
 import SucursalModal from "../components/SucursalModal";
 import { obtenerSucursales } from "../services/sucursalesService";
 import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
+import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 
 export default function SucursalesPage() {
   const { token } = useSelector((state: RootState) => state.auth);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [cargando, setCargando] = useState(true);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selectedSucursal, setSelectedSucursal] = useState<Sucursal | null>(
     null,
@@ -26,12 +28,15 @@ export default function SucursalesPage() {
     if (!token) return;
 
     const cargarSucursales = async () => {
+      setCargando(true);
       try {
         const res = await obtenerSucursales(token);
         setSucursales(res.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.response?.message);
+      } finally {
+        setCargando(false);
       }
     };
 
@@ -67,7 +72,14 @@ export default function SucursalesPage() {
           </section>
 
           <section className="w-full bg-cerulean-100 rounded shadow p-4 mt-4 mx-4 overflow-x-hidden">
-            <SucursalesTable sucursales={sucursales} handleEdit={handleEdit} />
+            {cargando ? (
+              <SkeletonCarga filas={6} alto={40} />
+            ) : (
+              <SucursalesTable
+                sucursales={sucursales}
+                handleEdit={handleEdit}
+              />
+            )}
           </section>
         </main>
         {modalOpen && (

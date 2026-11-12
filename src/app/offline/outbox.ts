@@ -234,8 +234,16 @@ const resolverRecurso = async (
       const estadoRequerido = recurso.estadoRequerido;
 
       if (estadoRequerido) {
-        const candidato = acarreos.find(
-          (acarreo) => acarreo.estado === estadoRequerido,
+        // La salida de playa (EGRESO) sirve tanto para abonados (COBRADO)
+        // como para salidos sin cargo (SIN_CARGO): los dos están en la
+        // playa esperando que la barrera les dé salida.
+        const estadosValidos =
+          estadoRequerido === "COBRADO" && item.tipo === "EGRESO"
+            ? ["COBRADO", "SIN_CARGO"]
+            : [estadoRequerido];
+
+        const candidato = acarreos.find((acarreo) =>
+          estadosValidos.includes(acarreo.estado),
         );
 
         if (!candidato) {
