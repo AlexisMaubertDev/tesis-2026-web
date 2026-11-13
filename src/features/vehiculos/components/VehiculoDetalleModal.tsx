@@ -26,7 +26,8 @@ export default function VehiculoDetalleModal({
 }: Props) {
   const { token } = useSelector((state: RootState) => state.auth);
   const [acarreos, setAcarreos] = useState<Acarreo[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Arranca en true: mientras se abre/fetchea no debe parpadear "sin acarreos".
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const patente = vehiculo?.patente;

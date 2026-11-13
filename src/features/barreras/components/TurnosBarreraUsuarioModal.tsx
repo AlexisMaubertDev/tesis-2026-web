@@ -44,7 +44,7 @@ export default function TurnosBarreraUsuarioModal({
   const { token } = useSelector((state: RootState) => state.auth);
 
   const [turnos, setTurnos] = useState<TurnoBarreraListado[]>([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoBarreraDetalle | null>(null);
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);

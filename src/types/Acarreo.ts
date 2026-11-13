@@ -1,5 +1,6 @@
 import type { Sucursal } from "./Sucursal";
 import type { EstadoAcarreo } from "./Vehiculo";
+import type { DamagesAcarreo } from "./DamageInspection";
 
 /** Usuario tal como lo devuelven los includes de acarreos (sin la contraseña). */
 export interface AcarreoUsuario {
@@ -68,6 +69,8 @@ export interface Acarreo {
   fue_denuncia: boolean;
   tuvo_siniestro: boolean;
   incidencias: string | null;
+  /** Inspección de daños cargada desde la app móvil (JSON en `acarreos.damages`). */
+  damages?: DamagesAcarreo | null;
   Turno_Grua?: AcarreoGrua | null;
   /**
    * Turno de barrera por el que ingresó. El nombre de la clave lo define

@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { formatDateFullWithHs, formatTime } from "../../../app/hooks/dataParse";
 import DetailItem from "../../../components/ui/DetailItem";
 import type { Acarreo, AcarreoUsuario } from "../../../types/Acarreo";
+import DanosAcarreoModal from "./DanosAcarreoModal";
 
 /** Nombre y apellido de un usuario asignado (chofer, enganchador...). */
 function nombreUsuario(usuario?: AcarreoUsuario | null) {
@@ -59,6 +60,15 @@ function Texto({ children }: { children: ReactNode }) {
  */
 export default function AcarreoDetalleCard({ acarreo }: { acarreo: Acarreo }) {
   const egreso = textoEgreso(acarreo);
+  const [danosAbierto, setDanosAbierto] = useState(false);
+
+  // Si la app cargó alguna inspección de daños, se ofrece el botón "Ver daños".
+  const tieneDanos = Boolean(
+    acarreo.damages &&
+      Object.values(acarreo.damages).some(
+        (vista) => (vista?.paths ?? []).length > 0,
+      ),
+  );
 
   return (
     <div className="rounded-lg bg-cerulean-50 border border-cerulean-200 p-3 flex flex-col gap-2">
@@ -97,9 +107,28 @@ export default function AcarreoDetalleCard({ acarreo }: { acarreo: Acarreo }) {
         {egreso && <Texto>{egreso}</Texto>}
       </div>
 
-      <DetailItem
-        etiqueta="Incidencias"
-        valor={acarreo.incidencias ?? "Ninguna"}
+      <div className="flex items-center justify-between gap-2">
+        <DetailItem
+          etiqueta="Incidencias"
+          valor={acarreo.incidencias ?? "Ninguna"}
+        />
+
+        {tieneDanos && (
+          <button
+            type="button"
+            onClick={() => setDanosAbierto(true)}
+            className="shrink-0 bg-cerulean-600 hover:bg-cerulean-700 text-white text-xs font-bold px-3 py-1.5 rounded cursor-pointer transition-colors"
+          >
+            Ver daños
+          </button>
+        )}
+      </div>
+
+      <DanosAcarreoModal
+        open={danosAbierto}
+        onClose={() => setDanosAbierto(false)}
+        damages={acarreo.damages!}
+        patente={acarreo.Vehiculo?.patente ?? undefined}
       />
     </div>
   );

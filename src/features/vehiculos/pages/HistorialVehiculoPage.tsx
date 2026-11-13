@@ -18,7 +18,7 @@ export default function HistorialVehiculoPage() {
   const { patente = "" } = useParams();
   const { token } = useSelector((state: RootState) => state.auth);
   const [acarreos, setAcarreos] = useState<Acarreo[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

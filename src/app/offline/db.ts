@@ -74,7 +74,9 @@ export const guardarCache = async <T>(
       data,
       actualizadoEn: new Date().toISOString(),
     };
-    await db.put("cache", entry);
+    // El store `cache` usa claves out-of-line: la clave se pasa como tercer
+    // parámetro del `put` (si no, IndexedDB lanza DataError).
+    await db.put("cache", entry, entry.key);
   } catch (error) {
     console.error("Offline: no se pudo guardar la caché:", error);
   }

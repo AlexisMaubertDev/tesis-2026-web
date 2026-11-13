@@ -29,7 +29,9 @@ export default function CobrosTurno() {
 
   const [cobros, setCobros] = useState<CobroConAcarreo[]>([]);
   const [totales, setTotales] = useState<TotalesTurno>(TOTALES_VACIOS);
-  const [cargando, setCargando] = useState(false);
+  // Arranca en true para que el primer render muestre el skeleton y no el
+  // "todavía no registraste cobros" de la lista vacía.
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<CobroConAcarreo | null>(null);
   // Cobro cuyo PDF se está generando (para deshabilitar sólo ese botón).

@@ -11,7 +11,7 @@ import TurnoCajaDetalleModal from "./TurnoCajaDetalleModal";
 export default function TurnosCerradosTable() {
   const { token, usuario } = useSelector((state: RootState) => state.auth);
   const [turnos, setTurnos] = useState<TurnoCajaCerrado[]>([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoCajaDetalle | null>(null);
   const [abriendo, setAbriendo] = useState(false);

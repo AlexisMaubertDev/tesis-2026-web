@@ -41,7 +41,7 @@ export default function TurnosGruaUsuarioModal({
   const { token } = useSelector((state: RootState) => state.auth);
 
   const [turnos, setTurnos] = useState<TurnoGruaListado[]>([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detalle, setDetalle] = useState<TurnoGruaDetalle | null>(null);
   const [abriendoDetalle, setAbriendoDetalle] = useState(false);
