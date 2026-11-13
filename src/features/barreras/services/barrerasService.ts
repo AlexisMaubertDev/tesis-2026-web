@@ -2,6 +2,29 @@ import api from "../../../services/api";
 import { obtenerConCache } from "../../../app/offline/cache";
 import { exigirConexion } from "../../../app/offline/writes";
 
+export const crearBarrera = async (
+  token: string,
+  barrera: { ubicacion: string; Sucursal: { id: string } },
+) => {
+  exigirConexion("el alta de la barrera");
+  const res = await api.post("/barreras", barrera, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const editarBarrera = async (
+  token: string,
+  id: string,
+  barrera: { ubicacion: string; Sucursal: { id: string } },
+) => {
+  exigirConexion("la edición de la barrera");
+  const res = await api.put(`/barreras/${id}`, barrera, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
 export const obtenerBarreras = async (token: string) => {
   return obtenerConCache({
     key: "barreras",

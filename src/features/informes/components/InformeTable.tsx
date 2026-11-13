@@ -9,9 +9,12 @@ import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
 export default function InformeTable({
   movimientos,
   etiquetaFecha,
+  esMovimientosCombinados,
 }: {
   movimientos: MovimientoInforme[];
   etiquetaFecha?: string;
+  /** Informe MOVIMIENTOS: muestra entrada y salida por fila. */
+  esMovimientosCombinados?: boolean;
 }) {
   if (movimientos.length === 0) {
     return (
@@ -28,9 +31,23 @@ export default function InformeTable({
           <tr className="text-sm border-b border-cerulean-400">
             <th className="border-r px-2 py-2">Patente</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Vehículo</th>
-            <th className="border-r px-2 py-2 border-cerulean-400">
-              {etiquetaFecha ?? "Fecha y hora"}
-            </th>
+            {esMovimientosCombinados ? (
+              <>
+                <th className="border-r px-2 py-2 border-cerulean-400">
+                  Entrada
+                </th>
+                <th className="border-r px-2 py-2 border-cerulean-400">
+                  Salida
+                </th>
+                <th className="border-r px-2 py-2 border-cerulean-400">
+                  Estado
+                </th>
+              </>
+            ) : (
+              <th className="border-r px-2 py-2 border-cerulean-400">
+                {etiquetaFecha ?? "Fecha y hora"}
+              </th>
+            )}
             <th className="px-2 py-2 border-cerulean-400">Barrera</th>
           </tr>
         </thead>
@@ -46,9 +63,27 @@ export default function InformeTable({
                   .filter(Boolean)
                   .join(" ") || "-"}
               </td>
-              <td className="border-r border-b border-cerulean-200 px-2 py-2">
-                {formatDateFullWithHs(movimiento.fecha)}
-              </td>
+              {esMovimientosCombinados ? (
+                <>
+                  <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                    {movimiento.fecha_entrada
+                      ? formatDateFullWithHs(movimiento.fecha_entrada)
+                      : "-"}
+                  </td>
+                  <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                    {movimiento.fecha_salida
+                      ? formatDateFullWithHs(movimiento.fecha_salida)
+                      : "Sin salida"}
+                  </td>
+                  <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                    {movimiento.estado ?? "-"}
+                  </td>
+                </>
+              ) : (
+                <td className="border-r border-b border-cerulean-200 px-2 py-2">
+                  {formatDateFullWithHs(movimiento.fecha)}
+                </td>
+              )}
               <td className="border-b border-cerulean-200 px-2 py-2">
                 {movimiento.barrera ?? "-"}
               </td>

@@ -17,6 +17,7 @@ export default function CajasPage() {
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [cargando, setCargando] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [cajaAEditar, setCajaAEditar] = useState<Caja | null>(null);
 
   useEffect(() => {
     const cargarCajas = async () => {
@@ -66,12 +67,16 @@ export default function CajasPage() {
             {cargando ? (
               <SkeletonCarga filas={6} alto={40} />
             ) : (
-              <CajasTable cajas={cajas} />
+              <CajasTable cajas={cajas} onEditar={setCajaAEditar} />
             )}
           </section>
           <NuevaCajaModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
+            open={modalOpen || cajaAEditar !== null}
+            caja={cajaAEditar ?? undefined}
+            onClose={() => {
+              setModalOpen(false);
+              setCajaAEditar(null);
+            }}
             onSuccess={() => setRefreshKey((n) => n + 1)}
           />
         </main>

@@ -6,14 +6,19 @@ import BreadcrumbsMenu from "../../../components/ui/BreadcrumbsMenu";
 import CallToActionButton from "../../../components/ui/CallToActionButton";
 import { useSelector } from "react-redux";
 import BarrerasTable from "../components/BarrerasTable";
+import BarreraModal from "../components/BarreraModal";
 import SkeletonCarga from "../../../components/ui/SkeletonCarga";
 import type { Barrera } from "../../../types/Barrera";
 import { obtenerBarreras } from "../services/barrerasService";
 
 export default function BarrerasPage() {
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, usuario } = useSelector((state: RootState) => state.auth);
   const [barreras, setBarreras] = useState<Barrera[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [barreraAEditar, setBarreraAEditar] = useState<Barrera | null>(null);
+  const esSistemas = usuario?.rol === "SISTEMAS";
 
   useEffect(() => {
     const cargarBarreras = async () => {
@@ -29,7 +34,7 @@ export default function BarrerasPage() {
       }
     };
     cargarBarreras();
-  }, [token]);
+  }, [token, refreshKey]);
 
   return (
     <PageLayout>
@@ -42,9 +47,17 @@ export default function BarrerasPage() {
             Barreras
           </h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
+            {esSistemas && (
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => setModalOpen(true)}
+              >
+                Agregar Barrera
+              </CallToActionButton>
+            )}
             <CallToActionButton
               type="button"
-              handleSubmit={() => window.location.reload()}
+              handleSubmit={() => setRefreshKey((n) => n + 1)}
             >
               Refrescar
             </CallToActionButton>
@@ -54,9 +67,23 @@ export default function BarrerasPage() {
           {cargando ? (
             <SkeletonCarga filas={6} alto={40} />
           ) : (
-            <BarrerasTable barreras={barreras} />
+            <BarrerasTable
+              barreras={barreras}
+              puedeEditar={esSistemas}
+              onEditar={setBarreraAEditar}
+            />
           )}
         </section>
+
+        <BarreraModal
+          open={modalOpen || barreraAEditar !== null}
+          barrera={barreraAEditar ?? undefined}
+          onClose={() => {
+            setModalOpen(false);
+            setBarreraAEditar(null);
+          }}
+          onSuccess={() => setRefreshKey((n) => n + 1)}
+        />
       </MainLayout>
     </PageLayout>
   );

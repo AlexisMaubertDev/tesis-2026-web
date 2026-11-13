@@ -7,8 +7,9 @@ import TurnosCajaCajaModal from "./TurnosCajaCajaModal";
 
 interface Props {
   cajas: Caja[];
+  onEditar?: (caja: Caja) => void;
 }
-export default function CajasTable({ cajas }: Props) {
+export default function CajasTable({ cajas, onEditar }: Props) {
   // Caja cuyo historial de turnos se está mirando.
   const [cajaTurnos, setCajaTurnos] = useState<Caja | null>(null);
 
@@ -46,7 +47,7 @@ export default function CajasTable({ cajas }: Props) {
                 <div className="flex items-center gap-2">
                   <button
                     className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
-                    //onClick={() => handleEdit(caja)}
+                    onClick={() => onEditar?.(caja)}
                   >
                     <Tooltip title="Editar">
                       <EditIcon />

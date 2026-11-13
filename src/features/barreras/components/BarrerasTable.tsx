@@ -7,9 +7,15 @@ import TurnosBarreraBarreraModal from "./TurnosBarreraBarreraModal";
 
 interface Props {
   barreras: Barrera[];
+  puedeEditar?: boolean;
+  onEditar?: (barrera: Barrera) => void;
 }
 
-export default function BarrerasTable({ barreras }: Props) {
+export default function BarrerasTable({
+  barreras,
+  puedeEditar,
+  onEditar,
+}: Props) {
   // Barrera cuyo historial de turnos se está mirando.
   const [barreraTurnos, setBarreraTurnos] = useState<Barrera | null>(null);
 
@@ -37,14 +43,16 @@ export default function BarrerasTable({ barreras }: Props) {
 
               <td className="border-b border-cerulean-200 px-2 py-2">
                 <div className="flex items-center gap-2">
-                  <button
-                    className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
-                    //onClick={() => handleEdit(caja)}
-                  >
-                    <Tooltip title="Editar">
-                      <EditIcon />
-                    </Tooltip>
-                  </button>
+                  {puedeEditar && (
+                    <button
+                      className="text-emerald-700 hover:text-emerald-500 transition-colors duration-300 cursor-pointer"
+                      onClick={() => onEditar?.(barrera)}
+                    >
+                      <Tooltip title="Editar">
+                        <EditIcon />
+                      </Tooltip>
+                    </button>
+                  )}
 
                   <button
                     className="text-cerulean-700 hover:text-cerulean-400 transition-colors duration-300 cursor-pointer"

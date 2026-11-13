@@ -76,7 +76,11 @@ export default function InformesPage() {
   const [informe, setInforme] = useState<Informe | null>(null);
   const [generandoPdf, setGenerandoPdf] = useState(false);
 
-  const esMovimientos = informe?.tipo === "ENTRADA" || informe?.tipo === "SALIDA";
+  const esMovimientos =
+    informe?.tipo === "ENTRADA" ||
+    informe?.tipo === "SALIDA" ||
+    informe?.tipo === "MOVIMIENTOS";
+  const esMovimientosCombinados = informe?.tipo === "MOVIMIENTOS";
   const informeMovimientos = esMovimientos
     ? (informe as InformeMovimientos)
     : null;
@@ -272,6 +276,7 @@ export default function InformesPage() {
                 <InformeTable
                   movimientos={informeMovimientos.movimientos}
                   etiquetaFecha={informeMovimientos.etiquetaFecha}
+                  esMovimientosCombinados={esMovimientosCombinados}
                 />
               </section>
             </>

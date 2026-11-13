@@ -143,7 +143,7 @@ export default function NuevoUsuarioModal({
       }}
       sx={{ padding: 4 }}
     >
-      <div className="absolute top-1/2 md:top-1/3 left-1/2 w-full max-w-4/5 md:max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
+      <div className="max-h-[90vh] overflow-y-auto absolute top-1/2 md:top-1/3 left-1/2 w-full max-w-4/5 md:max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-6 shadow-lg font-sans">
         <h2 className="text-center font-bold uppercase">
           {esEdicion ? "Editar Usuario" : "Crear Usuario"}
         </h2>

@@ -50,6 +50,10 @@ export default function GenerarInformeModal({
   const opcionesTipo = [
     { value: "ENTRADA", label: "Entrada de vehículos (ingresos)" },
     { value: "SALIDA", label: "Salida de vehículos (egresos)" },
+    {
+      value: "MOVIMIENTOS",
+      label: "Movimientos de barrera (entradas y salidas)",
+    },
     ...(puedeVerAcarreos
       ? [{ value: "ACARREO", label: "Acarreos realizados" }]
       : []),

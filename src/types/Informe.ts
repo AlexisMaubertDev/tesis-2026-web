@@ -8,7 +8,7 @@
 
 import type { EstadoAcarreo } from "./Vehiculo";
 
-export type TipoMovimiento = "ENTRADA" | "SALIDA";
+export type TipoMovimiento = "ENTRADA" | "SALIDA" | "MOVIMIENTOS";
 
 /** Tipos de informe que ofrece el módulo. */
 export type TipoInforme = TipoMovimiento | "COBRO" | "ACARREO";
@@ -40,6 +40,9 @@ export interface MovimientoInforme {
   id: string;
   /** Fecha del movimiento (de ingreso o de egreso, según el tipo). */
   fecha: string;
+  /** Fechas de entrada y salida del vehículo (informe MOVIMIENTOS). */
+  fecha_entrada?: string | null;
+  fecha_salida?: string | null;
   patente: string;
   marca: string | null;
   modelo: string | null;
