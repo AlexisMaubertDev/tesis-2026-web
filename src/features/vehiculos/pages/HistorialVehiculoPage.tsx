@@ -32,7 +32,15 @@ export default function HistorialVehiculoPage() {
 
       try {
         const res = await obtenerAcarreosPorPatente(token, patente);
-        if (activo) setAcarreos(res.data as Acarreo[]);
+        if (!activo) return;
+        // Ordenados por fecha de acarreo, el más reciente primero.
+        const lista = (res.data as Acarreo[]) ?? [];
+        lista.sort(
+          (a, b) =>
+            new Date(b.fecha_acarreo).getTime() -
+            new Date(a.fecha_acarreo).getTime(),
+        );
+        setAcarreos(lista);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         if (!activo) return;

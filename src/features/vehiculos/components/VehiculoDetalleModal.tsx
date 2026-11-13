@@ -46,7 +46,16 @@ export default function VehiculoDetalleModal({
 
       try {
         const res = await obtenerAcarreosPorPatente(token, patente);
-        if (activo) setAcarreos(res.data as Acarreo[]);
+        if (!activo) return;
+        // Se ordenan por fecha de acarreo (más reciente primero) para no
+        // depender del orden del server.
+        const lista = (res.data as Acarreo[]) ?? [];
+        lista.sort(
+          (a, b) =>
+            new Date(b.fecha_acarreo).getTime() -
+            new Date(a.fecha_acarreo).getTime(),
+        );
+        setAcarreos(lista);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         if (!activo) return;
