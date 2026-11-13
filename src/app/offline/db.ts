@@ -26,17 +26,30 @@ interface ParkControlDB extends DBSchema {
 }
 
 const DB_NAME = "parkcontrol-offline";
-const DB_VERSION = 1;
+// v2: borra la caché vieja (se guardó con claves rotas y luego con datos
+// desactualizados de vehículos duplicados). El upgrade recrea los stores.
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<ParkControlDB>> | null = null;
 
 const getDB = () => {
   if (!dbPromise) {
     dbPromise = openDB<ParkControlDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore("cache");
-        const outbox = db.createObjectStore("outbox", { keyPath: "id" });
-        outbox.createIndex("by-usuario", "usuarioId");
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          db.createObjectStore("cache");
+        } else {
+          // v2: se borra y recrea la caché (datos desactualizados guardados
+          // por la v1). La outbox no se toca: las operaciones pendientes se
+          // conservan.
+          db.deleteObjectStore("cache");
+          db.createObjectStore("cache");
+        }
+
+        if (!db.objectStoreNames.contains("outbox")) {
+          const outbox = db.createObjectStore("outbox", { keyPath: "id" });
+          outbox.createIndex("by-usuario", "usuarioId");
+        }
       },
     });
   }
