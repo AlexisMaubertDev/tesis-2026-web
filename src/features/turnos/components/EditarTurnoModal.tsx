@@ -167,33 +167,59 @@ export default function EditarTurnoModal({
 
         {esGrua ? (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold">Chofer</label>
-              <SelectInput
-                placeholder="Chofer"
-                name="chofer"
-                value={idChofer}
-                options={usuarios.map((u) => ({
-                  value: u.id ?? "",
-                  label: `${u.nombre} ${u.apellido}`,
-                }))}
-                onChange={(e) => setIdChofer(e.target.value)}
-              />
-            </div>
+            {(() => {
+              // Agrupados por sucursal y ordenados por turno del gruero.
+              const sucursales = new Map<string, Usuario[]>();
+              usuarios.forEach((u) => {
+                const nombreSucursal = u.Sucursal?.nombre ?? "Sin sucursal";
+                if (!sucursales.has(nombreSucursal)) {
+                  sucursales.set(nombreSucursal, []);
+                }
+                sucursales.get(nombreSucursal)!.push(u);
+              });
 
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold">Enganchador</label>
-              <SelectInput
-                placeholder="Enganchador"
-                name="enganchador"
-                value={idEnganchador}
-                options={usuarios.map((u) => ({
-                  value: u.id ?? "",
-                  label: `${u.nombre} ${u.apellido}`,
-                }))}
-                onChange={(e) => setIdEnganchador(e.target.value)}
-              />
-            </div>
+              const opciones = [...sucursales.entries()]
+                .sort(([a], [b]) => a.localeCompare(b))
+                .flatMap(([nombreSucursal, grueros]) =>
+                  grueros
+                    .slice()
+                    .sort(
+                      (a, b) =>
+                        (a.numero_turno ?? 99) - (b.numero_turno ?? 99),
+                    )
+                    .map((u) => ({
+                      value: u.id ?? "",
+                      label: `${u.nombre} ${u.apellido} (Turno ${u.numero_turno})`,
+                      group: nombreSucursal,
+                    })),
+                );
+
+              return (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold">Chofer</label>
+                    <SelectInput
+                      placeholder="Chofer"
+                      name="chofer"
+                      value={idChofer}
+                      options={opciones}
+                      onChange={(e) => setIdChofer(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold">Enganchador</label>
+                    <SelectInput
+                      placeholder="Enganchador"
+                      name="enganchador"
+                      value={idEnganchador}
+                      options={opciones}
+                      onChange={(e) => setIdEnganchador(e.target.value)}
+                    />
+                  </div>
+                </>
+              );
+            })()}
           </>
         ) : (
           <div className="flex flex-col gap-1">
