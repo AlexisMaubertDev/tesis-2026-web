@@ -19,6 +19,14 @@ export default function BarrerasTable({
   // Barrera cuyo historial de turnos se está mirando.
   const [barreraTurnos, setBarreraTurnos] = useState<Barrera | null>(null);
 
+  if (barreras.length === 0) {
+    return (
+      <p className="rounded-lg bg-cerulean-50 p-6 text-center text-sm text-cerulean-700">
+        No se encontraron resultados con el criterio de búsqueda.
+      </p>
+    );
+  }
+
   return (
     <>
       <table className="w-full table border-collapse">

@@ -106,6 +106,22 @@ export const agregarIncidenciaBarrera = async (
   return res.data;
 };
 
+/** Edita los playeros de un turno de barrera (supervisor), con incidencia
+ * obligatoria que explica qué sucedió. */
+export const editarTurnoBarrera = async (
+  token: string,
+  id: string,
+  datos: { usuarios: string[]; incidencias: string },
+) => {
+  exigirConexion("la edición del turno de barrera");
+  const res = await api.put(
+    `/barreras/turno/${id}/editar`,
+    datos,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data;
+};
+
 export const finalizarTodosTurnosBarrera = async (token: string, id: string) => {
   exigirConexion("el cierre de los turnos de barrera de la sucursal");
   const res = await api.put(

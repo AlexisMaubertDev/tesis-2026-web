@@ -28,14 +28,21 @@ export default function GruasTable({
   // Grúa a la que se le está cambiando el estado.
   const [gruaEstado, setGruaEstado] = useState<Grua | null>(null);
 
+  if (gruas.length === 0) {
+    return (
+      <p className="rounded-lg bg-cerulean-50 p-6 text-center text-sm text-cerulean-700">
+        No se encontraron resultados con el criterio de búsqueda.
+      </p>
+    );
+  }
+
   return (
     <>
       <table className="w-full table border-collapse">
         <thead className="bg-cerulean-600 text-white text-left">
           <tr className="text-sm border-b border-cerulean-400">
             <th className="border-r px-2 py-2 ">Número</th>
-            <th className="border-r px-2 py-2 border-cerulean-400">Patente</th>
-            <th className="border-r px-2 py-2 border-cerulean-400">Modelo</th>
+            <th className="border-r px-2 py-2 border-cerulean-400">Patente</th>            <th className="border-r px-2 py-2 border-cerulean-400">Modelo</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Estado</th>
             <th className="border-r px-2 py-2 border-cerulean-400">Sucursal</th>
             <th className="px-2 py-2 border-cerulean-400">Acciones</th>

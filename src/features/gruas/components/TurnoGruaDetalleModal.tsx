@@ -8,6 +8,7 @@ import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoGruaDetalle } from "../../../types/TurnoGrua";
 import AgregarIncidenciaAcarreoModal from "../../vehiculos/components/AgregarIncidenciaAcarreoModal";
 import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
+import EditarTurnoModal from "../../turnos/components/EditarTurnoModal";
 
 type Props = {
   open: boolean;
@@ -46,6 +47,9 @@ export default function TurnoGruaDetalleModal({
 
   // Si se está agregando/mirando la incidencia del turno.
   const [turnoIncidencia, setTurnoIncidencia] = useState(false);
+
+  // Si se está editando el turno (integrantes + incidencia obligatoria).
+  const [turnoEditar, setTurnoEditar] = useState(false);
 
   const turno = detalle?.turno ?? null;
   const acarreos = detalle?.acarreos ?? [];
@@ -117,7 +121,13 @@ export default function TurnoGruaDetalleModal({
                 valor={turno.incidencias ?? "-"}
               />
               {puedeAgregarIncidencia && (
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                  <CallToActionButton
+                    type="button"
+                    handleSubmit={() => setTurnoEditar(true)}
+                  >
+                    Editar turno
+                  </CallToActionButton>
                   <CallToActionButton
                     type="button"
                     handleSubmit={() => setTurnoIncidencia(true)}
@@ -253,6 +263,21 @@ export default function TurnoGruaDetalleModal({
             ? `Grúa ${turno.Grua?.patente ?? "-"} · Turno ${turno.turno || "-"}`
             : undefined
         }
+        onSuccess={onRefrescar}
+      />
+
+      <EditarTurnoModal
+        open={turnoEditar}
+        onClose={() => setTurnoEditar(false)}
+        tipo="grua"
+        idTurno={turno?.id ?? null}
+        descripcion={
+          turno
+            ? `Grúa ${turno.Grua?.patente ?? "-"} · Turno ${turno.turno || "-"}`
+            : undefined
+        }
+        choferId={turno?.chofer?.id}
+        enganchadorId={turno?.enganchador?.id}
         onSuccess={onRefrescar}
       />
     </>

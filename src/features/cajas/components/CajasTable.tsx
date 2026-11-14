@@ -13,6 +13,14 @@ export default function CajasTable({ cajas, onEditar }: Props) {
   // Caja cuyo historial de turnos se está mirando.
   const [cajaTurnos, setCajaTurnos] = useState<Caja | null>(null);
 
+  if (cajas.length === 0) {
+    return (
+      <p className="rounded-lg bg-cerulean-50 p-6 text-center text-sm text-cerulean-700">
+        No se encontraron resultados con el criterio de búsqueda.
+      </p>
+    );
+  }
+
   return (
     <>
       <table className="w-full table border-collapse">

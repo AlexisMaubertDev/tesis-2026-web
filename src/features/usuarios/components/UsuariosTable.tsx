@@ -39,6 +39,11 @@ export default function UsuariosTable({
 }: Props) {
   const [modalOpen, setModalOpen] = useState<string | null>(null);
   const [legajoBloqueando, setLegajoBloqueando] = useState<string | null>(null);
+  // Bloqueo/desbloqueo pendiente de confirmación (modal "¿está seguro?").
+  const [bloqueoPendiente, setBloqueoPendiente] = useState<{
+    usuario: Usuario;
+    nuevoEstado: boolean;
+  } | null>(null);
   // Usuario cuyos turnos de caja se están mirando (modal de turnos).
   const [usuarioTurnos, setUsuarioTurnos] = useState<Usuario | null>(null);
   // Gruero cuyos turnos de grúa se están mirando.
@@ -50,6 +55,14 @@ export default function UsuariosTable({
     useState<Usuario | null>(null);
   const { token } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
+
+  if (usuarios.length === 0) {
+    return (
+      <p className="rounded-lg bg-cerulean-50 p-6 text-center text-sm text-cerulean-700">
+        No se encontraron resultados con el criterio de búsqueda.
+      </p>
+    );
+  }
 
   const handleToggleBloqueo = async (usuario: Usuario) => {
     const nuevoEstado = !usuario.bloqueado;
@@ -201,7 +214,12 @@ export default function UsuariosTable({
                         : "text-amber-600 hover:text-amber-400")
                     }
                     disabled={legajoBloqueando === usuario.legajo}
-                    onClick={() => handleToggleBloqueo(usuario)}
+                    onClick={() =>
+                      setBloqueoPendiente({
+                        usuario,
+                        nuevoEstado: !usuario.bloqueado,
+                      })
+                    }
                   >
                     <Tooltip
                       title={usuario.bloqueado ? "Desbloquear" : "Bloquear"}
@@ -358,7 +376,12 @@ export default function UsuariosTable({
                     : "text-amber-600 hover:text-amber-400")
                 }
                 disabled={legajoBloqueando === usuario.legajo}
-                onClick={() => handleToggleBloqueo(usuario)}
+                onClick={() =>
+                  setBloqueoPendiente({
+                    usuario,
+                    nuevoEstado: !usuario.bloqueado,
+                  })
+                }
               >
                 <Tooltip title={usuario.bloqueado ? "Desbloquear" : "Bloquear"}>
                   <span className="inline-flex items-center">
@@ -447,6 +470,29 @@ export default function UsuariosTable({
         open={usuarioTurnos !== null}
         onClose={() => setUsuarioTurnos(null)}
         usuario={usuarioTurnos}
+      />
+
+      <ChoiceModal
+        open={bloqueoPendiente !== null}
+        setOpen={() => setBloqueoPendiente(null)}
+        title={
+          bloqueoPendiente?.nuevoEstado
+            ? `¿Está seguro de bloquear a ese usuario?`
+            : `¿Está seguro de desbloquear a ese usuario?`
+        }
+        subtitle={
+          bloqueoPendiente
+            ? `${bloqueoPendiente.usuario.nombre} ${bloqueoPendiente.usuario.apellido} (legajo ${bloqueoPendiente.usuario.legajo})`
+            : ""
+        }
+        disabled={legajoBloqueando !== null}
+        confirm={() => {
+          if (bloqueoPendiente) {
+            handleToggleBloqueo(bloqueoPendiente.usuario);
+          }
+          setBloqueoPendiente(null);
+        }}
+        cancel={() => setBloqueoPendiente(null)}
       />
 
       <TurnosGruaUsuarioModal

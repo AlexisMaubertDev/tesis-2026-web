@@ -1,6 +1,25 @@
 import api from "../../../services/api";
+import { exigirConexion } from "../../../app/offline/writes";
 import { mostrarPdf } from "../../../app/utils/informesPdf";
 import type { TurnoGruaDetalle, TurnoGruaListado } from "../../../types/TurnoGrua";
+
+/** Edita los integrantes de un turno de grúa (supervisor), con incidencia
+ * obligatoria que explica qué sucedió. */
+export const editarTurnoGrua = async (
+  token: string,
+  idTurno: string,
+  datos: {
+    id_chofer?: string;
+    id_enganchador?: string;
+    incidencias: string;
+  },
+) => {
+  exigirConexion("la edición del turno de grúa");
+  const res = await api.put(`/turno_grua/${idTurno}/editar`, datos, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
 
 /** Todos los turnos de grúa (historial, con grúa y usuarios). */
 export const obtenerTurnosGrua = async (token: string) => {
