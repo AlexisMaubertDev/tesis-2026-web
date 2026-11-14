@@ -12,6 +12,7 @@ import type { RootState } from "../../../app/store";
 import { useDispatch, useSelector } from "react-redux";
 import { showError, showSuccess } from "../../../app/store/snackbarSlice";
 import { formatDateFullWithHs } from "../../../app/hooks/dataParse";
+import EditarTurnoModal from "../../turnos/components/EditarTurnoModal";
 
 type Props = {
   open: boolean;
@@ -35,6 +36,8 @@ export default function VerDetalleBarreraModal({
   const [nuevaIncidencia, setNuevaIncidencia] = useState("");
   const [agregandoIncidencia, setAgregandoIncidencia] = useState(false);
   const [errorIncidencia, setErrorIncidencia] = useState("");
+  // Si se está editando el turno (playeros + incidencia obligatoria).
+  const [editarTurno, setEditarTurno] = useState(false);
 
   const handleAgregarIncidencias = async () => {
     setErrorIncidencia("");
@@ -100,6 +103,7 @@ export default function VerDetalleBarreraModal({
 
   return (
     <Modal open={open} onClose={() => setOpen(false)} sx={{ padding: 4 }}>
+      <>
       <div className="absolute top-1/2 md:top-1/3 left-1/2 max-w-4/5 md:max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-lg bg-cerulean-100 p-12 shadow-lg font-sans">
         <h2 className="text-center text-xl font-bold mb-2">
           {`Detalle de la barrera ${barrera?.ubicacion}`}
@@ -162,6 +166,14 @@ export default function VerDetalleBarreraModal({
           <p className="text-xs text-red-600">{errorIncidencia}</p>
 
           <div className="flex w-full gap-2 justify-end mt-4">
+            {turno && (
+              <CallToActionButton
+                type="button"
+                handleSubmit={() => setEditarTurno(true)}
+              >
+                Editar turno
+              </CallToActionButton>
+            )}
             <CallToActionButton
               type="button"
               handleSubmit={() => handleAgregarIncidencias()}
@@ -185,6 +197,21 @@ export default function VerDetalleBarreraModal({
           </div>
         </div>
       </div>
+
+      {turno && (
+        <EditarTurnoModal
+          open={editarTurno}
+          onClose={() => setEditarTurno(false)}
+          tipo="barrera"
+          idTurno={turno.id ?? null}
+          descripcion={`Barrera ${barrera?.ubicacion} · Turno ${turno.turno || "-"}`}
+          playerosIds={playeros
+            .map((p) => p?.id)
+            .filter((id): id is string => !!id)}
+          onSuccess={onSuccess}
+        />
+      )}
+      </>
     </Modal>
   );
 }

@@ -8,7 +8,6 @@ import DetailItem from "../../../components/ui/DetailItem";
 import type { TurnoBarreraDetalle } from "../../../types/TurnoBarrera";
 import AgregarIncidenciaAcarreoModal from "../../vehiculos/components/AgregarIncidenciaAcarreoModal";
 import AgregarIncidenciaTurnoModal from "../../turnos/components/AgregarIncidenciaTurnoModal";
-import EditarTurnoModal from "../../turnos/components/EditarTurnoModal";
 
 type Props = {
   open: boolean;
@@ -44,9 +43,6 @@ export default function TurnoBarreraDetalleModal({
 
   // Si se está agregando/mirando la incidencia del turno.
   const [turnoIncidencia, setTurnoIncidencia] = useState(false);
-
-  // Si se está editando el turno (playeros + incidencia obligatoria).
-  const [turnoEditar, setTurnoEditar] = useState(false);
 
   const turno = detalle?.turno ?? null;
   const movimientos = detalle?.movimientos ?? [];
@@ -108,13 +104,7 @@ export default function TurnoBarreraDetalleModal({
                 valor={turno.incidencias ?? "-"}
               />
               {puedeAgregarIncidencia && (
-                <div className="flex justify-end gap-2">
-                  <CallToActionButton
-                    type="button"
-                    handleSubmit={() => setTurnoEditar(true)}
-                  >
-                    Editar turno
-                  </CallToActionButton>
+                <div className="flex justify-end">
                   <CallToActionButton
                     type="button"
                     handleSubmit={() => setTurnoIncidencia(true)}
@@ -255,20 +245,6 @@ export default function TurnoBarreraDetalleModal({
             ? `Barrera ${turno.Barrera?.ubicacion ?? "-"} · Turno ${turno.turno || "-"}`
             : undefined
         }
-        onSuccess={onRefrescar}
-      />
-
-      <EditarTurnoModal
-        open={turnoEditar}
-        onClose={() => setTurnoEditar(false)}
-        tipo="barrera"
-        idTurno={turno?.id ?? null}
-        descripcion={
-          turno
-            ? `Barrera ${turno.Barrera?.ubicacion ?? "-"} · Turno ${turno.turno || "-"}`
-            : undefined
-        }
-        playerosIds={playeros.map((p) => p.id)}
         onSuccess={onRefrescar}
       />
     </>
