@@ -198,22 +198,51 @@ export default function EditarTurnoModal({
         ) : (
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold">Playeros asignados</label>
-            <div className="max-h-48 overflow-y-auto rounded-lg border border-cerulean-300 bg-cerulean-50 p-2 flex flex-col gap-1">
-              {usuarios.map((u) => (
-                <label
-                  key={u.id}
-                  className="flex items-center gap-2 text-sm cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    className="accent-cerulean-600"
-                    checked={asignados.includes(u.id ?? "")}
-                    onChange={() => toggleAsignado(u.id ?? "")}
-                  />
-                  {u.nombre} {u.apellido}
-                </label>
-              ))}
-            </div>
+            {(() => {
+              // Agrupados por sucursal y ordenados por turno del playero.
+              const sucursales = new Map<string, Usuario[]>();
+              usuarios.forEach((u) => {
+                const nombreSucursal = u.Sucursal?.nombre ?? "Sin sucursal";
+                if (!sucursales.has(nombreSucursal)) {
+                  sucursales.set(nombreSucursal, []);
+                }
+                sucursales.get(nombreSucursal)!.push(u);
+              });
+
+              return (
+                <div className="max-h-64 overflow-y-auto rounded-lg border border-cerulean-300 bg-cerulean-50 p-2 flex flex-col gap-3">
+                  {[...sucursales.entries()]
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([nombreSucursal, playeros]) => (
+                      <div key={nombreSucursal} className="flex flex-col gap-1">
+                        <h4 className="text-xs font-bold uppercase text-cerulean-900">
+                          {nombreSucursal}
+                        </h4>
+                        {playeros
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              (a.numero_turno ?? 99) - (b.numero_turno ?? 99),
+                          )
+                          .map((u) => (
+                            <label
+                              key={u.id}
+                              className="flex items-center gap-2 text-sm cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                className="accent-cerulean-600"
+                                checked={asignados.includes(u.id ?? "")}
+                                onChange={() => toggleAsignado(u.id ?? "")}
+                              />
+                              {u.nombre} {u.apellido} (Turno {u.numero_turno})
+                            </label>
+                          ))}
+                      </div>
+                    ))}
+                </div>
+              );
+            })()}
           </div>
         )}
 
