@@ -38,7 +38,19 @@ export default function Header() {
     <>
       <header className="h-16 bg-cerulean-600 w-full px-4">
         <div className="flex items-center justify-between h-full max-w-5xl mx-auto gap-4">
-          <h1 className="font-bold text-slate-100">ParkControl</h1>
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 cursor-pointer"
+            title="Ir al inicio"
+          >
+            <img
+              src="/logo.png"
+              alt="Logo ParkControl"
+              className="h-10 w-10 rounded-lg"
+            />
+            <h1 className="font-bold text-slate-100">ParkControl</h1>
+          </button>
           <nav className="flex gap-4 text-xs">
             {browserOnline && apiStatus !== "down" && (
               <>
