@@ -23,7 +23,7 @@ import VehiculosFiltros from "../components/VehiculosFiltros";
 import PlayeroHome from "../components/PlayeroHome";
 import {
   abrirInformeVehiculosPdf,
-  obtenerVehiculos,
+  obtenerVehiculosPaginado,
 } from "../services/vehiculosService";
 
 export type FiltrosVehiculos = {
@@ -129,14 +129,37 @@ function VehiculosTabla() {
       setCargando(true);
 
       try {
-        // Con texto en la barra de búsqueda la lista incluye los egresados
-        // (y su historial); sin búsqueda, el server ya no los trae.
-        const res = await obtenerVehiculos(token, search.trim() || undefined);
+        // Carga progresiva: primero se piden los primeros 20 vehículos y se
+        // muestran enseguida; mientras tanto, en segundo plano se van
+        // trayendo las páginas restantes hasta completar la lista.
+        const primera = await obtenerVehiculosPaginado(
+          token,
+          search.trim() || undefined,
+          0,
+        );
         if (!activo) return;
-        setVehiculos(res.data);
+
+        setVehiculos(primera.data);
+        setCargando(false);
+
+        const busqueda = search.trim() || undefined;
+        for (let offset = 20; offset < primera.total; offset += 20) {
+          const pagina = await obtenerVehiculosPaginado(
+            token,
+            busqueda,
+            offset,
+          );
+          if (!activo) return;
+
+          setVehiculos((prev) => {
+            const conocidos = new Set(prev.map((v) => v.id));
+            return [...prev, ...pagina.data.filter((v) => !conocidos.has(v.id))];
+          });
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (!activo) return;
+        setCargando(false);
         dispatch(
           showError(
             error.response?.data?.message ||

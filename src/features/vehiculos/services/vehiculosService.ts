@@ -27,6 +27,40 @@ export const obtenerVehiculos = async (token: string, busqueda?: string) => {
   });
 };
 
+const TAMANIO_PAGINA_VEHICULOS = 20;
+
+/**
+ * Pide una página de vehículos (limit/offset del server). Se usa para la
+ * carga progresiva de la tabla: primero los primeros 20 y después el resto
+ * por tandas en segundo plano.
+ */
+export const obtenerVehiculosPaginado = async (
+  token: string,
+  busqueda?: string,
+  offset = 0,
+) => {
+  const busquedaNormalizada = busqueda?.trim() ?? "";
+  const params = new URLSearchParams({
+    limit: String(TAMANIO_PAGINA_VEHICULOS),
+    offset: String(offset),
+  });
+
+  if (busquedaNormalizada) {
+    params.set("busqueda", busquedaNormalizada);
+  }
+
+  const res = await api.get(`/vehiculos?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return {
+    data: (res.data.data ?? []) as Vehiculo[],
+    total: (res.data.total ?? res.data.data?.length ?? 0) as number,
+  };
+};
+
 export type FiltrosInformeVehiculos = {
   busqueda?: string;
   sucursales?: string[];
