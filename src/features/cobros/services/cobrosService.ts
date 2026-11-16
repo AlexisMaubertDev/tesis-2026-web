@@ -142,7 +142,7 @@ const calcularPreviewLocal = async (
 
 /**
  * Registra el cobro de un acarreo ingresado. El servidor valida el turno de
- * caja abierto del cajero, que el vehículo esté en la playa (INGRESADO),
+ * caja abierto del cajero, que el vehículo esté en la playa (EN_PLAYA),
  * calcula el total con la tarifa vigente y las estadías por reloj, y exige que
  * los medios de pago sumen ese total.
  *
@@ -164,7 +164,7 @@ export const crearCobro = async (
       recurso: {
         tipo: "ACARREO",
         patente: opciones?.patente ?? "",
-        estadoRequerido: "INGRESADO",
+        estadoRequerido: "EN_PLAYA",
         id: cobro.id_acarreo ?? null,
       },
     },

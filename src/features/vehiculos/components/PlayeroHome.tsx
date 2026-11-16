@@ -178,7 +178,7 @@ export default function PlayeroHome({ turno }: { turno: Turno_Barrera }) {
 
   const verVehiculosEnPlaya = () =>
     navigate(
-      `/vehiculos?estado=INGRESADO&sucursal=${encodeURIComponent(sucursalNombre)}`,
+      `/vehiculos?estado=EN_PLAYA&sucursal=${encodeURIComponent(sucursalNombre)}`,
     );
 
   const confirmarAccion = async () => {

@@ -139,7 +139,7 @@ export const obtenerAcarreosPorPatente = async (
 };
 
 /**
- * Ingreso a playa desde la barrera: el acarreo ACARREADO pasa a INGRESADO.
+ * Ingreso a playa desde la barrera: el acarreo ACARREADO pasa a EN_PLAYA.
  * La usa el home del playero.
  *
  * Modo offline (Fase 4): la operación va a la outbox con el recurso por
@@ -173,7 +173,7 @@ export const ingresarAcarreoAPlaya = async (
 
 /**
  * Salida de playa desde la barrera: el acarreo COBRADO (abonado) pasa a
- * EGRESADO. La usa el home del playero.
+ * RETIRADO. La usa el home del playero.
  */
 export const egresarAcarreo = async (
   token: string,
@@ -201,7 +201,7 @@ export const egresarAcarreo = async (
 };
 
 /**
- * Salida sin cargo: un acarreo INGRESADO pasa a SIN_CARGO guardando el motivo.
+ * Salida sin cargo: un acarreo EN_PLAYA pasa a SIN_CARGO guardando el motivo.
  * Sólo el supervisor (o sistemas) puede autorizarla.
  */
 export const sacarSinCargo = async (
@@ -219,7 +219,7 @@ export const sacarSinCargo = async (
       recurso: {
         tipo: "ACARREO",
         patente: opciones?.patente ?? "",
-        estadoRequerido: "INGRESADO",
+        estadoRequerido: "EN_PLAYA",
         id: acarreoId ?? null,
       },
     },

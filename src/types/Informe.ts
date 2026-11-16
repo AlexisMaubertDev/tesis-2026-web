@@ -47,7 +47,7 @@ export interface MovimientoInforme {
   marca: string | null;
   modelo: string | null;
   color: string | null;
-  /** Estado actual del vehículo (INGRESADO, EGRESADO, COBRADO, SIN_CARGO...). */
+  /** Estado actual del vehículo (EN_PLAYA, RETIRADO, COBRADO, SIN_CARGO...). */
   estado: string | null;
   motivo: string | null;
   direccion: string | null;

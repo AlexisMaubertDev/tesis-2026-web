@@ -25,13 +25,13 @@ function Row({ etiqueta, valor }: { etiqueta: string; valor: string }) {
  * existe, se muestra una tarjeta con los datos del vehículo y las acciones
  * disponibles. Lo usan las pantallas de cajero y supervisor:
  *
- * - Cajero: si el vehículo está INGRESADO y tiene un turno de caja abierto,
+ * - Cajero: si el vehículo está EN_PLAYA y tiene un turno de caja abierto,
  *   "Cobrar" (abre el formulario de cobro). Sin turno de caja no se cobra.
- * - Supervisor: si el vehículo está INGRESADO, "Sacar sin cargo" (modal con motivo).
+ * - Supervisor: si el vehículo está EN_PLAYA, "Sacar sin cargo" (modal con motivo).
  *
  * Ambos tienen siempre "Ver historial". Al lado del buscador está "Ver playa",
  * que abre la tabla de vehículos filtrada por la sucursal del usuario y en
- * estado INGRESADO.
+ * estado EN_PLAYA.
  */
 export default function BuscarVehiculoPatente() {
   const { token, usuario } = useSelector((state: RootState) => state.auth);
@@ -55,7 +55,7 @@ export default function BuscarVehiculoPatente() {
   const esSupervisor = usuario?.rol === "SUPERVISOR";
   /** Sin turno de caja abierto el cajero no puede cobrar (lo exige el servidor). */
   const tieneTurnoCaja = !!usuario?.Turno_Caja;
-  const puedeCobrar = vehiculo?.ultimo_acarreo_estado === "INGRESADO";
+  const puedeCobrar = vehiculo?.ultimo_acarreo_estado === "EN_PLAYA";
 
   // El cajero sólo cobra acarreos de la sucursal de la caja de su turno
   // (la misma regla que valida el servidor al registrar el cobro).
@@ -73,10 +73,10 @@ export default function BuscarVehiculoPatente() {
   const irACobrar = (p: string) =>
     navigate(`/cajeros/cobrar/${encodeURIComponent(p)}`);
 
-  // Tabla de vehículos filtrada por la sucursal del usuario y estado INGRESADO.
+  // Tabla de vehículos filtrada por la sucursal del usuario y estado EN_PLAYA.
   const irAlaPlaya = () => {
     const sucursal = usuario?.Sucursal?.nombre;
-    const params = new URLSearchParams({ estado: "INGRESADO" });
+    const params = new URLSearchParams({ estado: "EN_PLAYA" });
     if (sucursal) params.set("sucursal", sucursal);
     navigate(`/vehiculos?${params.toString()}`);
   };

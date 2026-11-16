@@ -41,7 +41,7 @@ const FILTROS_VACIOS: FiltrosVehiculos = {
 };
 
 // Arma los filtros a partir de la URL. El home del playero enlaza a
-// `/vehiculos?estado=INGRESADO&sucursal=<nombre>` para prefiltrar la tabla.
+// `/vehiculos?estado=EN_PLAYA&sucursal=<nombre>` para prefiltrar la tabla.
 // `estado` se puede repetir para seleccionar más de un estado.
 const filtrosDesdeParams = (params: URLSearchParams): FiltrosVehiculos => ({
   ...FILTROS_VACIOS,

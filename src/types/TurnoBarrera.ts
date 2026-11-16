@@ -49,7 +49,7 @@ export interface TurnoBarreraDetalle {
     ingresos: number;
     /** De ésos, los que además egresaron dentro de la ventana del turno. */
     egresos: number;
-    /** Autos que siguen en la playa (estado INGRESADO). */
+    /** Autos que siguen en la playa (estado EN_PLAYA). */
     enPlaya: number;
     porEstado: {
       ingresados: number;

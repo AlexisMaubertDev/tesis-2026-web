@@ -21,7 +21,7 @@ import {
 
 /**
  * Formulario de cobro del cajero: se llega desde el buscador por patente
- * (acción "Cobrar" de un vehículo INGRESADO). El total lo calcula el servidor a
+ * (acción "Cobrar" de un vehículo EN_PLAYA). El total lo calcula el servidor a
  * partir de la tarifa vigente y de las **estadías automáticas por reloj** (una
  * cada 12 horas desde el acarreo, con tope de 70): el cajero sólo reparte el
  * pago entre efectivo y Mercado Pago. Registra el cobro y vuelve al home.
@@ -56,7 +56,7 @@ export default function CobroPage() {
   const [enviando, setEnviando] = useState(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
-  // 1) El acarreo INGRESADO de la patente buscada.
+  // 1) El acarreo EN_PLAYA de la patente buscada.
   useEffect(() => {
     let activo = true;
 
@@ -73,7 +73,7 @@ export default function CobroPage() {
         if (!activo) return;
 
         const ingresado = (res.data as Acarreo[]).find(
-          (a) => a.estado === "INGRESADO",
+          (a) => a.estado === "EN_PLAYA",
         );
 
         setAcarreo(ingresado ?? null);

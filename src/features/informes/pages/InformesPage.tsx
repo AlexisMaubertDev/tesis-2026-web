@@ -378,7 +378,7 @@ export default function InformesPage() {
                     {informeAcarreos.totales.enPlaya}
                   </p>
                   <p className="text-[10px] text-cerulean-700">
-                    Egresados {informeAcarreos.totales.egresados}
+                    Retirados {informeAcarreos.totales.egresados}
                   </p>
                 </div>
               </section>

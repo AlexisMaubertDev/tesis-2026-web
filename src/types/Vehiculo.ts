@@ -2,8 +2,8 @@ import type { Sucursal } from "./Sucursal";
 
 export type EstadoAcarreo =
   | "ACARREADO"
-  | "INGRESADO"
-  | "EGRESADO"
+  | "EN_PLAYA"
+  | "RETIRADO"
   | "COBRADO"
   | "SIN_CARGO";
 
@@ -18,7 +18,7 @@ export interface Vehiculo {
   ultimo_acarreo?: string | null;
   // Id del último acarreo: lo usan las acciones de la barrera (ingresar/egresar).
   ultimo_acarreo_id?: string | null;
-  // Estado real del último acarreo (ACARREADO, INGRESADO, ...). Es lo que se
+  // Estado real del último acarreo (ACARREADO, EN_PLAYA, ...). Es lo que se
   // muestra en la columna "Estado".
   ultimo_acarreo_estado?: EstadoAcarreo | null;
   // Sucursal del último acarreo (acarreo -> turno de grúa -> grúa -> sucursal).

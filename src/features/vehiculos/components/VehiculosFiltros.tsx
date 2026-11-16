@@ -12,7 +12,7 @@ import { ESTADOS_ACARREO } from "../../../app/constants/estados";
 
 // Los egresados no se listan (solo aparecen buscando por la barra de
 // búsqueda), así que tampoco van como opción del filtro.
-const ESTADOS_FILTRO = ESTADOS_ACARREO.filter((e) => e !== "EGRESADO");
+const ESTADOS_FILTRO = ESTADOS_ACARREO.filter((e) => e !== "RETIRADO");
 import type { Sucursal } from "../../../types/Sucursal";
 import type { EstadoAcarreo } from "../../../types/Vehiculo";
 import type { FiltrosVehiculos } from "../pages/VehiculosPage";

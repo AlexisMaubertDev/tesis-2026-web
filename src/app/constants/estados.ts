@@ -6,18 +6,18 @@ import type { EstadoAcarreo } from "../../types/Vehiculo";
  */
 export const ESTADOS_ACARREO: EstadoAcarreo[] = [
   "ACARREADO",
-  "INGRESADO",
+  "EN_PLAYA",
   "COBRADO",
-  "EGRESADO",
+  "RETIRADO",
   "SIN_CARGO",
 ];
 
 /** Etiquetas legibles de los estados del acarreo, para tablas e informes. */
 export const ETIQUETAS_ESTADO_ACARREO: Record<EstadoAcarreo, string> = {
   ACARREADO: "Acarreado",
-  INGRESADO: "En playa",
+  EN_PLAYA: "En playa",
   COBRADO: "Cobrado",
-  EGRESADO: "Egresado",
+  RETIRADO: "Retirado",
   SIN_CARGO: "Sin cargo",
 };
 
