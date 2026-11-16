@@ -24,6 +24,7 @@ import PlayeroHome from "../components/PlayeroHome";
 import {
   abrirInformeVehiculosPdf,
   obtenerVehiculosPaginado,
+  obtenerVehiculosResto,
 } from "../services/vehiculosService";
 
 export type FiltrosVehiculos = {
@@ -128,34 +129,29 @@ function VehiculosTabla() {
     const cargarVehiculos = async () => {
       setCargando(true);
 
+      const busqueda = search.trim() || undefined;
+
       try {
-        // Carga progresiva: primero se piden los primeros 20 vehículos y se
-        // muestran enseguida; mientras tanto, en segundo plano se van
-        // trayendo las páginas restantes hasta completar la lista.
-        const primera = await obtenerVehiculosPaginado(
-          token,
-          search.trim() || undefined,
-          0,
-        );
+        // Paginado en dos pedidos simultáneos: el primero trae la página 1
+        // (limit 20, offset 0) para mostrarla apenas llega, y en paralelo otro
+        // pedido trae todo el resto (offset 20, sin límite) mientras el
+        // usuario ya está viendo la tabla.
+        const promesaPrimera = obtenerVehiculosPaginado(token, busqueda, 0);
+        const promesaResto = obtenerVehiculosResto(token, busqueda, 20);
+
+        const primera = await promesaPrimera;
         if (!activo) return;
 
         setVehiculos(primera.data);
         setCargando(false);
 
-        const busqueda = search.trim() || undefined;
-        for (let offset = 20; offset < primera.total; offset += 20) {
-          const pagina = await obtenerVehiculosPaginado(
-            token,
-            busqueda,
-            offset,
-          );
-          if (!activo) return;
+        const resto = await promesaResto;
+        if (!activo) return;
 
-          setVehiculos((prev) => {
-            const conocidos = new Set(prev.map((v) => v.id));
-            return [...prev, ...pagina.data.filter((v) => !conocidos.has(v.id))];
-          });
-        }
+        setVehiculos((prev) => {
+          const conocidos = new Set(prev.map((v) => v.id));
+          return [...prev, ...resto.filter((v) => !conocidos.has(v.id))];
+        });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (!activo) return;
